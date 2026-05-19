@@ -50,19 +50,19 @@ const config: Config = {
         // Marca DoisB Sistemas
         // ----------------------------------------------------------------
         brand: {
-          // Azul tech primário — placeholder: #1E40AF (substitua depois)
+          // Azul DoisB — extraído do logo (#1472B5)
           primary: {
-            50:  '#EFF6FF',
-            100: '#DBEAFE',
-            200: '#BFDBFE',
-            300: '#93C5FD',
-            400: '#60A5FA',
-            500: '#3B82F6', // secundário
-            600: '#2563EB',
-            700: '#1D4ED8',
-            800: '#1E40AF', // primário principal
-            900: '#1E3A8A',
-            950: '#172554',
+            50:  '#EBF4FC',
+            100: '#C8E1F5',
+            200: '#96C5EC',
+            300: '#64A8E2',
+            400: '#3A8DD8',
+            500: '#1472B5', // primário principal (logo)
+            600: '#105C91',
+            700: '#0D486F',
+            800: '#09334E',
+            900: '#061E2E',
+            950: '#030F17',
           },
           // Tons semânticos
           success:  '#22C55E',
