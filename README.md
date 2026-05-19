@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DoisB Sistemas
 
-## Getting Started
+Plataforma de revenda do software **ZWeb** (Zucchetti) — sistema de gestão de ponto e controle de acesso.
 
-First, run the development server:
+## Visão geral
+
+| Módulo | Descrição |
+|---|---|
+| **Site público** | Landing page, planos/preços, blog, área de demonstração |
+| **Painel admin** | Gestão de clientes, assinaturas, tickets e métricas |
+| **Suporte** | Sistema de tickets com SLA e chat com IA (Claude) |
+| **Chat IA** | Assistente treinado na base de conhecimento do ZWeb |
+
+## Stack
+
+- **Framework**: Next.js 14 (App Router, TypeScript)
+- **UI**: Tailwind CSS + shadcn/ui
+- **Auth / DB / Storage**: Supabase (PostgreSQL + pgvector)
+- **Pagamentos**: Stripe
+- **E-mails**: Resend
+- **IA**: Anthropic Claude (chat) + OpenAI (embeddings)
+
+## Estrutura de pastas
+
+```
+app/
+  (site)/          → Rotas públicas (landing, preços, blog)
+  (admin)/         → Rotas protegidas (dashboard, clientes, suporte)
+  api/             → Route handlers (webhooks, edge functions)
+components/
+  ui/              → Componentes shadcn/ui
+  site/            → Componentes do site público
+  admin/           → Componentes do painel admin
+lib/
+  supabase/        → Clients: browser, server, admin (service_role)
+  stripe/          → Helpers de pagamento
+  utils/           → Utilitários gerais
+types/             → Tipagem TypeScript global
+middleware.ts      → Proteção de rotas via Supabase Auth
+```
+
+## Configuração inicial
+
+### 1. Instalar dependências
+
+```bash
+npm install
+```
+
+### 2. Configurar variáveis de ambiente
+
+```bash
+cp .env.local.example .env.local
+```
+
+Preencha **todas** as variáveis no `.env.local`. Veja a seção abaixo.
+
+### 3. Rodar em desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variáveis de ambiente obrigatórias
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variável | Onde obter |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard → API Keys |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard → API Keys |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Webhooks |
+| `RESEND_API_KEY` | Resend Dashboard → API Keys |
+| `ANTHROPIC_API_KEY` | Anthropic Console |
+| `OPENAI_API_KEY` | OpenAI Platform |
+| `GOOGLE_PLACES_API_KEY` | Google Cloud Console |
+| `NEXT_PUBLIC_SITE_URL` | URL de produção (ex: `https://doisbsistemas.com.br`) |
 
-## Learn More
+## Próximos passos
 
-To learn more about Next.js, take a look at the following resources:
+- [ ] Criar schema do banco de dados no Supabase (migrations)
+- [ ] Gerar tipos TypeScript com `supabase gen types`
+- [ ] Configurar webhook do Stripe
+- [ ] Criar templates de e-mail no Resend
+- [ ] Subir base de conhecimento do ZWeb para pgvector
+- [ ] Implementar landing page do site
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Desenvolvimento
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev      # servidor de desenvolvimento
+npm run build    # build de produção
+npm run lint     # checar ESLint
+```
 
-## Deploy on Vercel
+## Licença
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Propriedade de DoisB Sistemas. Todos os direitos reservados.
