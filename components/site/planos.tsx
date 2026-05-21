@@ -7,13 +7,13 @@ import { buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 const WA_LINK =
-  "https://wa.me/5551999999999?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
+  "https://wa.me/5551998518895?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
 
 const planos = [
   {
     tag: "Pra quem está começando",
     nome: "Essencial",
-    preco: "R$ 99,90",
+    preco: "R$ 129,90",
     desc: "Tudo o que sua empresa precisa pra ter cadastro, emitir nota e organizar a rotina.",
     highlight: false,
     popularBadge: null,
@@ -33,7 +33,7 @@ const planos = [
   {
     tag: "O queridinho do varejo",
     nome: "Standard",
-    preco: "R$ 159,90",
+    preco: "R$ 199,90",
     desc: "A escolha de 8 em cada 10 lojistas. Frente de caixa profissional + financeiro completo.",
     highlight: true,
     popularBadge: "⭐ MAIS POPULAR",
@@ -45,6 +45,7 @@ const planos = [
       { text: "Emissão de Boletos", bold: false },
       { text: "Emissão de MDF-e", bold: false },
       { text: "Integração com maquininhas", bold: false },
+      { text: "Importação assistida de dados do sistema antigo", bold: false },
       { text: "Suporte prioritário", bold: false },
     ],
     cta: "Quero o Standard",
@@ -53,7 +54,7 @@ const planos = [
   {
     tag: "Pra quem leva o varejo a sério",
     nome: "Premium",
-    preco: "R$ 219,90",
+    preco: "R$ 249,90",
     desc: "Solução completa pra quem quer escalar. Sem limites de usuários, com todos os módulos avançados.",
     highlight: false,
     popularBadge: null,
@@ -65,6 +66,7 @@ const planos = [
       { text: "Retaguarda Offline (venda sem internet)", bold: true },
       { text: "Ordens de Serviço completas", bold: false },
       { text: "Cadastro de Grades (vestuário/calçado)", bold: false },
+      { text: "Integração com marketplaces e e-commerce próprio", bold: true },
       { text: "Suporte prioritário + treinamento", bold: false },
     ],
     cta: "Quero o Premium",

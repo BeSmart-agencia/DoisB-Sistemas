@@ -1,6 +1,3 @@
-// Tipagem gerada automaticamente pelo Supabase CLI
-// Execute: npx supabase gen types typescript --project-id SEU_PROJECT_ID > types/database.ts
-
 export type Json =
   | string
   | number
@@ -9,26 +6,171 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type StatusPagamento = "aguardando" | "ativo" | "atrasado" | "cancelado"
+export type Plano = "essencial" | "standard" | "premium"
+export type StatusChamado = "a_atender" | "em_andamento" | "aguardando_cliente" | "resolvido" | "cancelado"
+export type PrioridadeChamado = "baixa" | "media" | "alta" | "urgente"
+export type AutorMensagem = "cliente" | "equipe"
+export type StatusLead = "a_enviar" | "1_msg" | "2_msg" | "3_msg" | "interessado" | "em_negociacao" | "fechado" | "perdido" | "sem_resposta"
+
 export interface Database {
   public: {
     Tables: {
-      // As tabelas serão adicionadas conforme o schema for criado
-      [key: string]: {
-        Row: Record<string, unknown>
-        Insert: Record<string, unknown>
-        Update: Record<string, unknown>
+      admins: {
+        Row: { id: string; email: string; nome: string; ativo: boolean; criado_em: string }
+        Insert: { id: string; email: string; nome: string; ativo?: boolean; criado_em?: string }
+        Update: { id?: string; email?: string; nome?: string; ativo?: boolean; criado_em?: string }
+        Relationships: []
+      }
+      clientes: {
+        Row: {
+          id: string; nome_empresa: string; cnpj: string; email: string; telefone: string
+          nome_responsavel: string; plano: Plano; status_pagamento: StatusPagamento
+          acesso_liberado: boolean; stripe_customer_id: string | null
+          stripe_subscription_id: string | null; data_assinatura: string | null
+          observacoes: string | null; criado_em: string
+        }
+        Insert: {
+          id?: string; nome_empresa: string; cnpj: string; email: string; telefone: string
+          nome_responsavel: string; plano: Plano; status_pagamento?: StatusPagamento
+          acesso_liberado?: boolean; stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null; data_assinatura?: string | null
+          observacoes?: string | null; criado_em?: string
+        }
+        Update: {
+          id?: string; nome_empresa?: string; cnpj?: string; email?: string; telefone?: string
+          nome_responsavel?: string; plano?: Plano; status_pagamento?: StatusPagamento
+          acesso_liberado?: boolean; stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null; data_assinatura?: string | null
+          observacoes?: string | null; criado_em?: string
+        }
+        Relationships: []
+      }
+      chamados: {
+        Row: {
+          id: number; cliente_id: string | null; cnpj_informado: string; email_retorno: string
+          assunto: string; descricao: string; status: StatusChamado; prioridade: PrioridadeChamado
+          atendente_id: string | null; criado_em: string; atualizado_em: string; resolvido_em: string | null
+        }
+        Insert: {
+          id?: number; cliente_id?: string | null; cnpj_informado: string; email_retorno: string
+          assunto: string; descricao: string; status?: StatusChamado; prioridade?: PrioridadeChamado
+          atendente_id?: string | null; criado_em?: string; atualizado_em?: string; resolvido_em?: string | null
+        }
+        Update: {
+          id?: number; cliente_id?: string | null; cnpj_informado?: string; email_retorno?: string
+          assunto?: string; descricao?: string; status?: StatusChamado; prioridade?: PrioridadeChamado
+          atendente_id?: string | null; criado_em?: string; atualizado_em?: string; resolvido_em?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "chamados_cliente_id_fkey"; columns: ["cliente_id"]; isOneToOne: false; referencedRelation: "clientes"; referencedColumns: ["id"] },
+          { foreignKeyName: "chamados_atendente_id_fkey"; columns: ["atendente_id"]; isOneToOne: false; referencedRelation: "admins"; referencedColumns: ["id"] }
+        ]
+      }
+      chamado_mensagens: {
+        Row: {
+          id: string; chamado_id: number; autor: AutorMensagem; autor_nome: string
+          conteudo: string; criado_em: string
+        }
+        Insert: {
+          id?: string; chamado_id: number; autor: AutorMensagem; autor_nome: string
+          conteudo: string; criado_em?: string
+        }
+        Update: {
+          id?: string; chamado_id?: number; autor?: AutorMensagem; autor_nome?: string
+          conteudo?: string; criado_em?: string
+        }
+        Relationships: [
+          { foreignKeyName: "chamado_mensagens_chamado_id_fkey"; columns: ["chamado_id"]; isOneToOne: false; referencedRelation: "chamados"; referencedColumns: ["id"] }
+        ]
+      }
+      tutoriais: {
+        Row: {
+          id: string; titulo: string; slug: string; categoria: string
+          resumo: string | null; conteudo_html: string | null
+          status: string; ordem: number; criado_em: string; atualizado_em: string
+        }
+        Insert: {
+          id?: string; titulo: string; slug: string; categoria: string
+          resumo?: string | null; conteudo_html?: string | null
+          status?: string; ordem?: number; criado_em?: string; atualizado_em?: string
+        }
+        Update: {
+          id?: string; titulo?: string; slug?: string; categoria?: string
+          resumo?: string | null; conteudo_html?: string | null
+          status?: string; ordem?: number; criado_em?: string; atualizado_em?: string
+        }
+        Relationships: []
+      }
+      documentos: {
+        Row: {
+          id: string; nome_arquivo: string; categoria: string | null
+          texto_completo: string; tutorial_id: string | null; criado_em: string
+        }
+        Insert: {
+          id?: string; nome_arquivo: string; categoria?: string | null
+          texto_completo: string; tutorial_id?: string | null; criado_em?: string
+        }
+        Update: {
+          id?: string; nome_arquivo?: string; categoria?: string | null
+          texto_completo?: string; tutorial_id?: string | null; criado_em?: string
+        }
+        Relationships: [
+          { foreignKeyName: "documentos_tutorial_id_fkey"; columns: ["tutorial_id"]; isOneToOne: false; referencedRelation: "tutoriais"; referencedColumns: ["id"] }
+        ]
+      }
+      leads: {
+        Row: {
+          id: string; google_place_id: string | null; nome: string; segmento: string | null
+          cidade: string | null; estado: string | null; endereco: string | null; telefone: string | null
+          rating: number | null; lat: number | null; lng: number | null; status: StatusLead
+          observacoes: string | null; ultima_interacao: string | null; responsavel_id: string | null
+          criado_em: string; atualizado_em: string
+        }
+        Insert: {
+          id?: string; google_place_id?: string | null; nome: string; segmento?: string | null
+          cidade?: string | null; estado?: string | null; endereco?: string | null; telefone?: string | null
+          rating?: number | null; lat?: number | null; lng?: number | null; status?: StatusLead
+          observacoes?: string | null; ultima_interacao?: string | null; responsavel_id?: string | null
+          criado_em?: string; atualizado_em?: string
+        }
+        Update: {
+          id?: string; google_place_id?: string | null; nome?: string; segmento?: string | null
+          cidade?: string | null; estado?: string | null; endereco?: string | null; telefone?: string | null
+          rating?: number | null; lat?: number | null; lng?: number | null; status?: StatusLead
+          observacoes?: string | null; ultima_interacao?: string | null; responsavel_id?: string | null
+          criado_em?: string; atualizado_em?: string
+        }
+        Relationships: [
+          { foreignKeyName: "leads_responsavel_id_fkey"; columns: ["responsavel_id"]; isOneToOne: false; referencedRelation: "admins"; referencedColumns: ["id"] }
+        ]
+      }
+      lead_interacoes: {
+        Row: {
+          id: string; lead_id: string; tipo: string; descricao: string
+          admin_id: string | null; admin_nome: string | null; criado_em: string
+        }
+        Insert: {
+          id?: string; lead_id: string; tipo: string; descricao: string
+          admin_id?: string | null; admin_nome?: string | null; criado_em?: string
+        }
+        Update: {
+          id?: string; lead_id?: string; tipo?: string; descricao?: string
+          admin_id?: string | null; admin_nome?: string | null; criado_em?: string
+        }
+        Relationships: [
+          { foreignKeyName: "lead_interacoes_lead_id_fkey"; columns: ["lead_id"]; isOneToOne: false; referencedRelation: "leads"; referencedColumns: ["id"] }
+        ]
+      }
+      stripe_events: {
+        Row: { id: string; tipo: string; payload: Json; processado_em: string }
+        Insert: { id: string; tipo: string; payload: Json; processado_em?: string }
+        Update: { id?: string; tipo?: string; payload?: Json; processado_em?: string }
+        Relationships: []
       }
     }
-    Views: {
-      [key: string]: {
-        Row: Record<string, unknown>
-      }
-    }
-    Functions: {
-      [key: string]: unknown
-    }
-    Enums: {
-      [key: string]: string
-    }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: { status_pagamento: StatusPagamento; plano: Plano }
   }
 }

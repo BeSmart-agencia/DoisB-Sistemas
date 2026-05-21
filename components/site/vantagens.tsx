@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { WifiOff, CreditCard, Wrench, FileCheck } from "lucide-react"
+import { WifiOff, CreditCard, Wrench, FileCheck, Store, DatabaseZap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 const vantagens = [
@@ -20,6 +20,22 @@ const vantagens = [
     text: "Vero, Stone, PagSeguro, Cielo, Rede, Sicredi, Sipag... o ZWeb se conecta com as principais maquininhas do Brasil. O valor da venda vai direto pra maquininha, sem retrabalho. E ainda emite boletos pelo banco Inter.",
     quote: "",
     badges: ["Vero", "Stone", "PagSeguro", "Cielo", "Rede", "Sicredi"],
+  },
+  {
+    icon: Store,
+    title: "Venda onde seu cliente já está",
+    subtitle: "Marketplace e e-commerce trabalhando junto com a loja.",
+    text: "Integre sua operação com Mercado Livre, Amazon, Shopee, TikTok Shop e outros canais. E se quiser ter sua própria loja virtual, você também pode criar um e-commerce com domínio personalizado, conectado ao seu cadastro de produtos e à sua rotina de vendas.",
+    quote: '"Sua empresa deixa de depender só do balcão e passa a vender em múltiplos canais."',
+    badges: ["Mercado Livre", "Amazon", "Shopee", "TikTok Shop", "E-commerce próprio"],
+  },
+  {
+    icon: DatabaseZap,
+    title: "Troque de sistema sem começar do zero",
+    subtitle: "Seu histórico pode ir junto com você.",
+    text: "Já usa outro sistema? A gente ajuda a importar o banco de dados antigo para acelerar a virada: clientes, produtos e informações essenciais entram no ZWeb para sua equipe começar com menos retrabalho, menos medo e mais velocidade.",
+    quote: '"Você moderniza a gestão sem perder o que já construiu."',
+    badges: ["Migração assistida", "Produtos", "Clientes", "Implantação guiada"],
   },
   {
     icon: Wrench,

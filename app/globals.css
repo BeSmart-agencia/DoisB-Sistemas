@@ -8,7 +8,227 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .app-soft-bg {
+    background:
+      linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, rgba(241, 245, 249, 0.96) 100%),
+      radial-gradient(circle at 20% 0%, rgba(20, 114, 181, 0.08), transparent 32rem),
+      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.07), transparent 28rem);
+  }
+
+  .admin-soft-bg {
+    background:
+      linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(239, 246, 255, 0.75) 46%, rgba(248, 250, 252, 1) 100%),
+      linear-gradient(90deg, rgba(20, 114, 181, 0.08) 0%, transparent 30%, rgba(16, 185, 129, 0.06) 100%);
+  }
 }
+
+.page-shell {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+}
+
+.admin-panel {
+  border: 1px solid rgba(203, 213, 225, 0.72);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 18px 55px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.admin-panel-strong {
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9));
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
+}
+
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  border-radius: 999px;
+  background: rgba(239, 246, 255, 0.8);
+  padding: 0.35rem 0.7rem;
+  color: #105c91;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+[data-slot="button"] {
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.04);
+}
+
+[data-slot="button"]:not(:disabled) {
+  transform-origin: center;
+}
+
+[data-slot="button"]:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+[data-slot="input"],
+textarea {
+  min-height: 2.55rem;
+  border-color: rgb(203 213 225);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[data-slot="input"]:focus-visible,
+textarea:focus-visible {
+  border-color: #1472b5;
+  box-shadow: 0 0 0 4px rgba(20, 114, 181, 0.13);
+}
+
+[data-slot="table"] {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+[data-slot="table-header"] tr {
+  border-bottom-color: rgb(226 232 240);
+}
+
+[data-slot="table-head"] {
+  height: 3rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: rgb(71 85 105);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+[data-slot="table-cell"] {
+  padding: 0.9rem 1rem;
+}
+
+[data-slot="table-row"] {
+  border-bottom-color: rgb(241 245 249);
+}
+
+[data-slot="table-body"] [data-slot="table-row"]:hover {
+  background: rgba(239, 246, 255, 0.55);
+}
+
+.tutorial-content {
+    counter-reset: tutorial-section;
+  }
+
+  .tutorial-content h2 {
+    counter-increment: tutorial-section;
+    position: relative;
+    margin-top: 2.75rem;
+    margin-bottom: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgb(226 232 240);
+    color: rgb(15 23 42);
+    font-size: 1.35rem;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
+  .tutorial-content h2::before {
+    content: counter(tutorial-section);
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: 0.65rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: #ebf4fc;
+    color: #1472b5;
+    font-size: 0.875rem;
+    font-weight: 800;
+    vertical-align: 0.08rem;
+  }
+
+  .tutorial-content h3 {
+    margin-top: 1.75rem;
+    color: rgb(30 41 59);
+    font-size: 1.05rem;
+    line-height: 1.4;
+  }
+
+  .tutorial-content p,
+  .tutorial-content li {
+    color: rgb(51 65 85);
+    font-size: 1rem;
+    line-height: 1.85;
+  }
+
+  .tutorial-content a {
+    word-break: break-word;
+    font-weight: 600;
+    text-underline-offset: 3px;
+  }
+
+  .tutorial-intro {
+    margin-bottom: 1.75rem;
+    border-left: 4px solid #1472b5;
+    border-radius: 0.75rem;
+    background: linear-gradient(90deg, #ebf4fc 0%, #ffffff 100%);
+    padding: 1rem 1.25rem;
+  }
+
+  .tutorial-intro p {
+    margin: 0;
+    color: rgb(30 41 59);
+    font-size: 1.05rem;
+  }
+
+  .tutorial-summary {
+    margin-bottom: 2rem;
+    border: 1px solid rgb(191 219 254);
+    border-radius: 1rem;
+    background: rgb(239 246 255);
+    padding: 1.25rem;
+  }
+
+  .tutorial-summary strong {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: rgb(30 64 175);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .tutorial-summary ol {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .tutorial-summary li {
+    margin: 0.35rem 0;
+    color: rgb(30 64 175);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .tutorial-list {
+    border-radius: 0.9rem;
+    background: rgb(248 250 252);
+    padding: 1rem 1.25rem 1rem 1.5rem;
+  }
+
+  .tutorial-note {
+    margin: 1.5rem 0;
+    border: 1px solid rgb(253 230 138);
+    border-radius: 0.9rem;
+    background: rgb(255 251 235);
+    padding: 1rem 1.25rem;
+  }
+
+  .tutorial-note p {
+    margin: 0;
+    color: rgb(120 53 15);
+  }
 
 @layer base {
   .theme {
