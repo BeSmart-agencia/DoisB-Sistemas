@@ -12,8 +12,8 @@ export default function TermosDeUsoPage() {
     <LegalLayout title="Termos de Uso" updated="01 de junho de 2025">
       <h2>1. Aceitação dos Termos</h2>
       <p>
-        Ao acessar e utilizar os serviços da <strong>DoisB Sistemas</strong> ("DoisB", "nós" ou
-        "nosso"), incluindo o sistema ZWeb e quaisquer funcionalidades relacionadas, você concorda
+        Ao acessar e utilizar os serviços da <strong>DoisB Sistemas</strong> (&quot;DoisB&quot;, &quot;nós&quot; ou
+        &quot;nosso&quot;), incluindo o sistema ZWeb e quaisquer funcionalidades relacionadas, você concorda
         em cumprir e estar vinculado a estes Termos de Uso. Se não concordar com alguma parte
         destes termos, não utilize nossos serviços.
       </p>

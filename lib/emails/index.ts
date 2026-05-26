@@ -6,9 +6,9 @@ const noop = () => Promise.resolve()
 
 export const enviarEmailPosCadastro = noop
 export const enviarEmailAcessoLiberado = noop
-export const enviarEmailInternoNovaVenda = (_dados: DadosNovaVenda) => Promise.resolve()
+export const enviarEmailInternoNovaVenda: (dados: DadosNovaVenda) => Promise<void> = () => Promise.resolve()
 export const enviarEmailPagamentoFalho = noop
 export const enviarEmailConfirmacaoChamado = noop
 export const enviarEmailRespostaChamado = noop
 export const enviarEmailChamadoResolvido = noop
-export const enviarEmailInternoNovoChamado = (_dados: DadosNovoChamado) => Promise.resolve()
+export const enviarEmailInternoNovoChamado: (dados: DadosNovoChamado) => Promise<void> = () => Promise.resolve()
