@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Signature ausente" }, { status: 400 })
   }
 
-  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim()
   if (!secret) {
     console.error("[webhook] STRIPE_WEBHOOK_SECRET não configurado")
     return NextResponse.json({ error: "Configuração ausente" }, { status: 500 })
