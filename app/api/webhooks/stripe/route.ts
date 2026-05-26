@@ -104,7 +104,10 @@ export async function POST(request: Request) {
           unpaid: "atrasado",
           paused: "atrasado",
         }
-        const novoStatus = (statusMap[sub.status] ?? "atrasado") as import("@/types/database").StatusPagamento
+        // Cancelamento agendado pro fim do período ainda é "active" no Stripe
+        const novoStatus = (
+          sub.cancel_at_period_end ? "cancelado" : (statusMap[sub.status] ?? "atrasado")
+        ) as import("@/types/database").StatusPagamento
 
         await supabase
           .from("clientes")
