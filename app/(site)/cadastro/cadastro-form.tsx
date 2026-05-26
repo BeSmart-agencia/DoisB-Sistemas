@@ -60,7 +60,7 @@ const schema = z.object({
     .min(14, "CNPJ inválido")
     .refine(validarCNPJ, "CNPJ inválido"),
   email: z.string().email("E-mail inválido"),
-  telefone: z.string().min(14, "Telefone inválido"),
+  telefone: z.string().min(10, "Telefone inválido"),
   nome_responsavel: z.string().min(2, "Informe o nome do responsável"),
   termos: z.boolean().refine((v) => v === true, "Você precisa aceitar os termos de uso"),
 })
