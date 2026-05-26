@@ -105,15 +105,15 @@ export interface Database {
       documentos: {
         Row: {
           id: string; nome_arquivo: string; categoria: string | null
-          texto_completo: string; tutorial_id: string | null; criado_em: string
+          conteudo_texto: string; tutorial_id: string | null; criado_em: string
         }
         Insert: {
           id?: string; nome_arquivo: string; categoria?: string | null
-          texto_completo: string; tutorial_id?: string | null; criado_em?: string
+          conteudo_texto: string; tutorial_id?: string | null; criado_em?: string
         }
         Update: {
           id?: string; nome_arquivo?: string; categoria?: string | null
-          texto_completo?: string; tutorial_id?: string | null; criado_em?: string
+          conteudo_texto?: string; tutorial_id?: string | null; criado_em?: string
         }
         Relationships: [
           { foreignKeyName: "documentos_tutorial_id_fkey"; columns: ["tutorial_id"]; isOneToOne: false; referencedRelation: "tutoriais"; referencedColumns: ["id"] }
@@ -168,9 +168,55 @@ export interface Database {
         Update: { id?: string; tipo?: string; payload?: Json; processado_em?: string }
         Relationships: []
       }
+      documento_chunks: {
+        Row: {
+          id: string; documento_id: string; conteudo: string
+          chunk_index: number; embedding: string | null; criado_em: string
+        }
+        Insert: {
+          id?: string; documento_id: string; conteudo: string
+          chunk_index: number; embedding?: string | null; criado_em?: string
+        }
+        Update: {
+          id?: string; documento_id?: string; conteudo?: string
+          chunk_index?: number; embedding?: string | null; criado_em?: string
+        }
+        Relationships: [
+          { foreignKeyName: "documento_chunks_documento_id_fkey"; columns: ["documento_id"]; isOneToOne: false; referencedRelation: "documentos"; referencedColumns: ["id"] }
+        ]
+      }
+      conversas_ia: {
+        Row: {
+          id: string; sessao_id: string; pergunta: string; resposta: string
+          chunks_ids: string[]; sem_resposta: boolean; criado_em: string
+        }
+        Insert: {
+          id?: string; sessao_id: string; pergunta: string; resposta: string
+          chunks_ids?: string[]; sem_resposta?: boolean; criado_em?: string
+        }
+        Update: {
+          id?: string; sessao_id?: string; pergunta?: string; resposta?: string
+          chunks_ids?: string[]; sem_resposta?: boolean; criado_em?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      match_documents: {
+        Args: {
+          query_embedding: number[]
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          id: string
+          documento_id: string
+          conteudo: string
+          similarity: number
+        }[]
+      }
+    }
     Enums: { status_pagamento: StatusPagamento; plano: Plano }
   }
 }

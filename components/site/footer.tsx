@@ -35,6 +35,7 @@ export function Footer() {
                 { label: "Tutoriais", href: "/tutoriais" },
                 { label: "Suporte", href: "/suporte" },
                 { label: "Chat IA", href: "/chat-suporte" },
+                { label: "Contato", href: "/contato" },
                 { label: "Sobre nós", href: "/sobre" },
               ].map((l) => (
                 <li key={l.href}>
@@ -56,7 +57,6 @@ export function Footer() {
               {[
                 { label: "Termos de Uso", href: "/termos-de-uso" },
                 { label: "Política de Privacidade", href: "/politica-de-privacidade" },
-                { label: "LGPD", href: "/lgpd" },
               ].map((l) => (
                 <li key={l.href}>
                   <a
@@ -89,7 +89,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-blue-800 transition-colors flex items-center gap-2"
                 >
-                  💬 WhatsApp: (51) 9XXXX-XXXX
+                  💬 WhatsApp: (51) 99851-8895
                 </a>
               </li>
               <li className="flex items-center gap-2">📍 Rio Grande do Sul – Brasil</li>

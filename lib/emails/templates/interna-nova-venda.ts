@@ -11,9 +11,9 @@ export interface DadosNovaVenda {
 export function templateInternaNovaVenda(dados: DadosNovaVenda): string {
   const planoNome = dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1)
   const precos: Record<string, string> = {
-    essencial: 'R$ 99,90/mês',
-    standard: 'R$ 159,90/mês',
-    premium: 'R$ 219,90/mês',
+    essencial: 'R$ 129,90/mês',
+    standard: 'R$ 199,90/mês',
+    premium: 'R$ 249,90/mês',
   }
   return `<!DOCTYPE html>
 <html lang="pt-BR">

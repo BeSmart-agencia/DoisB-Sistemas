@@ -16,7 +16,7 @@ Posso te mandar uma demonstração rápida?`,
     id: 2,
     nome: "Segunda mensagem",
     texto: `Oi [Nome], tudo bem? Passando pra saber se viu nossa mensagem sobre o ZWeb.
-Temos planos a partir de R$ 99,90/mês com tudo que você precisa pra gerir sua [segmento].
+Temos planos a partir de R$ 129,90/mês com tudo que você precisa pra gerir sua [segmento].
 Posso te enviar mais detalhes?`,
   },
   {

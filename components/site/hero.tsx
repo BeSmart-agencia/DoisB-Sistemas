@@ -45,7 +45,7 @@ export function Hero() {
 
         {/* ── Texto ── */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="flex flex-col gap-7"
@@ -111,7 +111,7 @@ export function Hero() {
 
         {/* ── Carrossel ── */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
+          initial={false}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative flex flex-col items-center gap-5 py-8 px-10"
@@ -123,7 +123,7 @@ export function Hero() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={current}
-                initial={{ opacity: 0, scale: 1.04 }}
+                initial={false}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}

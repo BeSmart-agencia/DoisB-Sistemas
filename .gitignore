@@ -25,6 +25,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.next-dev-*.log
+*-shot*.png
+.chrome-profile*/
 
 # local env files
 .env*.local
