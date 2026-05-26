@@ -91,16 +91,19 @@ export default function ClientesPage() {
   const [status, setStatus] = useState("")
   const [plano, setPlano] = useState("")
 
-  const { data, isLoading } = useQuery<ClientesResponse>({
+  const { data, isLoading, error } = useQuery<ClientesResponse>({
     queryKey: ["admin", "clientes", { page, search, status, plano }],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams({
         page: page.toString(),
         ...(search && { search }),
         ...(status && { status }),
         ...(plano && { plano }),
       })
-      return fetch(`/api/admin/clientes?${params}`).then((r) => r.json())
+      const r = await fetch(`/api/admin/clientes?${params}`)
+      const json = await r.json()
+      if (!r.ok) throw new Error(json.error ?? `HTTP ${r.status}`)
+      return json
     },
   })
 
@@ -129,6 +132,15 @@ export default function ClientesPage() {
 
   const clientes = data?.clientes ?? []
   const totalPages = data?.totalPages ?? 1
+
+  if (error) {
+    return (
+      <div className="admin-panel-strong p-8 text-center">
+        <p className="text-red-600 font-semibold">Erro ao carregar clientes</p>
+        <p className="text-slate-500 text-sm mt-1">{(error as Error).message}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

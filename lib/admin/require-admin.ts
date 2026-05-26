@@ -10,6 +10,7 @@ export async function requireAdmin() {
   } = await sessionClient.auth.getUser()
 
   if (!user) {
+    console.error("[requireAdmin] getUser() retornou null — sessão inválida ou expirada")
     return {
       admin: null,
       supabase: null,
@@ -20,14 +21,19 @@ export async function requireAdmin() {
   // DB operations via service_role — bypasses RLS
   const db = createAdminClient()
 
-  const { data: admin } = await db
+  const { data: admin, error: adminError } = await db
     .from("admins")
     .select("id, email, nome, ativo")
     .eq("id", user.id)
     .eq("ativo", true)
     .maybeSingle()
 
+  if (adminError) {
+    console.error("[requireAdmin] Erro ao buscar admin:", adminError)
+  }
+
   if (!admin) {
+    console.error("[requireAdmin] Admin não encontrado para user.id:", user.id)
     return {
       admin: null,
       supabase: null,

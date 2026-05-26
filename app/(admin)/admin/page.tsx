@@ -21,7 +21,12 @@ function formatBRL(value: number) {
 export default function AdminDashboard() {
   const { data, isLoading } = useQuery<Metrics>({
     queryKey: ["admin", "metrics"],
-    queryFn: () => fetch("/api/admin/metrics").then((r) => r.json()),
+    queryFn: async () => {
+      const r = await fetch("/api/admin/metrics")
+      const json = await r.json()
+      if (!r.ok) throw new Error(json.error ?? `HTTP ${r.status}`)
+      return json
+    },
   })
 
   const cards = [

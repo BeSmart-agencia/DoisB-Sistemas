@@ -3,9 +3,9 @@ import { requireAdmin } from "@/lib/admin/require-admin"
 import type { Plano } from "@/types/database"
 
 const PRECO_PLANO: Record<Plano, number> = {
-  essencial: 99.9,
-  standard: 159.9,
-  premium: 219.9,
+  essencial: 129.9,
+  standard: 199.9,
+  premium: 249.9,
 }
 
 export async function GET() {
