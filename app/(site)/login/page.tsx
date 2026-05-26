@@ -58,7 +58,7 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="seu@email.com"
             required
-            className="bg-white/10 border-white/10 text-white placeholder:text-slate-500 focus-visible:border-blue-400"
+            className="bg-white/10 border-white/10 text-white placeholder:text-slate-500 focus-visible:border-blue-400 [&:-webkit-autofill]:![box-shadow:0_0_0_30px_#020617_inset] [&:-webkit-autofill]:![-webkit-text-fill-color:white]"
           />
         </div>
 
@@ -70,7 +70,7 @@ function LoginForm() {
             onChange={(e) => setSenha(e.target.value)}
             placeholder="••••••••"
             required
-            className="bg-white/10 border-white/10 text-white placeholder:text-slate-500 focus-visible:border-blue-400"
+            className="bg-white/10 border-white/10 text-white placeholder:text-slate-500 focus-visible:border-blue-400 [&:-webkit-autofill]:![box-shadow:0_0_0_30px_#020617_inset] [&:-webkit-autofill]:![-webkit-text-fill-color:white]"
           />
         </div>
 
