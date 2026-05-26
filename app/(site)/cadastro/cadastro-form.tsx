@@ -78,10 +78,17 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      nome_empresa: "",
+      cnpj: "",
+      email: "",
+      telefone: "",
+      nome_responsavel: "",
+      termos: false,
+    },
   })
 
   async function onSubmit(data: FormData) {
@@ -195,12 +202,11 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
               <Input
                 placeholder="00.000.000/0000-00"
                 aria-invalid={!!errors.cnpj}
-                {...register("cnpj")}
-                onChange={(e) => {
-                  const masked = maskCNPJ(e.target.value)
-                  e.target.value = masked
-                  setValue("cnpj", masked, { shouldValidate: false })
-                }}
+                {...register("cnpj", {
+                  onChange: (e) => {
+                    e.target.value = maskCNPJ(e.target.value)
+                  },
+                })}
               />
             </Field>
 
@@ -218,12 +224,11 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
                 <Input
                   placeholder="(00) 00000-0000"
                   aria-invalid={!!errors.telefone}
-                  {...register("telefone")}
-                  onChange={(e) => {
-                    const masked = maskPhone(e.target.value)
-                    e.target.value = masked
-                    setValue("telefone", masked, { shouldValidate: false })
-                  }}
+                  {...register("telefone", {
+                    onChange: (e) => {
+                      e.target.value = maskPhone(e.target.value)
+                    },
+                  })}
                 />
               </Field>
             </div>
