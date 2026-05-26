@@ -100,9 +100,9 @@ export function Header() {
           >
             <Menu className="h-5 w-5" />
           </SheetTrigger>
-          <SheetContent side="right" className="w-72 p-6">
+          <SheetContent side="right" className="w-72 p-0 bg-white border-l border-slate-200 shadow-2xl">
             {/* Logos no menu mobile */}
-            <div className="flex flex-col items-center gap-3 mb-8 pt-2 pb-6 border-b border-slate-100">
+            <div className="flex flex-col items-center gap-3 px-6 pt-8 pb-6 mb-2 border-b border-slate-100">
               <Image
                 src="/logos/doisb-color.png"
                 alt="DoisB Sistemas"
@@ -122,7 +122,7 @@ export function Header() {
               </div>
             </div>
 
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-1 px-4 py-4">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
