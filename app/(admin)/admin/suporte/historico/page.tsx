@@ -24,7 +24,7 @@ interface Chamado {
   status: StatusChamado
   prioridade: PrioridadeChamado
   cnpj_informado: string
-  criado_em: string
+  created_at: string
   resolvido_em: string | null
   cliente: { nome_empresa: string } | null
   atendente: { nome: string } | null
@@ -186,7 +186,7 @@ export default function HistoricoPage() {
                   <TableCell className="text-sm text-slate-500">
                     {c.atendente?.nome ?? <span className="text-slate-300">—</span>}
                   </TableCell>
-                  <TableCell className="text-sm text-slate-500">{fmtDate(c.criado_em)}</TableCell>
+                  <TableCell className="text-sm text-slate-500">{fmtDate(c.created_at)}</TableCell>
                   <TableCell className="text-sm text-slate-500">{fmtDate(c.resolvido_em)}</TableCell>
                   <TableCell>
                     <Link href={`/admin/suporte/${c.id}`}>

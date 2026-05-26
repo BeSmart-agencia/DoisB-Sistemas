@@ -14,13 +14,13 @@ interface Conversa {
   resposta: string
   sem_resposta: boolean
   chunks_ids: string[]
-  criado_em: string
+  created_at: string
 }
 
 interface SemResposta {
   id: string
   pergunta: string
-  criado_em: string
+  created_at: string
 }
 
 interface Analytics {
@@ -65,7 +65,7 @@ function ConversaCard({ conversa }: { conversa: Conversa }) {
             {conversa.pergunta}
           </p>
           <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-            <span className="text-xs text-slate-400">{formatDate(conversa.criado_em)}</span>
+            <span className="text-xs text-slate-400">{formatDate(conversa.created_at)}</span>
             {conversa.sem_resposta
               ? <Badge className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 rounded-full px-2">Sem resposta</Badge>
               : <Badge className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 rounded-full px-2">
@@ -124,7 +124,7 @@ export default function ConhecimentoPage() {
     resposta: "",
     sem_resposta: true,
     chunks_ids: [],
-    criado_em: s.criado_em,
+    created_at: s.created_at,
   })) : data?.conversas ?? [])?.filter((c) =>
     busca === "" || c.pergunta.toLowerCase().includes(busca.toLowerCase())
   ) ?? []
@@ -237,7 +237,7 @@ export default function ConhecimentoPage() {
                     <span className="text-amber-500 mt-0.5 shrink-0">•</span>
                     <span className="text-sm text-slate-800">{s.pergunta}</span>
                     <span className="ml-auto text-xs text-slate-400 shrink-0 mt-0.5">
-                      {formatDate(s.criado_em)}
+                      {formatDate(s.created_at)}
                     </span>
                   </div>
                 ))

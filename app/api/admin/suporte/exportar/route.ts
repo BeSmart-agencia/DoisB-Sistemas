@@ -10,14 +10,14 @@ export async function GET(request: Request) {
 
   let query = supabase!
     .from("chamados")
-    .select(`id, assunto, status, prioridade, cnpj_informado, email_retorno, criado_em, resolvido_em, atualizado_em,
+    .select(`id, assunto, status, prioridade, cnpj_informado, email_retorno, created_at, resolvido_em, atualizado_em,
              cliente:clientes(nome_empresa), atendente:admins(nome)`)
     .in("status", ["resolvido", "cancelado"])
-    .order("criado_em", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(2000)
 
-  if (dataInicio) query = query.gte("criado_em", dataInicio)
-  if (dataFim) query = query.lte("criado_em", dataFim + "T23:59:59Z")
+  if (dataInicio) query = query.gte("created_at", dataInicio)
+  if (dataFim) query = query.lte("created_at", dataFim + "T23:59:59Z")
 
   const { data: chamados } = await query
 
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       STATUS_PT[c.status] ?? c.status,
       PRIO_PT[c.prioridade] ?? c.prioridade,
       esc(atd?.nome ?? ""),
-      fmtDate(c.criado_em),
+      fmtDate(c.created_at),
       fmtDate(c.resolvido_em),
     ].join(",")
   })

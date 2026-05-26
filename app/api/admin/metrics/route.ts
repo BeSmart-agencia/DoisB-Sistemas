@@ -35,7 +35,7 @@ export async function GET() {
     .from("clientes")
     .select("*", { count: "exact", head: true })
     .neq("status_pagamento", "aguardando")
-    .gte("criado_em", inicioMes.toISOString())
+    .gte("created_at", inicioMes.toISOString())
 
   // Gráfico: vendas dos últimos 6 meses
   const seisAtras = new Date()

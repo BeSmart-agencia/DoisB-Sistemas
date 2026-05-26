@@ -26,7 +26,7 @@ interface Chamado {
   prioridade: PrioridadeChamado
   email_retorno: string
   cnpj_informado: string
-  criado_em: string
+  created_at: string
   atualizado_em: string
   cliente: { nome_empresa: string; plano: string } | null
   atendente: { nome: string } | null
@@ -208,7 +208,7 @@ export default function SuporteAdminPage() {
                   <TableCell className="text-sm text-slate-500">
                     {c.atendente?.nome ?? <span className="text-slate-300 italic">Não atribuído</span>}
                   </TableCell>
-                  <TableCell className="text-sm text-slate-400">{tempoDesde(c.criado_em)}</TableCell>
+                  <TableCell className="text-sm text-slate-400">{tempoDesde(c.created_at)}</TableCell>
                   <TableCell>
                     <Link href={`/admin/suporte/${c.id}`}>
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0">

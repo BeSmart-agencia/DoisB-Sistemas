@@ -36,7 +36,7 @@ interface Lead {
   rating: number | null
   status: StatusLead
   ultima_interacao: string | null
-  criado_em: string
+  created_at: string
 }
 
 const COLUNAS: { status: StatusLead; label: string; cor: string; corBg: string; corBorda: string }[] = [

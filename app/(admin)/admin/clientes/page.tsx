@@ -44,7 +44,7 @@ interface Cliente {
   status_pagamento: StatusPagamento
   acesso_liberado: boolean
   data_assinatura: string | null
-  criado_em: string
+  created_at: string
 }
 
 interface ClientesResponse {

@@ -20,7 +20,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     .from("lead_interacoes")
     .select("*")
     .eq("lead_id", params.id)
-    .order("criado_em", { ascending: false })
+    .order("created_at", { ascending: false })
 
   const { data: admins } = await supabase!.from("admins").select("id, nome").eq("ativo", true)
 

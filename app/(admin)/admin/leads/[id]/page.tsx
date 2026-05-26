@@ -41,7 +41,7 @@ interface Lead {
   ultima_interacao: string | null
   responsavel_id: string | null
   responsavel: { id: string; nome: string } | null
-  criado_em: string
+  created_at: string
 }
 
 interface Interacao {
@@ -49,7 +49,7 @@ interface Interacao {
   tipo: string
   descricao: string
   admin_nome: string | null
-  criado_em: string
+  created_at: string
 }
 
 const STATUS_LABEL: Record<StatusLead, string> = {
@@ -434,7 +434,7 @@ export default function LeadDetalhePage() {
                       <span className="text-xs font-medium text-slate-700 flex items-center gap-1.5">
                         {TIPO_ICON[item.tipo] ?? "📋"} {item.admin_nome ?? "Sistema"}
                       </span>
-                      <span className="text-[11px] text-slate-400 shrink-0">{fmtDate(item.criado_em)}</span>
+                      <span className="text-[11px] text-slate-400 shrink-0">{fmtDate(item.created_at)}</span>
                     </div>
                     <p className="text-xs text-slate-500 leading-relaxed">{item.descricao}</p>
                   </div>

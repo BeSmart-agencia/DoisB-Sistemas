@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   let query = supabase!
     .from("leads")
     .select("*, responsavel:admins(nome)", { count: "exact" })
-    .order("criado_em", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(limite)
 
   if (search) query = query.ilike("nome", `%${search}%`)

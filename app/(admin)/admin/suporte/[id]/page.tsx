@@ -24,18 +24,18 @@ type StatusChamado = "a_atender" | "em_andamento" | "aguardando_cliente" | "reso
 type PrioridadeChamado = "baixa" | "media" | "alta" | "urgente"
 type AutorMensagem = "cliente" | "equipe"
 
-interface Mensagem { id: string; autor: AutorMensagem; autor_nome: string; conteudo: string; criado_em: string }
+interface Mensagem { id: string; autor: AutorMensagem; autor_nome: string; conteudo: string; created_at: string }
 interface Admin { id: string; nome: string }
 interface ChamadoDetalhe {
   id: number; assunto: string; descricao: string; email_retorno: string
   cnpj_informado: string; status: StatusChamado; prioridade: PrioridadeChamado
-  atendente_id: string | null; criado_em: string
+  atendente_id: string | null; created_at: string
   cliente: { id: string; nome_empresa: string; cnpj: string; telefone: string; email: string; plano: string; status_pagamento: string } | null
   atendente: { id: string; nome: string } | null
 }
 interface DetalheResponse {
   chamado: ChamadoDetalhe; mensagens: Mensagem[]
-  admins: Admin[]; chamadosAnteriores: { id: number; assunto: string; status: StatusChamado; criado_em: string }[]
+  admins: Admin[]; chamadosAnteriores: { id: number; assunto: string; status: StatusChamado; created_at: string }[]
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -202,7 +202,7 @@ export default function ChamadoDetalhePage() {
                   autor="cliente"
                   autorNome={chamado.cliente?.nome_empresa ?? chamado.cnpj_informado}
                   conteudo={chamado.descricao}
-                  data={chamado.criado_em}
+                  data={chamado.created_at}
                 />
 
                 {mensagens.map((m) => (
@@ -211,7 +211,7 @@ export default function ChamadoDetalhePage() {
                     autor={m.autor}
                     autorNome={m.autor_nome}
                     conteudo={m.conteudo}
-                    data={m.criado_em}
+                    data={m.created_at}
                   />
                 ))}
                 <div ref={messagesEndRef} />
@@ -366,7 +366,7 @@ export default function ChamadoDetalhePage() {
                           </Badge>
                         </div>
                         <p className="text-[11px] text-slate-400 mt-1">
-                          #{c.id} · {new Date(c.criado_em).toLocaleDateString("pt-BR")}
+                          #{c.id} · {new Date(c.created_at).toLocaleDateString("pt-BR")}
                         </p>
                       </div>
                     </Link>

@@ -16,8 +16,8 @@ export async function GET(request: Request) {
 
   let query = supabase!
     .from("clientes")
-    .select("id, nome_empresa, cnpj, email, telefone, nome_responsavel, plano, status_pagamento, acesso_liberado, data_assinatura, criado_em", { count: "exact" })
-    .order("criado_em", { ascending: false })
+    .select("id, nome_empresa, cnpj, email, telefone, nome_responsavel, plano, status_pagamento, acesso_liberado, data_assinatura, created_at", { count: "exact" })
+    .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
 
   if (search) {

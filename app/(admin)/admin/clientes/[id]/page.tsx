@@ -65,7 +65,7 @@ interface ClienteDetalhe {
   stripe_subscription_id: string | null
   data_assinatura: string | null
   observacoes: string | null
-  criado_em: string
+  created_at: string
 }
 
 interface Fatura {
@@ -316,7 +316,7 @@ export default function ClienteDetalhePage() {
               },
               {
                 label: "Cliente desde",
-                value: formatDate(cliente.criado_em),
+                value: formatDate(cliente.created_at),
                 icon: Calendar,
                 iconBg: "bg-amber-100",
                 iconColor: "text-amber-600",
@@ -369,7 +369,7 @@ export default function ClienteDetalhePage() {
                       { icon: Phone, label: "Telefone", value: cliente.telefone },
                       { icon: CreditCard, label: "Plano", value: PLANO_LABEL[cliente.plano] },
                       { icon: Calendar, label: "Assinatura", value: formatDate(cliente.data_assinatura) },
-                      { icon: Calendar, label: "Cadastro", value: formatDate(cliente.criado_em) },
+                      { icon: Calendar, label: "Cadastro", value: formatDate(cliente.created_at) },
                       {
                         icon: Shield,
                         label: "Acesso",

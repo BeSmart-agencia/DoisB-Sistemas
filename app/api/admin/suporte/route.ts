@@ -20,12 +20,12 @@ export async function GET(request: Request) {
   let query = supabase!
     .from("chamados")
     .select(
-      `id, assunto, status, prioridade, email_retorno, cnpj_informado, criado_em, atualizado_em, resolvido_em,
+      `id, assunto, status, prioridade, email_retorno, cnpj_informado, created_at, atualizado_em, resolvido_em,
        cliente:clientes(nome_empresa, plano),
        atendente:admins(nome)`,
       { count: "exact" }
     )
-    .order("criado_em", { ascending: !historico }) // ativos: mais antigos primeiro; historico: mais recentes primeiro
+    .order("created_at", { ascending: !historico }) // ativos: mais antigos primeiro; historico: mais recentes primeiro
     .range(offset, offset + limit - 1)
 
   if (historico) {
@@ -39,8 +39,8 @@ export async function GET(request: Request) {
   }
   if (status) query = query.eq("status", status as StatusChamado)
   if (prioridade) query = query.eq("prioridade", prioridade as PrioridadeChamado)
-  if (dataInicio) query = query.gte("criado_em", dataInicio)
-  if (dataFim) query = query.lte("criado_em", dataFim + "T23:59:59Z")
+  if (dataInicio) query = query.gte("created_at", dataInicio)
+  if (dataFim) query = query.lte("created_at", dataFim + "T23:59:59Z")
 
   const { data, count, error } = await query
 

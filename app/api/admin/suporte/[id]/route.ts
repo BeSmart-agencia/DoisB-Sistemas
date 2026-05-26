@@ -21,7 +21,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     supabase!.from("chamado_mensagens")
       .select("*")
       .eq("chamado_id", id)
-      .order("criado_em", { ascending: true }),
+      .order("created_at", { ascending: true }),
 
     supabase!.from("admins").select("id, nome").eq("ativo", true),
   ])
@@ -34,10 +34,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if (clienteId) {
     const { data } = await supabase!
       .from("chamados")
-      .select("id, assunto, status, criado_em")
+      .select("id, assunto, status, created_at")
       .eq("cliente_id", clienteId)
       .neq("id", id)
-      .order("criado_em", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(5)
     chamadosAnteriores = data ?? []
   }

@@ -29,14 +29,14 @@ export async function GET() {
     db.from('conversas_ia').select('*', { count: 'exact', head: true }).eq('sem_resposta', true),
     db
       .from('conversas_ia')
-      .select('id, sessao_id, pergunta, resposta, sem_resposta, chunks_ids, criado_em')
-      .order('criado_em', { ascending: false })
+      .select('id, sessao_id, pergunta, resposta, sem_resposta, chunks_ids, created_at')
+      .order('created_at', { ascending: false })
       .limit(100),
     db
       .from('conversas_ia')
-      .select('id, pergunta, criado_em')
+      .select('id, pergunta, created_at')
       .eq('sem_resposta', true)
-      .order('criado_em', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(50),
   ])
 
