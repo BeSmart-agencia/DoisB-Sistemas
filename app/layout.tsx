@@ -21,11 +21,25 @@ export const metadata: Metadata = {
     template: '%s | DoisB Sistemas',
   },
   description: 'Revenda autorizada Zucchetti. Sistema de gestão ZWeb para o varejo brasileiro.',
+  icons: {
+    icon: '/logos/doisb-blue.png',
+    shortcut: '/logos/doisb-blue.png',
+    apple: '/logos/doisb-blue.png',
+  },
   openGraph: {
+    title: 'DoisB Sistemas',
+    description: 'Sistema de gestão ZWeb para o varejo brasileiro. Revenda autorizada Zucchetti.',
     siteName: 'DoisB Sistemas',
+    url: 'https://doisbsistemas.com.br',
     locale: 'pt_BR',
     type: 'website',
-    images: [{ url: '/logos/doisb-blue.png', width: 800, height: 600 }],
+    images: [{ url: '/logos/doisb-blue.png', width: 800, height: 600, alt: 'DoisB Sistemas' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'DoisB Sistemas',
+    description: 'Sistema de gestão ZWeb para o varejo brasileiro.',
+    images: ['/logos/doisb-blue.png'],
   },
   robots: { index: true, follow: true },
 }
