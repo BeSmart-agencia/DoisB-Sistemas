@@ -11,19 +11,25 @@ import {
 export const dynamic = "force-dynamic"
 
 export async function POST(request: Request) {
-  const body = await request.text()
+  const bodyBuffer = Buffer.from(await request.arrayBuffer())
   const sig = request.headers.get("stripe-signature")
 
   if (!sig) {
     return NextResponse.json({ error: "Signature ausente" }, { status: 400 })
   }
 
+  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!secret) {
+    console.error("[webhook] STRIPE_WEBHOOK_SECRET não configurado")
+    return NextResponse.json({ error: "Configuração ausente" }, { status: 500 })
+  }
+
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(bodyBuffer, sig, secret)
   } catch (err) {
-    console.error("[webhook] Assinatura inválida:", err)
-    return NextResponse.json({ error: "Webhook signature inválida" }, { status: 400 })
+    console.error("[webhook] Assinatura inválida:", (err as Error).message)
+    return NextResponse.json({ error: `Webhook inválido: ${(err as Error).message}` }, { status: 400 })
   }
 
   const supabase = createAdminClient()
