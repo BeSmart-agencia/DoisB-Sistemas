@@ -2,7 +2,8 @@ import type { DadosNovaVenda } from './templates/interna-nova-venda'
 import type { DadosNovoChamado } from './templates/interna-novo-chamado'
 
 // Envio de e-mail desativado temporariamente
-const noop = () => Promise.resolve()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const noop = (..._args: any[]) => Promise.resolve()
 
 export const enviarEmailPosCadastro = noop
 export const enviarEmailAcessoLiberado = noop
