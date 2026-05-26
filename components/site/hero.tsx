@@ -187,7 +187,7 @@ export function Hero() {
           <motion.div
             animate={{ y: [0, -7, 0] }}
             transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: 0.4 }}
-            className="absolute top-4 -right-2 sm:-right-6 bg-white rounded-2xl shadow-xl px-4 py-3 border border-slate-100 flex items-center gap-2.5"
+            className="absolute top-4 right-0 sm:-right-6 bg-white rounded-2xl shadow-xl px-3 py-2 sm:px-4 sm:py-3 border border-slate-100 flex items-center gap-2"
           >
             <div className="h-2.5 w-2.5 rounded-full bg-green-500 shadow-sm shadow-green-300" />
             <span className="text-sm font-semibold text-slate-700">Venda offline ✓</span>
@@ -197,7 +197,7 @@ export function Hero() {
           <motion.div
             animate={{ y: [0, -7, 0] }}
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 1.2 }}
-            className="absolute bottom-16 -left-2 sm:-left-6 bg-white rounded-2xl shadow-xl px-4 py-3 border border-slate-100 flex items-center gap-2.5"
+            className="absolute bottom-16 left-0 sm:-left-6 bg-white rounded-2xl shadow-xl px-3 py-2 sm:px-4 sm:py-3 border border-slate-100 flex items-center gap-2"
           >
             <div className="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
             <span className="text-sm font-semibold text-slate-700">NF-e emitida ✓</span>
@@ -207,7 +207,7 @@ export function Hero() {
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 2 }}
-            className="absolute top-1/2 -right-2 sm:-right-8 bg-white rounded-2xl shadow-xl px-4 py-3 border border-slate-100 flex items-center gap-2.5"
+            className="absolute top-1/2 right-0 sm:-right-8 bg-white rounded-2xl shadow-xl px-3 py-2 sm:px-4 sm:py-3 border border-slate-100 flex items-center gap-2"
           >
             <div className="h-2.5 w-2.5 rounded-full bg-purple-500 shadow-sm shadow-purple-300" />
             <span className="text-sm font-semibold text-slate-700">Maquininha integrada ✓</span>
