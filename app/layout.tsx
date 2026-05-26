@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     url: 'https://doisbsistemas.com.br',
     locale: 'pt_BR',
     type: 'website',
-    images: [{ url: '/logos/doisb-blue.png', width: 800, height: 600, alt: 'DoisB Sistemas' }],
+    images: [{ url: '/og-banner.png', width: 1200, height: 630, alt: 'DoisB Sistemas' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'DoisB Sistemas',
     description: 'Sistema de gestão ZWeb para o varejo brasileiro.',
-    images: ['/logos/doisb-blue.png'],
+    images: ['/og-banner.png'],
   },
   robots: { index: true, follow: true },
 }
