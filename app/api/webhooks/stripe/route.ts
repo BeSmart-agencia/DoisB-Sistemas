@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   await supabase.from("stripe_events").insert({
     id: event.id,
     tipo: event.type,
-    payload: JSON.parse(body),
+    payload: JSON.parse(bodyBuffer.toString()),
   })
 
   try {
