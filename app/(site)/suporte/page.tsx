@@ -5,11 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Loader2, CheckCircle, ArrowLeft, LifeBuoy, Mail } from "lucide-react"
+import { Loader2, CheckCircle, LifeBuoy, Mail } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Header } from "@/components/site/header"
+import { Footer } from "@/components/site/footer"
 
 function validarCNPJ(cnpj: string): boolean {
   const n = cnpj.replace(/\D/g, "")
@@ -114,17 +116,8 @@ export default function SuportePage() {
 
   return (
     <div className="min-h-screen app-soft-bg">
-      <header className="border-b border-white/70 bg-white/75 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2 text-slate-500 hover:text-blue-700 text-sm font-medium transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </a>
-          <span className="font-black tracking-tight text-slate-950 text-lg">DoisB Sistemas</span>
-          <div className="w-16" />
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-4 py-10 lg:py-14">
+      <Header />
+      <main className="max-w-4xl mx-auto px-4 pt-28 pb-14">
         <div className="mb-8 text-center">
           <span className="section-kicker mx-auto">
             <LifeBuoy className="h-3.5 w-3.5" />
@@ -201,6 +194,7 @@ export default function SuportePage() {
           </form>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

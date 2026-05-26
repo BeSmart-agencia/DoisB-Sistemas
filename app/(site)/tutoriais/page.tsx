@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { Metadata } from "next"
+import { Header } from "@/components/site/header"
+import { Footer } from "@/components/site/footer"
 import {
   BookOpen, Users, ShoppingCart, FileText, DollarSign,
   Wrench, Package, Zap, Settings, Rocket,
@@ -45,8 +47,9 @@ export default async function TutoriaisPage() {
 
   return (
     <div className="min-h-screen app-soft-bg">
+      <Header />
       {/* Hero */}
-      <div className="bg-slate-950 text-white">
+      <div className="bg-slate-950 text-white pt-16">
         <div className="max-w-4xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-6 ring-1 ring-white/15">
             <BookOpen className="h-4 w-4" />
@@ -120,6 +123,7 @@ export default async function TutoriaisPage() {
           </Link>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

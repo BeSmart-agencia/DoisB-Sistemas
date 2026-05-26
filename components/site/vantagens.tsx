@@ -1,10 +1,22 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { WifiOff, CreditCard, Wrench, FileCheck, Store, DatabaseZap } from "lucide-react"
+import { WifiOff, CreditCard, Wrench, FileCheck, Store, DatabaseZap, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
-const vantagens = [
+type Vantagem = {
+  icon: React.ElementType
+  title: string
+  subtitle: string
+  text: string
+  quote: string
+  badges: string[]
+  destaque?: boolean
+}
+
+import React from "react"
+
+const vantagens: Vantagem[] = [
   {
     icon: WifiOff,
     title: "Venda mesmo sem internet",
@@ -28,6 +40,7 @@ const vantagens = [
     text: "Integre sua operação com Mercado Livre, Amazon, Shopee, TikTok Shop e outros canais. E se quiser ter sua própria loja virtual, você também pode criar um e-commerce com domínio personalizado, conectado ao seu cadastro de produtos e à sua rotina de vendas.",
     quote: '"Sua empresa deixa de depender só do balcão e passa a vender em múltiplos canais."',
     badges: ["Mercado Livre", "Amazon", "Shopee", "TikTok Shop", "E-commerce próprio"],
+    destaque: true,
   },
   {
     icon: DatabaseZap,
@@ -36,6 +49,7 @@ const vantagens = [
     text: "Já usa outro sistema? A gente ajuda a importar o banco de dados antigo para acelerar a virada: clientes, produtos e informações essenciais entram no ZWeb para sua equipe começar com menos retrabalho, menos medo e mais velocidade.",
     quote: '"Você moderniza a gestão sem perder o que já construiu."',
     badges: ["Migração assistida", "Produtos", "Clientes", "Implantação guiada"],
+    destaque: true,
   },
   {
     icon: Wrench,
@@ -79,8 +93,16 @@ export function Vantagens() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300 group"
+              className={v.destaque
+                ? "relative bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border-2 border-blue-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                : "bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300 group"
+              }
             >
+              {v.destaque && (
+                <span className="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-800 text-white text-xs font-semibold">
+                  <Sparkles className="h-3 w-3" /> Destaque
+                </span>
+              )}
               <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
                 <v.icon className="h-7 w-7 text-blue-800" />
               </div>

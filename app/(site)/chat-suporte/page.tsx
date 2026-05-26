@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { Bot, Send, Trash2, User, Headphones, ChevronRight } from "lucide-react"
+import { Header } from "@/components/site/header"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { cn } from "@/lib/utils"
@@ -181,6 +182,7 @@ export default function ChatSuportePage() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50 overflow-hidden">
+      <Header />
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="flex-none bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm z-10">
