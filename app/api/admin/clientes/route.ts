@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error("[clientes] Supabase error:", error)
-    return NextResponse.json({ error: `Supabase: ${error.message}` }, { status: 500 })
+    return NextResponse.json({ error: "Erro ao buscar clientes" }, { status: 500 })
   }
 
   return NextResponse.json({
