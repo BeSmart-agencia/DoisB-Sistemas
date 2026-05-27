@@ -6,7 +6,6 @@ import { Vantagens } from "@/components/site/vantagens"
 import { Segmentos } from "@/components/site/segmentos"
 import { Planos } from "@/components/site/planos"
 import { SobreZucchetti } from "@/components/site/sobre-zucchetti"
-import { SobreDoisb } from "@/components/site/sobre-doisb"
 import { Faq } from "@/components/site/faq"
 import { CtaFinal } from "@/components/site/cta-final"
 import { Footer } from "@/components/site/footer"
@@ -49,8 +48,7 @@ export default function HomePage() {
         <Segmentos />
         <Planos />
         <SobreZucchetti />
-        <SobreDoisb />
-        <Faq />
+<Faq />
         <CtaFinal />
       </main>
       <Footer />

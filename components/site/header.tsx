@@ -27,10 +27,10 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         scrolled
           ? "bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm"
-          : "bg-white/80 backdrop-blur-sm"
+          : "bg-transparent"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20 gap-4">
@@ -48,10 +48,10 @@ export function Header() {
             />
           </a>
 
-          <div className="h-7 w-px bg-slate-200 hidden sm:block" />
+          <div className={cn("h-7 w-px hidden sm:block", scrolled ? "bg-slate-200" : "bg-white/20")} />
 
           <div className="hidden sm:flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+            <span className={cn("text-xs font-medium whitespace-nowrap", scrolled ? "text-slate-400" : "text-white/50")}>
               revenda oficial
             </span>
             <Image
@@ -70,7 +70,10 @@ export function Header() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-slate-600 hover:text-blue-800 transition-colors"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                scrolled ? "text-slate-600 hover:text-blue-800" : "text-white/80 hover:text-white"
+              )}
             >
               {link.label}
             </a>
