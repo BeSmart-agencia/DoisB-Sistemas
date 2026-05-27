@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { Header } from "@/components/site/header"
 import { Hero } from "@/components/site/hero"
 import { Problemas } from "@/components/site/problemas"
-import { Solucao } from "@/components/site/solucao"
 import { Vantagens } from "@/components/site/vantagens"
 import { Segmentos } from "@/components/site/segmentos"
 import { Planos } from "@/components/site/planos"
@@ -46,7 +45,6 @@ export default function HomePage() {
       <main className="scroll-smooth">
         <Hero />
         <Problemas />
-        <Solucao />
         <Vantagens />
         <Segmentos />
         <Planos />

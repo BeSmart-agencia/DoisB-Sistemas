@@ -2,13 +2,11 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { Bot, Send, Trash2, User, Headphones, ChevronRight } from "lucide-react"
-import { Header } from "@/components/site/header"
+import { Bot, Send, Trash2, User, Headphones, Sparkles } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { cn } from "@/lib/utils"
 
-// ── Tipos ────────────────────────────────────────────────────────────────────
 interface Mensagem {
   id: string
   role: "user" | "assistant"
@@ -17,7 +15,6 @@ interface Mensagem {
   loading?: boolean
 }
 
-// ── Sessão persistente ────────────────────────────────────────────────────────
 function getSessaoId(): string {
   const key = "doisb_chat_sessao_id"
   const existing = localStorage.getItem(key)
@@ -37,7 +34,14 @@ Posso responder suas dúvidas sobre o **ZWeb** com base nos manuais oficiais do 
 Sobre o que você precisa de ajuda hoje?`,
 }
 
-// ── Componente principal ─────────────────────────────────────────────────────
+const SUGESTOES = [
+  "Como emitir uma NF-e?",
+  "Como usar o PDV?",
+  "Configurar maquininha",
+  "Venda offline, como funciona?",
+  "Como cadastrar um produto?",
+]
+
 export default function ChatSuportePage() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([MSG_INICIAL])
   const [input, setInput] = useState("")
@@ -49,17 +53,14 @@ export default function ChatSuportePage() {
   const abortRef = useRef<AbortController | null>(null)
   const messagesRef = useRef<HTMLDivElement>(null)
 
-  // Inicializar sessão no cliente
   useEffect(() => {
     setSessaoId(getSessaoId())
   }, [])
 
-  // Auto-scroll para a última mensagem
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [mensagens])
 
-  // Auto-resize do textarea
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value)
     e.target.style.height = "auto"
@@ -77,40 +78,27 @@ export default function ChatSuportePage() {
     setTimeout(() => inputRef.current?.focus(), 50)
   }, [])
 
-  const enviar = useCallback(async () => {
-    const texto = input.trim()
-    if (!texto || enviando || !sessaoId) return
+  const enviar = useCallback(async (texto?: string) => {
+    const msg = (texto ?? input).trim()
+    if (!msg || enviando || !sessaoId) return
 
     setInput("")
     setEnviando(true)
 
-    // Reset altura do textarea
     if (inputRef.current) inputRef.current.style.height = "auto"
 
-    const userMsg: Mensagem = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: texto,
-    }
-
+    const userMsg: Mensagem = { id: crypto.randomUUID(), role: "user", content: msg }
     const loadingId = crypto.randomUUID()
-    const loadingMsg: Mensagem = {
-      id: loadingId,
-      role: "assistant",
-      content: "",
-      loading: true,
-    }
+    const loadingMsg: Mensagem = { id: loadingId, role: "assistant", content: "", loading: true }
 
     setMensagens((prev) => [...prev, userMsg, loadingMsg])
 
-    // Histórico para a API (sem a mensagem inicial fixa e sem o loading)
     const historico = [...mensagens.filter((m) => m.id !== "boas-vindas"), userMsg].map(
       (m) => ({ role: m.role, content: m.content })
     )
 
     try {
       abortRef.current = new AbortController()
-
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,9 +106,7 @@ export default function ChatSuportePage() {
         signal: abortRef.current.signal,
       })
 
-      if (!response.ok || !response.body) {
-        throw new Error(`HTTP ${response.status}`)
-      }
+      if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`)
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
@@ -128,22 +114,15 @@ export default function ChatSuportePage() {
 
       while (true) {
         const { done, value } = await reader.read()
-        console.log("[chat] read:", { done, bytes: value?.length })
         if (done) break
-
-        const text = decoder.decode(value, { stream: true })
-        resposta += text
-
+        resposta += decoder.decode(value, { stream: true })
         setMensagens((prev) =>
           prev.map((m) =>
-            m.id === loadingId
-              ? { ...m, loading: false, streaming: true, content: resposta }
-              : m
+            m.id === loadingId ? { ...m, loading: false, streaming: true, content: resposta } : m
           )
         )
       }
 
-      // Finalizar
       setMensagens((prev) =>
         prev.map((m) =>
           m.id === loadingId
@@ -153,17 +132,10 @@ export default function ChatSuportePage() {
       )
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return
-
       setMensagens((prev) =>
         prev.map((m) =>
           m.id === loadingId
-            ? {
-                ...m,
-                loading: false,
-                streaming: false,
-                content:
-                  "Desculpe, tive um problema para processar sua pergunta. Tente novamente.",
-              }
+            ? { ...m, loading: false, streaming: false, content: "Desculpe, tive um problema. Tente novamente." }
             : m
         )
       )
@@ -180,37 +152,75 @@ export default function ChatSuportePage() {
     }
   }
 
-  return (
-    <div className="flex flex-col h-screen bg-slate-50 overflow-hidden">
-      <Header />
+  const somenteInicial = mensagens.length === 1 && mensagens[0].id === "boas-vindas"
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header className="flex-none bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm z-10">
+  return (
+    <div
+      className="flex flex-col h-screen overflow-hidden relative"
+      style={{ background: "linear-gradient(180deg, #060e1a 0%, #0a1628 100%)" }}
+    >
+      {/* Gradient decorations */}
+      <div
+        className="absolute top-0 right-0 pointer-events-none z-0"
+        style={{
+          width: "40rem",
+          height: "40rem",
+          background: "radial-gradient(ellipse at top right, rgba(20,114,181,0.15) 0%, transparent 70%)",
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute bottom-0 left-0 pointer-events-none z-0"
+        style={{
+          width: "30rem",
+          height: "30rem",
+          background: "radial-gradient(ellipse at bottom left, rgba(20,114,181,0.08) 0%, transparent 70%)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <header
+        className="relative z-10 flex-none"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          backdropFilter: "blur(16px)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center shadow-md">
+              <div
+                className="h-10 w-10 rounded-xl flex items-center justify-center shadow-md"
+                style={{ background: "linear-gradient(145deg, #1a5fa8 0%, #0e3a6e 100%)" }}
+              >
                 <Bot className="h-5 w-5 text-white" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 border-2 shadow-sm"
+                style={{ borderColor: "#06111e" }} />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900 leading-none">Assistente DoisB</p>
-              <p className="text-xs text-emerald-600 font-medium mt-0.5">Online · ZWeb</p>
+              <p className="text-sm font-bold text-white leading-none">Assistente DoisB</p>
+              <p className="text-xs font-medium mt-0.5" style={{ color: "rgba(52,211,153,0.9)" }}>
+                Online · ZWeb
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Link
               href="/suporte"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
+              style={{ color: "rgba(147,197,253,0.7)" }}
             >
               <Headphones className="h-3.5 w-3.5" />
               Suporte humano
             </Link>
             <button
               onClick={limparConversa}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
+              style={{ color: "rgba(148,163,184,0.6)" }}
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Limpar</span>
@@ -220,50 +230,50 @@ export default function ChatSuportePage() {
       </header>
 
       {/* ── Mensagens ──────────────────────────────────────────────────── */}
-      <div ref={messagesRef} className="flex-1 overflow-y-auto">
+      <div ref={messagesRef} className="relative z-10 flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
           {mensagens.map((msg) => (
             <div
               key={msg.id}
-              className={cn(
-                "flex items-start gap-3",
-                msg.role === "user" && "flex-row-reverse"
-              )}
+              className={cn("flex items-start gap-3", msg.role === "user" && "flex-row-reverse")}
             >
               {/* Avatar */}
               {msg.role === "assistant" ? (
-                <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <div
+                  className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm mt-0.5"
+                  style={{ background: "linear-gradient(145deg, #1a5fa8 0%, #0e3a6e 100%)" }}
+                >
                   <Bot className="h-4 w-4 text-white" />
                 </div>
               ) : (
-                <div className="h-8 w-8 rounded-xl bg-slate-200 border border-slate-300 flex items-center justify-center shrink-0 mt-0.5">
-                  <User className="h-4 w-4 text-slate-600" />
+                <div
+                  className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+                >
+                  <User className="h-4 w-4" style={{ color: "rgba(147,197,253,0.8)" }} />
                 </div>
               )}
 
               {/* Bolha */}
               <div
-                className={cn(
-                  "max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
+                className={cn("max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed", msg.role === "user" ? "rounded-tr-sm" : "rounded-tl-sm")}
+                style={
                   msg.role === "user"
-                    ? "bg-blue-800 text-white rounded-tr-sm"
-                    : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm"
-                )}
+                    ? { background: "linear-gradient(145deg, #1a5fa8 0%, #1060a0 100%)", color: "white", boxShadow: "0 4px 16px rgba(20,114,181,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(226,232,240,0.9)" }
+                }
               >
                 {msg.loading ? (
-                  /* Dots animados */
                   <div className="flex items-center gap-1.5 py-0.5 px-1">
-                    <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" />
+                    <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:-0.3s]" style={{ background: "rgba(147,197,253,0.6)" }} />
+                    <span className="h-2 w-2 rounded-full animate-bounce [animation-delay:-0.15s]" style={{ background: "rgba(147,197,253,0.6)" }} />
+                    <span className="h-2 w-2 rounded-full animate-bounce" style={{ background: "rgba(147,197,253,0.6)" }} />
                   </div>
                 ) : msg.role === "assistant" ? (
-                  <div className="relative prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-headings:my-2 prose-pre:my-2 prose-code:text-blue-800 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded prose-a:text-blue-700">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {msg.content}
-                    </ReactMarkdown>
+                  <div className="relative prose prose-sm max-w-none prose-invert prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-headings:my-2 prose-pre:my-2 prose-code:text-blue-300 prose-code:bg-white/10 prose-code:px-1 prose-code:rounded prose-a:text-blue-300">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                     {msg.streaming && (
-                      <span className="inline-block h-4 w-0.5 bg-slate-400 animate-pulse ml-0.5 align-middle" />
+                      <span className="inline-block h-4 w-0.5 animate-pulse ml-0.5 align-middle" style={{ background: "rgba(147,197,253,0.7)" }} />
                     )}
                   </div>
                 ) : (
@@ -277,53 +287,81 @@ export default function ChatSuportePage() {
         </div>
       </div>
 
-      {/* ── Footer: CTA + Input ─────────────────────────────────────────── */}
-      <div className="flex-none bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(15,23,42,0.05)]">
-        {/* CTA */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-3">
-          <div className="flex items-center justify-center gap-1 text-xs text-slate-400">
-            Não encontrou o que queria?
-            <Link
-              href="/suporte"
-              className="inline-flex items-center gap-0.5 text-blue-700 font-semibold hover:underline underline-offset-2"
-            >
-              Abrir chamado de suporte
-              <ChevronRight className="h-3 w-3" />
-            </Link>
+      {/* ── Sugestões (só quando não tem mensagem do usuário ainda) ──── */}
+      {somenteInicial && (
+        <div className="relative z-10 max-w-3xl mx-auto w-full px-4 sm:px-6 pb-3">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {SUGESTOES.map((s) => (
+              <button
+                key={s}
+                onClick={() => enviar(s)}
+                className="text-sm rounded-full px-4 py-2 transition-all hover:-translate-y-0.5"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(147,197,253,0.8)",
+                }}
+              >
+                {s}
+              </button>
+            ))}
           </div>
         </div>
+      )}
 
-        {/* Input */}
+      {/* ── Input ──────────────────────────────────────────────────────── */}
+      <div
+        className="relative z-10 flex-none"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3">
           <div
-            className={cn(
-              "flex items-end gap-3 bg-white border rounded-2xl px-4 py-3 transition-all",
-              enviando
-                ? "border-blue-300 ring-1 ring-blue-100"
-                : "border-slate-200 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-100"
-            )}
+            className="flex items-end gap-2 rounded-2xl px-3 py-2.5 transition-all"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: enviando ? "1px solid rgba(20,114,181,0.6)" : "1px solid rgba(255,255,255,0.1)",
+              boxShadow: enviando ? "0 0 0 3px rgba(20,114,181,0.1)" : "none",
+            }}
           >
+            <div
+              className="p-2 rounded-xl shrink-0"
+              style={{ background: "rgba(20,114,181,0.15)" }}
+            >
+              <Sparkles className="h-4 w-4" style={{ color: "rgba(147,197,253,0.8)" }} />
+            </div>
             <textarea
               ref={inputRef}
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="Pergunte sobre qualquer funcionalidade do ZWeb..."
-              className="flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 resize-none outline-none leading-relaxed"
-              style={{ minHeight: "24px", maxHeight: "160px" }}
+              className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
+              style={{
+                color: "rgba(226,232,240,0.9)",
+                minHeight: "24px",
+                maxHeight: "160px",
+              }}
               rows={1}
               disabled={enviando}
             />
             <button
-              onClick={enviar}
+              onClick={() => enviar()}
               disabled={!input.trim() || enviando}
-              className="h-8 w-8 rounded-xl bg-blue-800 hover:bg-blue-900 text-white flex items-center justify-center shrink-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-md disabled:hover:translate-y-0 disabled:hover:shadow-none"
+              className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:-translate-y-0.5"
+              style={{
+                background: "linear-gradient(145deg, #1a5fa8 0%, #0e3a6e 100%)",
+                color: "white",
+                boxShadow: "0 4px 12px rgba(20,114,181,0.4)",
+              }}
             >
               <Send className="h-4 w-4" />
             </button>
           </div>
-          <p className="text-[11px] text-slate-400 text-center mt-2">
-            Enter para enviar · Shift+Enter para nova linha
+          <p className="text-[11px] text-center mt-2" style={{ color: "rgba(100,116,139,0.6)" }}>
+            Enter para enviar · Shift+Enter para nova linha ·{" "}
+            <Link href="/suporte" className="underline underline-offset-2 hover:opacity-80" style={{ color: "rgba(147,197,253,0.5)" }}>
+              abrir chamado
+            </Link>
           </p>
         </div>
       </div>
