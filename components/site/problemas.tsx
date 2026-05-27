@@ -11,11 +11,11 @@ const WA_LINK =
   "https://wa.me/5551998518895?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
 
 type Item = { before: string; after: string }
-type Category = { id: string; label: string; emoji: string; Icon: React.ElementType; items: Item[] }
+type Category = { id: string; label: string; tabLabel: string; emoji: string; Icon: React.ElementType; items: Item[] }
 
 const CATEGORIES: Category[] = [
   {
-    id: "vendas", label: "Vendas e Atendimento", emoji: "🏪", Icon: ShoppingCart,
+    id: "vendas", label: "Vendas e Atendimento", tabLabel: "Vendas", emoji: "🏪", Icon: ShoppingCart,
     items: [
       { before: "Internet cai e o caixa para de funcionar", after: "Vende offline e sincroniza tudo quando a internet volta" },
       { before: "Calculadora na mão pra somar troco e desconto", after: "PDV calcula tudo automaticamente, sem erro" },
@@ -26,7 +26,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "estoque", label: "Estoque e Compras", emoji: "📦", Icon: Package,
+    id: "estoque", label: "Estoque e Compras", tabLabel: "Estoque", emoji: "📦", Icon: Package,
     items: [
       { before: "Vende produto que não tem em estoque", after: "Controle de estoque em tempo real, com alerta de mínimo" },
       { before: "Compra repetida porque ninguém anotou", after: "Ordem de compra organizada e histórico de fornecedores" },
@@ -36,7 +36,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "financeiro", label: "Financeiro", emoji: "💰", Icon: Wallet,
+    id: "financeiro", label: "Financeiro", tabLabel: "Financeiro", emoji: "💰", Icon: Wallet,
     items: [
       { before: "Não sabe quanto entra nem quanto sai no mês", after: "Controle completo de contas a pagar e a receber" },
       { before: "Boleto manual, planilha de cobrança, atraso de cliente", after: "Boletos automáticos via banco Inter, Sicoob, Sicredi e Santander" },
@@ -46,7 +46,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "fiscal", label: "Fiscal e Legal", emoji: "📑", Icon: FileText,
+    id: "fiscal", label: "Fiscal e Legal", tabLabel: "Fiscal", emoji: "📑", Icon: FileText,
     items: [
       { before: "Emite nota fiscal em site da prefeitura, lento e travado", after: "NF-e, NFC-e, NFS-e e MDF-e em poucos cliques" },
       { before: "Erro de tributação gera autuação", after: "CFOP, CST, NCM e benefícios fiscais configurados corretamente" },
@@ -56,7 +56,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "os", label: "Ordens de Serviço", emoji: "🛠️", Icon: Wrench,
+    id: "os", label: "Ordens de Serviço", tabLabel: "O.S.", emoji: "🛠️", Icon: Wrench,
     items: [
       { before: "OS em bloco de papel, ilegível, perdida", after: "OS digital com objeto, identificador, situação e prazo" },
       { before: "Cliente cobra garantia e ninguém lembra do prazo", after: "Controle automático de garantia por data" },
@@ -66,7 +66,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "gestao", label: "Escala e Gestão", emoji: "🌐", Icon: BarChart3,
+    id: "gestao", label: "Escala e Gestão", tabLabel: "Gestão", emoji: "🌐", Icon: BarChart3,
     items: [
       { before: "Não sabe quais produtos vendem mais", after: "Relatórios de vendas por produto, vendedor, período" },
       { before: "Funcionário vende com desconto sem autorização", after: "Permissões por usuário e controle de descontos" },
@@ -117,26 +117,33 @@ export function Problemas() {
         </motion.div>
 
         {/* ── Tab bar ── */}
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-6" style={{ scrollbarWidth: "none" }}>
-          {CATEGORIES.map((cat) => {
-            const isActive = cat.id === active
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActive(cat.id)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all shrink-0 focus:outline-none"
-                style={
-                  isActive
-                    ? { background: "rgba(20,114,181,0.2)", border: "1px solid rgba(20,114,181,0.5)", color: "rgba(147,197,253,0.95)" }
-                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(148,163,184,0.7)" }
-                }
-              >
-                <span className="text-base">{cat.emoji}</span>
-                <span className="hidden sm:inline">{cat.label}</span>
-                <span className="sm:hidden">{cat.label.split(" ")[0]}</span>
-              </button>
-            )
-          })}
+        <div className="relative mb-6">
+          {/* fade hint on right edge */}
+          <div className="absolute right-0 top-0 bottom-3 w-10 pointer-events-none z-10"
+            style={{ background: "linear-gradient(to right, transparent, #0a1628)" }} />
+          <div
+            className="flex gap-2 overflow-x-auto pb-3 pr-8"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+          >
+            {CATEGORIES.map((cat) => {
+              const isActive = cat.id === active
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActive(cat.id)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all shrink-0 focus:outline-none"
+                  style={
+                    isActive
+                      ? { background: "rgba(20,114,181,0.2)", border: "1px solid rgba(20,114,181,0.5)", color: "rgba(147,197,253,0.95)" }
+                      : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(148,163,184,0.7)" }
+                  }
+                >
+                  <span className="text-base">{cat.emoji}</span>
+                  <span>{cat.tabLabel}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* ── Comparison table ── */}
