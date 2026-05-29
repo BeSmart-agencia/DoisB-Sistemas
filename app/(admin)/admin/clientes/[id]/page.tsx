@@ -66,6 +66,9 @@ interface ClienteDetalhe {
   data_assinatura: string | null
   observacoes: string | null
   created_at: string
+  forma_pagamento: "cartao" | "pix" | null
+  pix_vencimento: string | null
+  pix_charge_id: string | null
 }
 
 interface Fatura {
@@ -368,6 +371,10 @@ export default function ClienteDetalhePage() {
                       { icon: Mail, label: "E-mail", value: cliente.email },
                       { icon: Phone, label: "Telefone", value: cliente.telefone },
                       { icon: CreditCard, label: "Plano", value: PLANO_LABEL[cliente.plano] },
+                      { icon: Wallet, label: "Pagamento", value: cliente.forma_pagamento === "pix" ? "PIX mensal" : "Cartão (assinatura)" },
+                      ...(cliente.forma_pagamento === "pix" && cliente.pix_vencimento
+                        ? [{ icon: Calendar, label: "Venc. PIX", value: formatDate(cliente.pix_vencimento) }]
+                        : []),
                       { icon: Calendar, label: "Assinatura", value: formatDate(cliente.data_assinatura) },
                       { icon: Calendar, label: "Cadastro", value: formatDate(cliente.created_at) },
                       {
@@ -500,7 +507,27 @@ export default function ClienteDetalhePage() {
                     </a>
                   )}
 
-                  {/* Cancelar */}
+                  {/* Cancelar PIX (manual) */}
+                  {cliente.status_pagamento !== "cancelado" && cliente.forma_pagamento === "pix" && (
+                    <button
+                      className="w-full group flex items-center gap-3 border border-red-200 rounded-xl p-4 hover:bg-red-50 hover:border-red-300 transition-all"
+                      onClick={async () => {
+                        if (!confirm(`Cancelar conta de ${cliente.nome_empresa}?`)) return
+                        await fetch(`/api/admin/clientes/${id}/cancelar`, { method: "POST" })
+                        qc.invalidateQueries({ queryKey: ["admin", "cliente", id] })
+                      }}
+                    >
+                      <div className="h-9 w-9 rounded-xl bg-red-50 group-hover:bg-red-100 flex items-center justify-center shrink-0 transition-colors">
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-semibold text-red-600">Cancelar conta</p>
+                        <p className="text-xs text-red-400 mt-0.5">Suspende acesso imediatamente</p>
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Cancelar assinatura Stripe (cartão) */}
                   {cliente.status_pagamento !== "cancelado" && cliente.stripe_subscription_id && (
                     <>
                       <button
@@ -552,7 +579,7 @@ export default function ClienteDetalhePage() {
               </div>
 
               {/* Card Stripe IDs */}
-              {(cliente.stripe_customer_id || cliente.stripe_subscription_id) && (
+              {(cliente.stripe_customer_id || cliente.stripe_subscription_id || cliente.pix_charge_id) && (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
                     <div className="h-7 w-7 rounded-lg bg-violet-50 flex items-center justify-center">
@@ -578,6 +605,16 @@ export default function ClienteDetalhePage() {
                         </p>
                         <p className="text-xs font-mono text-slate-600 truncate">
                           {cliente.stripe_subscription_id}
+                        </p>
+                      </div>
+                    )}
+                    {cliente.pix_charge_id && (
+                      <div className="px-6 py-3.5">
+                        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mb-1">
+                          PIX Charge ID
+                        </p>
+                        <p className="text-xs font-mono text-slate-600 truncate">
+                          {cliente.pix_charge_id}
                         </p>
                       </div>
                     )}
