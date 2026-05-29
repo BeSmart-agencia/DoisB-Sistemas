@@ -27,21 +27,37 @@ interface CidadeSugestao {
   label: string
 }
 
-/* ── Busca IBGE ── */
+/* ── Cache IBGE (carrega uma vez, filtra localmente) ── */
+type MunicipioRaw = { nome: string; uf: string }
+let ibgeCache: MunicipioRaw[] | null = null
+
+async function getMunicipios(): Promise<MunicipioRaw[]> {
+  if (ibgeCache) return ibgeCache
+  const res = await fetch(
+    "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome"
+  )
+  if (!res.ok) return []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any[] = await res.json()
+  ibgeCache = data.map((m) => ({
+    nome: m.nome as string,
+    uf: (m.microrregiao?.mesorregiao?.UF?.sigla as string) ?? "",
+  }))
+  return ibgeCache
+}
+
+const norm = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+
 async function buscarCidades(query: string): Promise<CidadeSugestao[]> {
   if (query.length < 2) return []
   try {
-    const res = await fetch(
-      `https://servicodados.ibge.gov.br/api/v1/localidades/municipios?nome=${encodeURIComponent(query)}&orderBy=nome`
-    )
-    if (!res.ok) return []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any[] = await res.json()
-    return data.slice(0, 8).map((m) => ({
-      nome: m.nome,
-      uf: m.microrregiao?.mesorregiao?.UF?.sigla ?? "",
-      label: `${m.nome} — ${m.microrregiao?.mesorregiao?.UF?.sigla ?? ""}`,
-    }))
+    const municipios = await getMunicipios()
+    const q = norm(query)
+    return municipios
+      .filter((m) => norm(m.nome).startsWith(q))
+      .slice(0, 8)
+      .map((m) => ({ ...m, label: `${m.nome} — ${m.uf}` }))
   } catch {
     return []
   }
