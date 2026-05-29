@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Loader2, CheckCircle2, Clock, Copy, Check } from "lucide-react"
@@ -8,6 +8,14 @@ import { Loader2, CheckCircle2, Clock, Copy, Check } from "lucide-react"
 type Status = "pending" | "processing" | "succeeded" | "error" | "loading"
 
 export default function AguardandoPix() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>}>
+      <AguardandoPixContent />
+    </Suspense>
+  )
+}
+
+function AguardandoPixContent() {
   const params = useSearchParams()
   const intentId = params.get("intent_id")
   const qrImage = params.get("qr_image")
