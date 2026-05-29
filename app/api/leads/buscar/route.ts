@@ -106,6 +106,11 @@ export async function GET(request: Request) {
     }
   }
 
+  // Filtrar resultados que não contêm a cidade no endereço
+  const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+  const cidadeNorm = norm(cidade)
+  allResults = allResults.filter((r) => norm(r.endereco).includes(cidadeNorm))
+
   // Filter already-added leads
   const placeIds = allResults.map((r) => r.google_place_id).filter(Boolean)
   const { data: existentes } = await supabase!
