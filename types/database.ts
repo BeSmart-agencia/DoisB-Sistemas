@@ -29,6 +29,7 @@ export interface Database {
           acesso_liberado: boolean; stripe_customer_id: string | null
           stripe_subscription_id: string | null; data_assinatura: string | null
           observacoes: string | null; created_at: string
+          forma_pagamento: "cartao" | "pix"; pix_vencimento: string | null; pix_charge_id: string | null
         }
         Insert: {
           id?: string; nome_empresa: string; cnpj: string; email: string; telefone: string
@@ -36,6 +37,7 @@ export interface Database {
           acesso_liberado?: boolean; stripe_customer_id?: string | null
           stripe_subscription_id?: string | null; data_assinatura?: string | null
           observacoes?: string | null; created_at?: string
+          forma_pagamento?: "cartao" | "pix"; pix_vencimento?: string | null; pix_charge_id?: string | null
         }
         Update: {
           id?: string; nome_empresa?: string; cnpj?: string; email?: string; telefone?: string
@@ -43,6 +45,7 @@ export interface Database {
           acesso_liberado?: boolean; stripe_customer_id?: string | null
           stripe_subscription_id?: string | null; data_assinatura?: string | null
           observacoes?: string | null; created_at?: string
+          forma_pagamento?: "cartao" | "pix"; pix_vencimento?: string | null; pix_charge_id?: string | null
         }
         Relationships: []
       }

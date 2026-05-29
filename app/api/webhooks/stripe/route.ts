@@ -10,6 +10,12 @@ import {
 
 export const dynamic = "force-dynamic"
 
+function addDays(isoDate: string, days: number): string {
+  const d = new Date(isoDate + "T12:00:00Z")
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
 export async function POST(request: Request) {
   const bodyBuffer = Buffer.from(await request.arrayBuffer())
   const sig = request.headers.get("stripe-signature")
@@ -130,6 +136,67 @@ export async function POST(request: Request) {
           .from("clientes")
           .update({ status_pagamento: "cancelado", acesso_liberado: false })
           .eq("stripe_customer_id", customerId)
+        break
+      }
+
+      case "payment_intent.succeeded": {
+        const intent = event.data.object as Stripe.PaymentIntent
+        const clienteId = intent.metadata?.supabase_cliente_id
+        const isRenovacao = intent.metadata?.renovacao === "true"
+
+        if (!clienteId) break
+
+        if (isRenovacao) {
+          // Renovação: estender vencimento + 30 dias a partir do vencimento atual
+          const { data: cliente } = await supabase
+            .from("clientes")
+            .select("pix_vencimento, email, nome_responsavel, plano, acesso_liberado")
+            .eq("id", clienteId)
+            .maybeSingle()
+
+          if (!cliente) break
+
+          const base = cliente.pix_vencimento ?? new Date().toISOString().slice(0, 10)
+          const novoVencimento = addDays(base, 30)
+
+          await supabase
+            .from("clientes")
+            .update({
+              status_pagamento: "ativo",
+              acesso_liberado: true,
+              pix_vencimento: novoVencimento,
+              data_assinatura: new Date().toISOString(),
+            })
+            .eq("id", clienteId)
+
+          console.log(`[webhook] PIX renovado: ${clienteId}, novo vencimento: ${novoVencimento}`)
+        } else {
+          // Novo cliente: marcar pagamento recebido, equipe libera manualmente
+          const { data: cliente } = await supabase
+            .from("clientes")
+            .select("email, nome_responsavel, plano")
+            .eq("id", clienteId)
+            .maybeSingle()
+
+          const vencimento = addDays(new Date().toISOString().slice(0, 10), 30)
+          await supabase
+            .from("clientes")
+            .update({
+              status_pagamento: "ativo",
+              acesso_liberado: false, // equipe libera manualmente
+              pix_vencimento: vencimento,
+              data_assinatura: new Date().toISOString(),
+            })
+            .eq("id", clienteId)
+
+          if (cliente) {
+            await Promise.allSettled([
+              enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano),
+            ])
+          }
+
+          console.log(`[webhook] PIX novo cliente confirmado: ${clienteId}`)
+        }
         break
       }
 
