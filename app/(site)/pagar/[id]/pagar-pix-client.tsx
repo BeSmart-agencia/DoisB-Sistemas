@@ -6,7 +6,6 @@ import { Loader2, CheckCircle2, Copy, Check } from "lucide-react"
 
 type Props = {
   intentId: string
-  nome: string
   plano: string
   vencimento: string
   qrImage: string
@@ -19,7 +18,7 @@ function formatarData(iso: string) {
   return `${d}/${m}/${y}`
 }
 
-export default function PagarPixClient({ intentId, nome, plano, vencimento, qrImage, qrCode }: Props) {
+export default function PagarPixClient({ intentId, plano, vencimento, qrImage, qrCode }: Props) {
   const [succeeded, setSucceeded] = useState(false)
   const [copied, setCopied] = useState(false)
   const planoNome = plano.charAt(0).toUpperCase() + plano.slice(1)

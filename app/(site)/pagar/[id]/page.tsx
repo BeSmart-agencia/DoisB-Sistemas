@@ -66,7 +66,6 @@ export default async function PagarPage({ params }: { params: { id: string } }) 
   return (
     <PagarPixClient
       intentId={cliente.pix_charge_id}
-      nome={cliente.nome_responsavel}
       plano={cliente.plano}
       vencimento={cliente.pix_vencimento ?? ""}
       qrImage={qrImage}
