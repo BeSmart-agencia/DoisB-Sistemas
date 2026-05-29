@@ -81,6 +81,7 @@ export default function LeadsBuscarPage() {
   const [dropdownAberto, setDropdownAberto] = useState(false)
   const [buscandoCidade, setBuscandoCidade] = useState(false)
   const cidadeRef = useRef<HTMLDivElement>(null)
+  const skipSearchRef = useRef(false)
 
   /* limite */
   const [limite, setLimite] = useState(20)
@@ -98,6 +99,7 @@ export default function LeadsBuscarPage() {
 
   /* ── Debounce busca IBGE ── */
   useEffect(() => {
+    if (skipSearchRef.current) { skipSearchRef.current = false; return }
     if (cidadeInput.length < 2) { setSugestoes([]); return }
     setBuscandoCidade(true)
     const t = setTimeout(async () => {
@@ -139,6 +141,7 @@ export default function LeadsBuscarPage() {
 
   /* ── Selecionar cidade ── */
   function selecionarCidade(c: CidadeSugestao) {
+    skipSearchRef.current = true
     setCidadeInput(c.nome)
     setCidadeSelecionada(c.nome)
     setEstado(c.uf)
@@ -170,12 +173,14 @@ export default function LeadsBuscarPage() {
         limite: limite.toString(),
       })
       const res = await fetch(`/api/leads/buscar?${p}`)
-      const json = await res.json()
-      if (!res.ok) { toast.error(json.error ?? "Erro na busca"); return }
-      setResults(json.results)
-      if (json.results.length === 0) toast.info("Nenhuma empresa nova encontrada")
-    } catch {
-      toast.error("Erro de conexão")
+      const text = await res.text()
+      let json: { error?: string; results?: PlaceResult[] }
+      try { json = JSON.parse(text) } catch { toast.error(`Resposta inválida: ${text.slice(0, 120)}`); return }
+      if (!res.ok) { toast.error(json.error ?? `Erro ${res.status}`); return }
+      setResults(json.results ?? [])
+      if ((json.results ?? []).length === 0) toast.info("Nenhuma empresa nova encontrada")
+    } catch (err) {
+      toast.error(`Erro de conexão: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
       setLoading(false)
     }
