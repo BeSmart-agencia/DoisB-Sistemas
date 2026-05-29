@@ -1,24 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { toast } from "sonner"
-import { Search, MapPin, Star, Phone, Plus, PlusSquare, Loader2, LayoutList, PhoneOff } from "lucide-react"
+import {
+  Search, MapPin, Star, Phone, Plus, PlusSquare, Loader2,
+  LayoutList, PhoneOff, X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-
-const schema = z.object({
-  segmento: z.string().min(2, "Informe o segmento"),
-  cidade: z.string().min(2, "Informe a cidade"),
-  estado: z.string().max(2).optional(),
-  limite: z.number().min(1).max(60),
-})
-type FormData = z.infer<typeof schema>
 
 interface PlaceResult {
   google_place_id: string
@@ -30,31 +21,137 @@ interface PlaceResult {
   lng: number | null
 }
 
+interface CidadeSugestao {
+  nome: string
+  uf: string
+  label: string
+}
+
+/* ── Busca IBGE ── */
+async function buscarCidades(query: string): Promise<CidadeSugestao[]> {
+  if (query.length < 2) return []
+  try {
+    const res = await fetch(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/municipios?nome=${encodeURIComponent(query)}&orderBy=nome`
+    )
+    if (!res.ok) return []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any[] = await res.json()
+    return data.slice(0, 8).map((m) => ({
+      nome: m.nome,
+      uf: m.microrregiao?.mesorregiao?.UF?.sigla ?? "",
+      label: `${m.nome} — ${m.microrregiao?.mesorregiao?.UF?.sigla ?? ""}`,
+    }))
+  } catch {
+    return []
+  }
+}
+
 export default function LeadsBuscarPage() {
   const [results, setResults] = useState<PlaceResult[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [adicionados, setAdicionados] = useState<Set<string>>(new Set())
   const [adicionando, setAdicionando] = useState<Set<string>>(new Set())
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { limite: 20 },
-  })
+  /* segmentos */
+  const [segmentos, setSegmentos] = useState<string[]>([])
+  const [segInput, setSegInput] = useState("")
 
-  const segmento = watch("segmento") ?? ""
-  const cidade = watch("cidade") ?? ""
-  const estado = watch("estado") ?? ""
+  /* cidade */
+  const [cidadeInput, setCidadeInput] = useState("")
+  const [cidadeSelecionada, setCidadeSelecionada] = useState("")
+  const [estado, setEstado] = useState("")
+  const [sugestoes, setSugestoes] = useState<CidadeSugestao[]>([])
+  const [dropdownAberto, setDropdownAberto] = useState(false)
+  const [buscandoCidade, setBuscandoCidade] = useState(false)
+  const cidadeRef = useRef<HTMLDivElement>(null)
 
-  async function onSearch(data: FormData) {
+  /* limite */
+  const [limite, setLimite] = useState(20)
+
+  /* ── Fechar dropdown ao clicar fora ── */
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (cidadeRef.current && !cidadeRef.current.contains(e.target as Node)) {
+        setDropdownAberto(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [])
+
+  /* ── Debounce busca IBGE ── */
+  useEffect(() => {
+    if (cidadeInput.length < 2) { setSugestoes([]); return }
+    setBuscandoCidade(true)
+    const t = setTimeout(async () => {
+      const res = await buscarCidades(cidadeInput)
+      setSugestoes(res)
+      setDropdownAberto(res.length > 0)
+      setBuscandoCidade(false)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [cidadeInput])
+
+  /* ── Adicionar segmento ── */
+  function addSegmento(valor: string) {
+    const v = valor.replace(/,/g, "").trim()
+    if (v.length >= 2 && !segmentos.includes(v)) {
+      setSegmentos((prev) => [...prev, v])
+    }
+    setSegInput("")
+  }
+
+  function onSegKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "," || e.key === "Enter") {
+      e.preventDefault()
+      addSegmento(segInput)
+    } else if (e.key === "Backspace" && segInput === "" && segmentos.length > 0) {
+      setSegmentos((prev) => prev.slice(0, -1))
+    }
+  }
+
+  function onSegChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const v = e.target.value
+    if (v.endsWith(",")) { addSegmento(v); return }
+    setSegInput(v)
+  }
+
+  function removerSegmento(seg: string) {
+    setSegmentos((prev) => prev.filter((s) => s !== seg))
+  }
+
+  /* ── Selecionar cidade ── */
+  function selecionarCidade(c: CidadeSugestao) {
+    setCidadeInput(c.nome)
+    setCidadeSelecionada(c.nome)
+    setEstado(c.uf)
+    setDropdownAberto(false)
+    setSugestoes([])
+  }
+
+  function onCidadeChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setCidadeInput(e.target.value)
+    setCidadeSelecionada("")
+    setEstado("")
+  }
+
+  /* ── Buscar ── */
+  async function onSearch(e: React.FormEvent) {
+    e.preventDefault()
+    if (segmentos.length === 0) { toast.error("Adicione pelo menos um segmento"); return }
+    const cidadeFinal = cidadeSelecionada || cidadeInput
+    if (cidadeFinal.length < 2) { toast.error("Informe a cidade"); return }
+
     setLoading(true)
     setResults(null)
     setAdicionados(new Set())
     try {
       const p = new URLSearchParams({
-        segmento: data.segmento,
-        cidade: data.cidade,
-        ...(data.estado && { estado: data.estado }),
-        limite: data.limite.toString(),
+        segmento: segmentos.join(", "),
+        cidade: cidadeFinal,
+        ...(estado && { estado }),
+        limite: limite.toString(),
       })
       const res = await fetch(`/api/leads/buscar?${p}`)
       const json = await res.json()
@@ -69,12 +166,18 @@ export default function LeadsBuscarPage() {
   }
 
   async function adicionarLead(place: PlaceResult) {
+    const cidadeFinal = cidadeSelecionada || cidadeInput
     setAdicionando((prev) => new Set(prev).add(place.google_place_id))
     try {
       const res = await fetch("/api/admin/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...place, segmento, cidade, estado }),
+        body: JSON.stringify({
+          ...place,
+          segmento: segmentos.join(", "),
+          cidade: cidadeFinal,
+          estado,
+        }),
       })
       const json = await res.json()
       if (!res.ok) { toast.error(json.error ?? "Erro ao adicionar"); return }
@@ -106,29 +209,116 @@ export default function LeadsBuscarPage() {
 
       {/* Form */}
       <div className="admin-panel p-6">
-        <form onSubmit={handleSubmit(onSearch)} className="space-y-4">
+        <form onSubmit={onSearch} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Field label="Segmento *" error={errors.segmento?.message}>
-              <Input placeholder="padaria, oficina mecânica..." {...register("segmento")} />
-            </Field>
-            <Field label="Cidade *" error={errors.cidade?.message}>
-              <Input placeholder="Porto Alegre" {...register("cidade")} />
-            </Field>
-            <Field label="Estado" error={errors.estado?.message}>
-              <Input placeholder="RS" maxLength={2} {...register("estado")}
-                className="uppercase" style={{ textTransform: "uppercase" }} />
-            </Field>
-            <Field label="Máx. resultados" error={undefined}>
-              <Input type="number" min={1} max={60} {...register("limite", { valueAsNumber: true })} />
-            </Field>
+
+            {/* Segmentos (tags) */}
+            <div className="space-y-1.5 lg:col-span-2">
+              <Label className="text-slate-700 font-medium text-sm">
+                Segmento * <span className="font-normal text-slate-400">(vírgula ou Enter para adicionar)</span>
+              </Label>
+              <div
+                className={cn(
+                  "flex flex-wrap items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-md border border-slate-200 bg-white cursor-text",
+                  "focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500"
+                )}
+                onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}
+              >
+                {segmentos.map((seg) => (
+                  <span
+                    key={seg}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                  >
+                    {seg}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removerSegmento(seg) }}
+                      className="hover:text-blue-900 ml-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  value={segInput}
+                  onChange={onSegChange}
+                  onKeyDown={onSegKeyDown}
+                  onBlur={() => { if (segInput.trim()) addSegmento(segInput) }}
+                  placeholder={segmentos.length === 0 ? "padaria, oficina, mercado..." : ""}
+                  className="flex-1 min-w-[120px] outline-none text-sm bg-transparent placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Cidade (autocomplete IBGE) */}
+            <div className="space-y-1.5 relative" ref={cidadeRef}>
+              <Label className="text-slate-700 font-medium text-sm">Cidade *</Label>
+              <div className="relative">
+                <input
+                  value={cidadeInput}
+                  onChange={onCidadeChange}
+                  onFocus={() => sugestoes.length > 0 && setDropdownAberto(true)}
+                  placeholder="Digite a cidade..."
+                  autoComplete="off"
+                  className="w-full h-9 px-3 text-sm rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-slate-400"
+                />
+                {buscandoCidade && (
+                  <Loader2 className="absolute right-2.5 top-2 h-4 w-4 animate-spin text-slate-400" />
+                )}
+              </div>
+              {dropdownAberto && sugestoes.length > 0 && (
+                <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                  {sugestoes.map((c) => (
+                    <button
+                      key={`${c.nome}-${c.uf}`}
+                      type="button"
+                      onMouseDown={() => selecionarCidade(c)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center justify-between gap-2"
+                    >
+                      <span className="text-slate-800">{c.nome}</span>
+                      <span className="text-xs font-semibold text-slate-400 shrink-0">{c.uf}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Estado (auto-preenchido) */}
+            <div className="space-y-1.5">
+              <Label className="text-slate-700 font-medium text-sm">Estado</Label>
+              <input
+                value={estado}
+                onChange={(e) => setEstado(e.target.value.toUpperCase().slice(0, 2))}
+                placeholder="RS"
+                maxLength={2}
+                className="w-full h-9 px-3 text-sm rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase placeholder:text-slate-400"
+                style={{ textTransform: "uppercase" }}
+              />
+            </div>
           </div>
-          <Button
-            type="submit" disabled={loading}
-            className="gap-2 bg-blue-800 hover:bg-blue-900 text-white"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            {loading ? "Buscando..." : "Buscar empresas"}
-          </Button>
+
+          {/* Limite */}
+          <div className="flex items-end gap-4 flex-wrap">
+            <div className="space-y-1.5">
+              <Label className="text-slate-700 font-medium text-sm">Máx. resultados</Label>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={limite}
+                onChange={(e) => setLimite(Number(e.target.value))}
+                className="w-24 h-9 px-3 text-sm rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="gap-2 bg-blue-800 hover:bg-blue-900 text-white"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {loading ? "Buscando..." : "Buscar empresas"}
+            </Button>
+          </div>
         </form>
       </div>
 
@@ -216,16 +406,6 @@ export default function LeadsBuscarPage() {
           )}
         </div>
       )}
-    </div>
-  )
-}
-
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-slate-700 font-medium text-sm">{label}</Label>
-      {children}
-      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   )
 }
