@@ -200,10 +200,17 @@ export default function LeadsBuscarPage() {
           estado,
         }),
       })
-      const json = await res.json()
-      if (!res.ok) { toast.error(json.error ?? "Erro ao adicionar"); return }
+      const text = await res.text()
+      let json: { error?: string } = {}
+      try { json = JSON.parse(text) } catch { /* ignore */ }
+      if (!res.ok) {
+        toast.error(json.error ?? `Erro ${res.status} ao adicionar`)
+        return
+      }
       setAdicionados((prev) => new Set(prev).add(place.google_place_id))
       toast.success(`${place.nome} adicionado`)
+    } catch (err) {
+      toast.error(`Erro de conexão: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
       setAdicionando((prev) => { const s = new Set(prev); s.delete(place.google_place_id); return s })
     }
