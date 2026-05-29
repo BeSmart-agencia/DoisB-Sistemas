@@ -139,6 +139,34 @@ export async function POST(request: Request) {
         break
       }
 
+      // Boleto compensado (1-3 dias úteis após geração)
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object as Stripe.Checkout.Session
+        const customerId = session.customer as string
+
+        const { data: cliente } = await supabase
+          .from("clientes")
+          .select("email, nome_responsavel, plano")
+          .eq("stripe_customer_id", customerId)
+          .maybeSingle()
+
+        await supabase
+          .from("clientes")
+          .update({
+            status_pagamento: "ativo",
+            stripe_subscription_id: session.subscription as string,
+            data_assinatura: new Date().toISOString(),
+          })
+          .eq("stripe_customer_id", customerId)
+
+        if (cliente) {
+          await Promise.allSettled([
+            enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano),
+          ])
+        }
+        break
+      }
+
       case "payment_intent.succeeded": {
         const intent = event.data.object as Stripe.PaymentIntent
         const clienteId = intent.metadata?.supabase_cliente_id

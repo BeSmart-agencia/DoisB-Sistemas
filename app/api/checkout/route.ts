@@ -32,6 +32,7 @@ const schema = z.object({
   telefone: z.string().min(10),
   nome_responsavel: z.string().min(2),
   plano: z.enum(["essencial", "standard", "premium"]),
+  forma_pagamento: z.enum(["cartao", "boleto"]).default("cartao"),
 })
 
 export async function POST(request: Request) {
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano } = parsed.data
+  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano, forma_pagamento } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
       plano,
       status_pagamento: "aguardando",
       acesso_liberado: false,
+      forma_pagamento,
     })
     .select("id")
     .single()
@@ -124,6 +126,7 @@ export async function POST(request: Request) {
       mode: "subscription",
       customer: stripeCustomer.id,
       line_items: [{ price: PRICE_IDS[plano], quantity: 1 }],
+      ...(forma_pagamento === "boleto" && { payment_method_types: ["boleto"] }),
       success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cadastro?plano=${plano}&erro=cancelado`,
       locale: "pt-BR",

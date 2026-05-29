@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Loader2, Check, ArrowLeft, ShieldCheck, Building2, CreditCard, QrCode } from "lucide-react"
+import { Loader2, Check, ArrowLeft, ShieldCheck, Building2, CreditCard, QrCode, FileText } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -67,7 +67,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-type FormaPagamento = "cartao" | "pix"
+type FormaPagamento = "cartao" | "boleto" | "pix"
 
 export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }) {
   const info = PLANOS[plano] ?? PLANOS.standard
@@ -104,10 +104,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
           body: JSON.stringify({ ...data, plano }),
         })
         const json = await res.json()
-        if (!res.ok) {
-          toast.error(json.error ?? "Erro ao processar cadastro")
-          return
-        }
+        if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }
         const params = new URLSearchParams({
           intent_id: json.intentId,
           qr_image: json.qrImage ?? "",
@@ -118,13 +115,10 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, plano }),
+          body: JSON.stringify({ ...data, plano, forma_pagamento: formaPagamento }),
         })
         const json = await res.json()
-        if (!res.ok) {
-          toast.error(json.error ?? "Erro ao processar cadastro")
-          return
-        }
+        if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }
         window.location.href = json.url
       }
     } catch {
@@ -263,33 +257,63 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
             {/* Forma de pagamento */}
             <div className="pt-1">
               <Label className="text-slate-700 font-medium text-sm mb-2 block">Forma de pagamento *</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {([
-                  { value: "cartao", label: "Cartão de crédito", Icon: CreditCard, sub: "Parcelado ou à vista" },
-                  { value: "pix", label: "PIX", Icon: QrCode, sub: "Pagamento mensal" },
-                ] as const).map(({ value, label, Icon, sub }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setFormaPagamento(value)}
-                    className={cn(
-                      "flex items-start gap-3 p-4 rounded-xl border text-left transition-all",
-                      formaPagamento === value
-                        ? "border-blue-700 bg-blue-50 shadow-sm"
-                        : "border-slate-200 bg-white hover:border-slate-300"
-                    )}
-                  >
-                    <Icon className={cn("h-5 w-5 mt-0.5 shrink-0", formaPagamento === value ? "text-blue-700" : "text-slate-400")} />
-                    <div>
-                      <p className={cn("text-sm font-semibold", formaPagamento === value ? "text-blue-900" : "text-slate-700")}>{label}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
-                    </div>
-                  </button>
-                ))}
+              <div className="grid grid-cols-3 gap-3">
+
+                {/* Cartão */}
+                <button
+                  type="button"
+                  onClick={() => setFormaPagamento("cartao")}
+                  className={cn(
+                    "flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all",
+                    formaPagamento === "cartao"
+                      ? "border-blue-700 bg-blue-50 shadow-sm"
+                      : "border-slate-200 bg-white hover:border-slate-300"
+                  )}
+                >
+                  <CreditCard className={cn("h-5 w-5", formaPagamento === "cartao" ? "text-blue-700" : "text-slate-400")} />
+                  <div>
+                    <p className={cn("text-sm font-semibold", formaPagamento === "cartao" ? "text-blue-900" : "text-slate-700")}>Cartão</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Recorrente automático</p>
+                  </div>
+                </button>
+
+                {/* Boleto */}
+                <button
+                  type="button"
+                  onClick={() => setFormaPagamento("boleto")}
+                  className={cn(
+                    "flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all",
+                    formaPagamento === "boleto"
+                      ? "border-blue-700 bg-blue-50 shadow-sm"
+                      : "border-slate-200 bg-white hover:border-slate-300"
+                  )}
+                >
+                  <FileText className={cn("h-5 w-5", formaPagamento === "boleto" ? "text-blue-700" : "text-slate-400")} />
+                  <div>
+                    <p className={cn("text-sm font-semibold", formaPagamento === "boleto" ? "text-blue-900" : "text-slate-700")}>Boleto</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Compensa em 1-3 dias</p>
+                  </div>
+                </button>
+
+                {/* PIX — em breve */}
+                <div
+                  className="relative flex flex-col items-start gap-2 p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed select-none"
+                >
+                  <span className="absolute -top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                    EM BREVE
+                  </span>
+                  <QrCode className="h-5 w-5 text-slate-300" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-400">PIX</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Pagamento mensal</p>
+                  </div>
+                </div>
+
               </div>
-              {formaPagamento === "pix" && (
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
-                  Com PIX você paga mensalmente via QR Code. Um novo código será enviado por e-mail 5 dias antes do vencimento.
+
+              {formaPagamento === "boleto" && (
+                <p className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mt-2">
+                  Você será redirecionado ao Stripe para gerar o boleto. O acesso é liberado após a compensação (1-3 dias úteis).
                 </p>
               )}
             </div>
@@ -338,9 +362,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
             </Button>
 
             <p className="text-center text-xs text-slate-400 pt-1">
-              🔒 {formaPagamento === "pix"
-                ? "Pagamento via PIX processado pelo Stripe. Seguro e instantâneo."
-                : "Pagamento 100% seguro via Stripe. Não armazenamos dados do cartão."}
+              🔒 Pagamento 100% seguro via Stripe. Não armazenamos dados de pagamento.
             </p>
           </form>
         </div>
