@@ -31,24 +31,35 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { supabase, response } = await requireAdmin()
-  if (response) return response
+  try {
+    const { supabase, response } = await requireAdmin()
+    if (response) return response
 
-  const body = await request.json()
-  const { google_place_id, nome, segmento, cidade, estado, endereco, telefone, rating, lat, lng } = body
+    const body = await request.json()
+    const { google_place_id, nome, segmento, cidade, estado, endereco, telefone, rating, lat, lng } = body
 
-  if (!nome) return NextResponse.json({ error: "Nome obrigatório" }, { status: 400 })
+    if (!nome) return NextResponse.json({ error: "Nome obrigatório" }, { status: 400 })
 
-  const { data, error } = await supabase!
-    .from("leads")
-    .insert({ google_place_id, nome, segmento, cidade, estado, endereco, telefone, rating, lat, lng })
-    .select()
-    .single()
+    console.log("[leads POST] inserindo:", { google_place_id, nome, segmento, cidade })
 
-  if (error) {
-    if (error.code === "23505") return NextResponse.json({ error: "Lead já cadastrado" }, { status: 409 })
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const { data, error } = await supabase!
+      .from("leads")
+      .insert({ google_place_id, nome, segmento, cidade, estado, endereco, telefone, rating, lat, lng })
+      .select()
+      .single()
+
+    if (error) {
+      console.error("[leads POST] erro supabase:", error)
+      if (error.code === "23505") return NextResponse.json({ error: "Lead já cadastrado" }, { status: 409 })
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json(data, { status: 201 })
+  } catch (err) {
+    console.error("[leads POST] exceção:", err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Erro interno" },
+      { status: 500 }
+    )
   }
-
-  return NextResponse.json(data, { status: 201 })
 }
