@@ -15,6 +15,10 @@ interface PlaceResult {
 const cache = new Map<string, { results: PlaceResult[]; at: number }>()
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
+function removerAcentos(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+}
+
 async function searchPlaces(query: string, limite: number): Promise<PlaceResult[]> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY!
   const results: PlaceResult[] = []
@@ -107,9 +111,8 @@ export async function GET(request: Request) {
   }
 
   // Filtrar resultados que não contêm a cidade no endereço
-  const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
-  const cidadeNorm = norm(cidade)
-  allResults = allResults.filter((r) => norm(r.endereco).includes(cidadeNorm))
+  const cidadeNorm = removerAcentos(cidade)
+  allResults = allResults.filter((r) => removerAcentos(r.endereco).includes(cidadeNorm))
 
   // Filter already-added leads
   const placeIds = allResults.map((r) => r.google_place_id).filter(Boolean)
