@@ -11,7 +11,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { toast } from "sonner"
 import {
   GripVertical, Phone, MapPin, ExternalLink, Loader2, MessageCircle,
-  Search, X, Plus, Star,
+  Search, X, Star,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -367,7 +367,7 @@ export default function LeadsListaPage() {
           </form>
           <Link href="/admin/leads">
             <Button size="sm" variant="outline" className="gap-1.5 h-8">
-              <Plus className="h-3.5 w-3.5" /> Buscar
+              <Search className="h-3.5 w-3.5" /> Buscar leads
             </Button>
           </Link>
         </div>
