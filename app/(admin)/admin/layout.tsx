@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { QueryProvider } from "@/lib/providers/query-provider"
 import { Sidebar } from "./_components/sidebar"
+import { Toaster } from "sonner"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -29,6 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <main className="page-shell px-4 py-5 sm:px-6 lg:px-8 lg:py-8">{children}</main>
         </div>
       </div>
+      <Toaster richColors position="top-right" />
     </QueryProvider>
   )
 }
