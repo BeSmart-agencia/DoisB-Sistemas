@@ -6,6 +6,7 @@ import {
   enviarEmailPosCadastro,
   enviarEmailInternoNovaVenda,
   enviarEmailPagamentoFalho,
+  enviarEmailInternoAtivacaoPendente,
 } from "@/lib/emails"
 
 export const dynamic = "force-dynamic"
@@ -98,6 +99,14 @@ export async function POST(request: Request) {
             plano: cliente.plano as string,
             stripe_customer_id: customerId,
           }),
+          enviarEmailInternoAtivacaoPendente({
+            nome_empresa: cliente.nome_empresa as string,
+            nome_responsavel: cliente.nome_responsavel as string,
+            email: cliente.email as string,
+            telefone: cliente.telefone as string,
+            plano: cliente.plano as string,
+            forma_pagamento: "Cartão",
+          }),
         ])
         break
       }
@@ -146,7 +155,7 @@ export async function POST(request: Request) {
 
         const { data: cliente } = await supabase
           .from("clientes")
-          .select("email, nome_responsavel, plano")
+          .select("*")
           .eq("stripe_customer_id", customerId)
           .maybeSingle()
 
@@ -162,6 +171,14 @@ export async function POST(request: Request) {
         if (cliente) {
           await Promise.allSettled([
             enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano),
+            enviarEmailInternoAtivacaoPendente({
+              nome_empresa: cliente.nome_empresa,
+              nome_responsavel: cliente.nome_responsavel,
+              email: cliente.email,
+              telefone: cliente.telefone,
+              plano: cliente.plano,
+              forma_pagamento: "Boleto",
+            }),
           ])
         }
         break
@@ -202,7 +219,7 @@ export async function POST(request: Request) {
           // Novo cliente: marcar pagamento recebido, equipe libera manualmente
           const { data: cliente } = await supabase
             .from("clientes")
-            .select("email, nome_responsavel, plano")
+            .select("*")
             .eq("id", clienteId)
             .maybeSingle()
 
@@ -220,6 +237,14 @@ export async function POST(request: Request) {
           if (cliente) {
             await Promise.allSettled([
               enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano),
+              enviarEmailInternoAtivacaoPendente({
+                nome_empresa: cliente.nome_empresa,
+                nome_responsavel: cliente.nome_responsavel,
+                email: cliente.email,
+                telefone: cliente.telefone,
+                plano: cliente.plano,
+                forma_pagamento: "PIX",
+              }),
             ])
           }
 

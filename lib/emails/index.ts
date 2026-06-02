@@ -1,6 +1,7 @@
 import { Resend } from "resend"
 import type { DadosNovaVenda } from "./templates/interna-nova-venda"
 import type { DadosNovoChamado } from "./templates/interna-novo-chamado"
+import type { DadosAtivacaoPendente } from "./templates/interna-ativacao-pendente"
 import { templatePosCadastro } from "./templates/pos-cadastro"
 import { templateAcessoLiberado } from "./templates/acesso-liberado"
 import { templatePagamentoFalho } from "./templates/pagamento-falho"
@@ -10,10 +11,11 @@ import { templateChamadoResolvido } from "./templates/chamado-resolvido"
 import { templateInternaNovaVenda } from "./templates/interna-nova-venda"
 import { templateInternaNewChamado } from "./templates/interna-novo-chamado"
 import { templatePixCobranca } from "./templates/pix-cobranca"
+import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pendente"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = "DoisB Sistemas <onboarding@resend.dev>"
-const INTERNO = "barthlaisa@gmail.com"
+const INTERNO = ["barthlaisa@gmail.com", "laisabarth@doisbsistemas.com.br", "abelbarth@doisbsistemas.com.br"]
 
 export async function enviarEmailPosCadastro(email: string, nome: string, plano: string) {
   await resend.emails.send({
@@ -88,6 +90,15 @@ export async function enviarEmailInternoNovoChamado(dados: DadosNovoChamado) {
     to: INTERNO,
     subject: `🎫 Novo chamado — ${dados.assunto}`,
     html: templateInternaNewChamado(dados),
+  })
+}
+
+export async function enviarEmailInternoAtivacaoPendente(dados: DadosAtivacaoPendente) {
+  await resend.emails.send({
+    from: FROM,
+    to: INTERNO,
+    subject: `⚡ Ativar no ZWeb — ${dados.nome_empresa} (${dados.plano})`,
+    html: templateInternaAtivacaoPendente(dados),
   })
 }
 
