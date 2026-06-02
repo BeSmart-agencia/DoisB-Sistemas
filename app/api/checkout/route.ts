@@ -9,6 +9,21 @@ const PRICE_IDS: Record<string, string> = {
   premium: process.env.STRIPE_PRICE_PREMIUM!,
 }
 
+const PROMO_GDOOR = {
+  inicio: new Date("2026-06-02T03:00:00Z"), // 00h BRT
+  fim: new Date("2026-06-09T20:00:00Z"),    // 17h BRT
+  cupons: {
+    essencial: "GDOOR_JUN26_ESSENCIAL",
+    standard:  "GDOOR_JUN26_STANDARD",
+    premium:   "GDOOR_JUN26_PREMIUM",
+  } as Record<string, string>,
+}
+
+function promoAtiva(): boolean {
+  const agora = new Date()
+  return agora >= PROMO_GDOOR.inicio && agora <= PROMO_GDOOR.fim
+}
+
 function validarCNPJ(cnpj: string): boolean {
   const n = cnpj.replace(/\D/g, "")
   if (n.length !== 14 || /^(\d)\1+$/.test(n)) return false
@@ -120,6 +135,7 @@ export async function POST(request: Request) {
     .eq("id", cliente.id)
 
   // Criar Stripe Checkout Session
+  const aplicarPromo = forma_pagamento === "cartao" && promoAtiva()
   let session
   try {
     session = await stripe.checkout.sessions.create({
@@ -130,7 +146,9 @@ export async function POST(request: Request) {
       success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cadastro?plano=${plano}&erro=cancelado`,
       locale: "pt-BR",
-      allow_promotion_codes: true,
+      ...(aplicarPromo
+        ? { discounts: [{ coupon: PROMO_GDOOR.cupons[plano] }] }
+        : { allow_promotion_codes: true }),
       subscription_data: {
         metadata: {
           supabase_cliente_id: cliente.id,

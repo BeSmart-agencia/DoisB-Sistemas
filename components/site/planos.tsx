@@ -74,8 +74,11 @@ const PLANOS = [
   },
 ]
 
+const PROMO_FIM = new Date("2026-06-09T20:00:00Z") // 17h BRT
+
 export function Planos() {
   const [billing, setBilling] = useState<Billing>("monthly")
+  const promoAtiva = new Date() <= PROMO_FIM
 
   return (
     <section
@@ -114,6 +117,26 @@ export function Planos() {
           <p className="text-lg max-w-xl mx-auto" style={{ color: "rgba(148,163,184,0.8)" }}>
             Comece com o essencial. Evolua quando precisar. Sem multa de fidelidade.
           </p>
+
+          {/* Banner promoção Gdoor */}
+          {promoAtiva && (
+            <div className="mt-8 mx-auto max-w-2xl rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0f2744 0%, #1a3a5c 100%)", border: "1px solid rgba(99,179,237,0.3)" }}>
+              <div className="px-6 py-4 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+                <div className="text-2xl">🎉</div>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-base leading-tight">
+                    1ª mensalidade por <span style={{ color: "#63b3ed" }}>R$ 19,90</span> — em parceria com a Gdoor
+                  </p>
+                  <p className="text-sm mt-0.5" style={{ color: "rgba(148,163,184,0.85)" }}>
+                    Somente no cartão · CNPJs novos · Válido até 09/06 às 17h · A partir do 2º mês, o valor normal do plano
+                  </p>
+                </div>
+                <div className="shrink-0 text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(99,179,237,0.15)", color: "#63b3ed", border: "1px solid rgba(99,179,237,0.3)" }}>
+                  OFERTA LIMITADA
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Billing toggle */}
           <div className="inline-flex items-center gap-1 mt-8 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
