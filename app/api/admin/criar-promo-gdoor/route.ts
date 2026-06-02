@@ -6,9 +6,9 @@ import { stripe } from "@/lib/stripe/client"
 // Cupom: duration=once, amount_off = (preço normal - 19,90) em centavos
 // Acesse /api/admin/criar-promo-gdoor uma vez para criar os cupons
 const CUPONS = [
-  { id: "GDOOR_JUN26_ESSENCIAL", amount_off: 11000, nome: "Essencial" }, // 129,90 - 19,90
-  { id: "GDOOR_JUN26_STANDARD",  amount_off: 18000, nome: "Standard"  }, // 199,90 - 19,90
-  { id: "GDOOR_JUN26_PREMIUM",   amount_off: 23000, nome: "Premium"   }, // 249,90 - 19,90
+  { id: "GDOOR_JUN26_ESSENCIAL", amount_off: 11000, nome: "Essencial", label: "Gdoor Jun26 Essencial" },
+  { id: "GDOOR_JUN26_STANDARD",  amount_off: 18000, nome: "Standard",  label: "Gdoor Jun26 Standard"  },
+  { id: "GDOOR_JUN26_PREMIUM",   amount_off: 23000, nome: "Premium",   label: "Gdoor Jun26 Premium"   },
 ]
 
 export async function GET() {
@@ -21,7 +21,7 @@ export async function GET() {
     try {
       const cupom = await stripe.coupons.create({
         id: c.id,
-        name: `Promoção Gdoor Jun/26 — ${c.nome} (1ª mensalidade R$19,90)`,
+        name: c.label,
         amount_off: c.amount_off,
         currency: "brl",
         duration: "once",
