@@ -216,7 +216,7 @@ const HTML = `<!DOCTYPE html>
   <section class="slide bg-blue grid-pattern" data-slide="1">
     <div class="capa stagger">
       <div class="capa-center">
-        <img src="/logos/doisb-color.png" alt="DoisB Sistemas" style="max-width:clamp(240px,30vw,440px);height:auto">
+        <img src="/logos/doisb-logo02.png" alt="DoisB Sistemas" style="max-width:clamp(240px,30vw,440px);height:auto">
         <div class="capa-slogan">&lt;Venda. Controle. Cresça.&gt;</div>
       </div>
       <div class="capa-meta">
@@ -473,7 +473,7 @@ const HTML = `<!DOCTYPE html>
       <div class="fechamento-list">&gt; O sistema está pronto.<br>&gt; O site está no ar.<br>&gt; A marca está construída.<br>&gt; O nosso plano está aqui.</div>
       <div style="font-size:clamp(18px,1.8vw,24px);opacity:0.95;max-width:900px;line-height:1.4;">Não vamos ser os maiores.<br>Vamos ser <strong style="color:var(--blue-light);font-weight:800">os melhores no que a gente atende</strong>.</div>
       <div class="fechamento-slogan">&lt;Venda. Controle. Cresça.&gt;</div>
-      <div style="margin-top:1vh"><img src="/logos/doisb-color.png" alt="DoisB Sistemas" style="max-width:clamp(160px,20vw,280px);height:auto"></div>
+      <div style="margin-top:1vh"><img src="/logos/doisb-logo02.png" alt="DoisB Sistemas" style="max-width:clamp(160px,20vw,280px);height:auto"></div>
     </div>
   </section>
 
