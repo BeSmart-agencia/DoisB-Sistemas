@@ -11,7 +11,7 @@ const CUPONS = [
   { id: "GDOOR_JUN26_PREMIUM",   amount_off: 23000, nome: "Premium"   }, // 249,90 - 19,90
 ]
 
-export async function POST() {
+export async function GET() {
   const { response } = await requireAdmin()
   if (response) return response
 
