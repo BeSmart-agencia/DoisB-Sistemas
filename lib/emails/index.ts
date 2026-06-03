@@ -15,7 +15,8 @@ import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pe
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = "DoisB Sistemas <onboarding@resend.dev>"
-const INTERNO = ["barthlaisa@gmail.com", "laisabarth@doisbsistemas.com.br", "abelbarth@doisbsistemas.com.br"]
+// Após verificar doisbsistemas.com.br no Resend, adicionar: "laisabarth@doisbsistemas.com.br", "abelbarth@doisbsistemas.com.br"
+const INTERNO = ["barthlaisa@gmail.com"]
 
 export async function enviarEmailPosCadastro(email: string, nome: string, plano: string) {
   await resend.emails.send({
