@@ -88,7 +88,7 @@ export async function POST(request: Request) {
           .eq("id", cliente.id)
 
         // E-mails em paralelo — falha de e-mail não deve quebrar o webhook
-        await Promise.allSettled([
+        const emailResults = await Promise.allSettled([
           enviarEmailPosCadastro(cliente.email as string, cliente.nome_responsavel as string, cliente.plano as string),
           enviarEmailInternoNovaVenda({
             nome_empresa: cliente.nome_empresa as string,
@@ -108,6 +108,10 @@ export async function POST(request: Request) {
             forma_pagamento: "Cartão",
           }),
         ])
+        emailResults.forEach((r, i) => {
+          if (r.status === "rejected") console.error(`[webhook] email[${i}] falhou:`, r.reason)
+          else console.log(`[webhook] email[${i}] ok`)
+        })
         break
       }
 
