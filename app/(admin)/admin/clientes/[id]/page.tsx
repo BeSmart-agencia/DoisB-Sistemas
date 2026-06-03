@@ -25,6 +25,8 @@ import {
   FileText,
   Pencil,
   Wallet,
+  MapPin,
+  Receipt,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -51,13 +53,34 @@ import { cn } from "@/lib/utils"
 type StatusPagamento = "aguardando" | "ativo" | "atrasado" | "cancelado"
 type Plano = "essencial" | "standard" | "premium"
 
+const CRT_LABEL: Record<string, string> = {
+  "1": "Simples Nacional",
+  "2": "Simples Nacional – Excesso Sublimite",
+  "3": "Regime Normal",
+}
+
+function formatCEP(cep: string) {
+  return cep.replace(/^(\d{5})(\d{3})$/, "$1-$2")
+}
+
 interface ClienteDetalhe {
   id: string
   nome_empresa: string
+  nome_fantasia: string | null
   cnpj: string
+  ie: string | null
+  im: string | null
+  crt: string | null
   email: string
   telefone: string
   nome_responsavel: string
+  cep: string | null
+  logradouro: string | null
+  numero: string | null
+  complemento: string | null
+  bairro: string | null
+  cidade: string | null
+  estado: string | null
   plano: Plano
   status_pagamento: StatusPagamento
   acesso_liberado: boolean
@@ -365,11 +388,22 @@ export default function ClienteDetalhePage() {
                 <div className="divide-y divide-slate-50">
                   {(
                     [
-                      { icon: Building2, label: "Empresa", value: cliente.nome_empresa },
+                      { icon: Building2, label: "Razão Social", value: cliente.nome_empresa },
+                      ...(cliente.nome_fantasia ? [{ icon: Building2, label: "Nome Fantasia", value: cliente.nome_fantasia }] : []),
                       { icon: Hash, label: "CNPJ", value: formatCNPJ(cliente.cnpj), mono: true },
+                      { icon: Receipt, label: "IE", value: cliente.ie ?? "—" },
+                      ...(cliente.im ? [{ icon: Receipt, label: "IM", value: cliente.im }] : []),
+                      { icon: Receipt, label: "CRT", value: cliente.crt ? (CRT_LABEL[cliente.crt] ?? cliente.crt) : "—" },
                       { icon: User, label: "Responsável", value: cliente.nome_responsavel },
                       { icon: Mail, label: "E-mail", value: cliente.email },
                       { icon: Phone, label: "Telefone", value: cliente.telefone },
+                      {
+                        icon: MapPin, label: "Endereço",
+                        value: cliente.logradouro
+                          ? `${cliente.logradouro}, ${cliente.numero}${cliente.complemento ? ` ${cliente.complemento}` : ""} — ${cliente.bairro}, ${cliente.cidade}/${cliente.estado}`
+                          : "—"
+                      },
+                      { icon: MapPin, label: "CEP", value: cliente.cep ? formatCEP(cliente.cep) : "—", mono: true },
                       { icon: CreditCard, label: "Plano", value: PLANO_LABEL[cliente.plano] },
                       { icon: Wallet, label: "Pagamento", value: cliente.forma_pagamento === "pix" ? "PIX mensal" : "Cartão (assinatura)" },
                       ...(cliente.forma_pagamento === "pix" && cliente.pix_vencimento

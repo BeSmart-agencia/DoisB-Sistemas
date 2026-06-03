@@ -48,6 +48,17 @@ const schema = z.object({
   nome_responsavel: z.string().min(2),
   plano: z.enum(["essencial", "standard", "premium"]),
   forma_pagamento: z.enum(["cartao", "boleto"]).default("cartao"),
+  nome_fantasia: z.string().optional(),
+  ie: z.string().optional(),
+  im: z.string().optional(),
+  crt: z.string().optional(),
+  cep: z.string().optional(),
+  logradouro: z.string().optional(),
+  numero: z.string().optional(),
+  complemento: z.string().optional(),
+  bairro: z.string().optional(),
+  cidade: z.string().optional(),
+  estado: z.string().optional(),
 })
 
 export async function POST(request: Request) {
@@ -62,7 +73,8 @@ export async function POST(request: Request) {
     )
   }
 
-  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano, forma_pagamento } = parsed.data
+  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano, forma_pagamento,
+    nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -99,6 +111,17 @@ export async function POST(request: Request) {
       status_pagamento: "aguardando",
       acesso_liberado: false,
       forma_pagamento,
+      nome_fantasia,
+      ie,
+      im,
+      crt,
+      cep: cep?.replace(/\D/g, ""),
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
     })
     .select("id")
     .single()

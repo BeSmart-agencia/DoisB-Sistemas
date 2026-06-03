@@ -33,6 +33,17 @@ const schema = z.object({
   telefone: z.string().min(10),
   nome_responsavel: z.string().min(2),
   plano: z.enum(["essencial", "standard", "premium"]),
+  nome_fantasia: z.string().optional(),
+  ie: z.string().optional(),
+  im: z.string().optional(),
+  crt: z.string().optional(),
+  cep: z.string().optional(),
+  logradouro: z.string().optional(),
+  numero: z.string().optional(),
+  complemento: z.string().optional(),
+  bairro: z.string().optional(),
+  cidade: z.string().optional(),
+  estado: z.string().optional(),
 })
 
 export async function POST(request: Request) {
@@ -44,7 +55,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dados inválidos", detalhes: parsed.error.flatten() }, { status: 422 })
   }
 
-  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano } = parsed.data
+  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano,
+    nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
 
@@ -77,6 +89,17 @@ export async function POST(request: Request) {
       status_pagamento: "aguardando",
       acesso_liberado: false,
       forma_pagamento: "pix",
+      nome_fantasia,
+      ie,
+      im,
+      crt,
+      cep: cep?.replace(/\D/g, ""),
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
     })
     .select("id")
     .single()
