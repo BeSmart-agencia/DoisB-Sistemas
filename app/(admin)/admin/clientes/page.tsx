@@ -206,6 +206,7 @@ export default function ClientesPage() {
               <TableHead className="font-semibold text-slate-700">CNPJ</TableHead>
               <TableHead className="font-semibold text-slate-700">Plano</TableHead>
               <TableHead className="font-semibold text-slate-700">Status</TableHead>
+              <TableHead className="font-semibold text-slate-700">Cadastro</TableHead>
               <TableHead className="font-semibold text-slate-700">Assinatura</TableHead>
               <TableHead className="font-semibold text-slate-700 text-right">Ações</TableHead>
             </TableRow>
@@ -223,7 +224,7 @@ export default function ClientesPage() {
               ))
             ) : clientes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-12 text-slate-400">
                   Nenhum cliente encontrado
                 </TableCell>
               </TableRow>
@@ -249,6 +250,9 @@ export default function ClientesPage() {
                     >
                       {STATUS_LABEL[c.status_pagamento]}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-slate-500">
+                    {formatDate(c.created_at)}
                   </TableCell>
                   <TableCell className="text-sm text-slate-500">
                     {formatDate(c.data_assinatura)}
