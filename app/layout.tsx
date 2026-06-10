@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/react'
+import { Suspense } from 'react'
+import MetaPixel from './components/MetaPixel'
 import './globals.css'
 
 const geistSans = localFont({
@@ -50,6 +52,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+        <Suspense fallback={null}>
+          <MetaPixel />
+        </Suspense>
         {children}
         <Analytics />
       </body>
