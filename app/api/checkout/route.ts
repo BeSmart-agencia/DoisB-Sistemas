@@ -11,7 +11,7 @@ const PRICE_IDS: Record<string, string> = {
 
 const PROMO_GDOOR = {
   inicio: new Date("2026-06-02T03:00:00Z"), // 00h BRT
-  fim: new Date("2026-06-09T20:00:00Z"),    // 17h BRT
+  fim: new Date("2026-06-25T20:00:00Z"),    // 17h BRT
   cupons: {
     essencial: "GDOOR_JUN26_ESSENCIAL",
     standard:  "GDOOR_JUN26_STANDARD",

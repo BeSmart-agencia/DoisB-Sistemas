@@ -76,7 +76,7 @@ const PLANOS = [
   },
 ]
 
-const PROMO_FIM = new Date("2026-06-09T20:00:00Z") // 17h BRT
+const PROMO_FIM = new Date("2026-06-25T20:00:00Z") // 17h BRT
 
 export function Planos() {
   const [billing, setBilling] = useState<Billing>("monthly")
