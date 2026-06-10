@@ -8,7 +8,7 @@ const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID
 
 declare global {
   interface Window {
-    fbq: any
+    fbq: (...args: unknown[]) => void
   }
 }
 
@@ -55,6 +55,7 @@ export default function MetaPixel() {
         }}
       />
       <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           height="1"
           width="1"
