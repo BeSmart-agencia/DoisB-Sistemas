@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Loader2, Check, ArrowLeft, ShieldCheck, Building2, CreditCard, QrCode, FileText, MapPin, Receipt } from "lucide-react"
+import { Loader2, Check, ArrowLeft, ShieldCheck, Building2, CreditCard, QrCode, FileText, MapPin, Receipt, AlertCircle, Mail, MessageCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,9 @@ const PLANOS = {
   standard: { nome: "Standard", preco: "R$ 199,90", desc: "A escolha de 8 em cada 10 lojistas" },
   premium: { nome: "Premium", preco: "R$ 249,90", desc: "Solução completa pra escalar" },
 } as const
+
+const WA_ORCAMENTO_LINK =
+  "https://wa.me/5551998518895?text=Ol%C3%A1!%20Vim%20pelo%20cadastro%20do%20ZWeb%20e%20minha%20empresa%20%C3%A9%20do%20regime%20geral%20%28lucro%20real%20ou%20presumido%29.%20Quero%20solicitar%20um%20or%C3%A7amento%20sob%20medida."
 
 type PlanoKey = keyof typeof PLANOS
 
@@ -96,6 +99,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -106,6 +110,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
       termos: false,
     },
   })
+  const regimeNormalSelecionado = watch("crt") === "3"
 
   async function buscarCEP(cep: string) {
     const digits = cep.replace(/\D/g, "")
@@ -127,6 +132,11 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
   }
 
   async function onSubmit(data: FormData) {
+    if (data.crt === "3") {
+      window.location.href = WA_ORCAMENTO_LINK
+      return
+    }
+
     setLoading(true)
     try {
       if (formaPagamento === "pix") {
@@ -244,6 +254,10 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="E-mail *" error={errors.email?.message}>
                     <Input type="email" placeholder="contato@empresa.com.br" {...register("email")} />
+                    <p className="flex items-start gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-2 text-xs leading-relaxed text-blue-800">
+                      <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      Confira com atenção: toda a ativação do sistema e os dados de acesso serão enviados para este e-mail.
+                    </p>
                   </Field>
                   <Field label="WhatsApp *" error={errors.telefone?.message}>
                     <Input placeholder="(00) 00000-0000" {...register("telefone", { onChange: (e) => { e.target.value = maskPhone(e.target.value) } })} />
@@ -288,6 +302,29 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
                   </select>
                 </Field>
               </div>
+              {regimeNormalSelecionado && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
+                    <div className="space-y-3">
+                      <p className="font-semibold">Empresas do regime normal precisam de orçamento sob medida.</p>
+                      <p className="leading-relaxed text-amber-800">
+                        Os planos desta página são para MEI e Simples Nacional. Para lucro real ou lucro presumido,
+                        fale com a gente no WhatsApp para avaliarmos a melhor configuração do ZWeb.
+                      </p>
+                      <a
+                        href={WA_ORCAMENTO_LINK}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Solicitar orçamento sob medida
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -408,14 +445,26 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
               {errors.termos && <p className="mt-1.5 text-sm text-red-600 ml-7">{errors.termos.message}</p>}
             </div>
 
-            <Button type="submit" disabled={loading}
-              className="w-full h-12 bg-slate-950 hover:bg-blue-900 text-white font-bold text-base rounded-xl shadow-lg shadow-blue-900/20 mt-5">
-              {loading ? (
-                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processando...</>
-              ) : (
-                <><Check className="h-4 w-4 mr-2" />{formaPagamento === "pix" ? "Gerar QR Code PIX" : "Continuar para pagamento"}</>
-              )}
-            </Button>
+            {regimeNormalSelecionado ? (
+              <a
+                href={WA_ORCAMENTO_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition-colors hover:bg-emerald-700"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Solicitar orçamento sob medida
+              </a>
+            ) : (
+              <Button type="submit" disabled={loading}
+                className="w-full h-12 bg-slate-950 hover:bg-blue-900 text-white font-bold text-base rounded-xl shadow-lg shadow-blue-900/20 mt-5">
+                {loading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processando...</>
+                ) : (
+                  <><Check className="h-4 w-4 mr-2" />{formaPagamento === "pix" ? "Gerar QR Code PIX" : "Continuar para pagamento"}</>
+                )}
+              </Button>
+            )}
 
             <p className="text-center text-xs text-slate-400 pt-3">
               🔒 Pagamento 100% seguro via Stripe. Não armazenamos dados de pagamento.

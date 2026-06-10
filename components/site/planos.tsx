@@ -3,11 +3,13 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import NumberFlow from "@number-flow/react"
-import { Check, Sparkles } from "lucide-react"
+import { Check, MessageCircle, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const WA_LINK =
   "https://wa.me/5551998518895?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
+const WA_ORCAMENTO_LINK =
+  "https://wa.me/5551998518895?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20tenho%20empresa%20no%20regime%20geral%20%28lucro%20real%20ou%20presumido%29.%20Quero%20solicitar%20um%20or%C3%A7amento%20sob%20medida%20para%20o%20ZWeb."
 
 type Billing = "monthly" | "yearly"
 
@@ -117,6 +119,33 @@ export function Planos() {
           <p className="text-lg max-w-xl mx-auto" style={{ color: "rgba(148,163,184,0.8)" }}>
             Comece com o essencial. Evolua quando precisar. Sem multa de fidelidade.
           </p>
+          <div
+            className="mt-6 mx-auto max-w-3xl rounded-2xl px-5 py-4 text-left sm:flex sm:items-center sm:justify-between sm:gap-5"
+            style={{
+              background: "rgba(20,114,181,0.12)",
+              border: "1px solid rgba(147,197,253,0.22)",
+            }}
+          >
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(226,232,240,0.88)" }}>
+              Os planos abaixo são indicados para empresas <strong className="text-white">MEI</strong> e{" "}
+              <strong className="text-white">Simples Nacional</strong>. Empresas do regime geral, como{" "}
+              <strong className="text-white">lucro real</strong> ou <strong className="text-white">lucro presumido</strong>,
+              recebem um orçamento sob medida.
+            </p>
+            <a
+              href={WA_ORCAMENTO_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 sm:mt-0"
+              style={{
+                background: "linear-gradient(145deg, #16a34a 0%, #15803d 100%)",
+                boxShadow: "0 8px 24px rgba(22,163,74,0.28)",
+              }}
+            >
+              <MessageCircle className="h-4 w-4" />
+              Orçamento sob medida
+            </a>
+          </div>
 
           {/* Banner promoção Gdoor */}
           {promoAtiva && (

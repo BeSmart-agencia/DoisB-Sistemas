@@ -30,6 +30,9 @@ export interface Database {
           stripe_subscription_id: string | null; data_assinatura: string | null
           observacoes: string | null; created_at: string
           forma_pagamento: "cartao" | "boleto" | "pix"; pix_vencimento: string | null; pix_charge_id: string | null
+          nome_fantasia: string | null; ie: string | null; im: string | null; crt: string | null
+          cep: string | null; logradouro: string | null; numero: string | null; complemento: string | null
+          bairro: string | null; cidade: string | null; estado: string | null
         }
         Insert: {
           id?: string; nome_empresa: string; cnpj: string; email: string; telefone: string
@@ -38,6 +41,9 @@ export interface Database {
           stripe_subscription_id?: string | null; data_assinatura?: string | null
           observacoes?: string | null; created_at?: string
           forma_pagamento?: "cartao" | "boleto" | "pix"; pix_vencimento?: string | null; pix_charge_id?: string | null
+          nome_fantasia?: string | null; ie?: string | null; im?: string | null; crt?: string | null
+          cep?: string | null; logradouro?: string | null; numero?: string | null; complemento?: string | null
+          bairro?: string | null; cidade?: string | null; estado?: string | null
         }
         Update: {
           id?: string; nome_empresa?: string; cnpj?: string; email?: string; telefone?: string
@@ -46,6 +52,9 @@ export interface Database {
           stripe_subscription_id?: string | null; data_assinatura?: string | null
           observacoes?: string | null; created_at?: string
           forma_pagamento?: "cartao" | "boleto" | "pix"; pix_vencimento?: string | null; pix_charge_id?: string | null
+          nome_fantasia?: string | null; ie?: string | null; im?: string | null; crt?: string | null
+          cep?: string | null; logradouro?: string | null; numero?: string | null; complemento?: string | null
+          bairro?: string | null; cidade?: string | null; estado?: string | null
         }
         Relationships: []
       }

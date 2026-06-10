@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       bairro,
       cidade,
       estado,
-    })
+    } as any)
     .select("id")
     .single()
 
