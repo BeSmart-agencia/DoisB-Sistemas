@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Loader2, Check, ArrowLeft, ShieldCheck, Building2, CreditCard, QrCode, FileText, MapPin, Receipt, AlertCircle, Mail, MessageCircle } from "lucide-react"
+import { Loader2, Check, ArrowLeft, ShieldCheck, Building2, CreditCard, QrCode, FileText, MapPin, Mail } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -17,16 +17,7 @@ const PLANOS = {
   premium: { nome: "Premium", preco: "R$ 249,90", desc: "Solução completa pra escalar" },
 } as const
 
-const WA_ORCAMENTO_LINK =
-  "https://wa.me/5551998518895?text=Ol%C3%A1!%20Vim%20pelo%20cadastro%20do%20ZWeb%20e%20minha%20empresa%20%C3%A9%20do%20regime%20geral%20%28lucro%20real%20ou%20presumido%29.%20Quero%20solicitar%20um%20or%C3%A7amento%20sob%20medida."
-
 type PlanoKey = keyof typeof PLANOS
-
-const CRT_OPTIONS = [
-  { value: "1", label: "Simples Nacional" },
-  { value: "2", label: "Simples Nacional – Excesso de Sublimite" },
-  { value: "3", label: "Regime Normal" },
-]
 
 function validarCNPJ(cnpj: string): boolean {
   const n = cnpj.replace(/\D/g, "")
@@ -66,9 +57,9 @@ const schema = z.object({
   nome_empresa: z.string().min(2, "Informe a razão social"),
   nome_fantasia: z.string().optional(),
   cnpj: z.string().min(14, "CNPJ inválido").refine(validarCNPJ, "CNPJ inválido"),
-  ie: z.string().min(1, "Informe a IE ou 'ISENTO'"),
+  ie: z.string().optional(),
   im: z.string().optional(),
-  crt: z.string().min(1, "Selecione o regime tributário"),
+  crt: z.string().optional(),
   email: z.string().email("E-mail inválido"),
   telefone: z.string().min(10, "Telefone inválido"),
   nome_responsavel: z.string().min(2, "Informe o nome do responsável"),
@@ -99,7 +90,6 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -110,7 +100,6 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
       termos: false,
     },
   })
-  const regimeNormalSelecionado = watch("crt") === "3"
 
   async function buscarCEP(cep: string) {
     const digits = cep.replace(/\D/g, "")
@@ -132,11 +121,6 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
   }
 
   async function onSubmit(data: FormData) {
-    if (data.crt === "3") {
-      window.location.href = WA_ORCAMENTO_LINK
-      return
-    }
-
     setLoading(true)
     try {
       if (formaPagamento === "pix") {
@@ -271,63 +255,6 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
             </div>
           </div>
 
-          {/* Dados fiscais */}
-          <div className="admin-panel p-6 sm:p-8">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-                <Receipt className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-950">Dados fiscais</h2>
-                <p className="text-sm text-slate-500">Necessários para configurar o sistema.</p>
-              </div>
-            </div>
-            <div className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <Field label="Inscrição Estadual (IE) *" error={errors.ie?.message}>
-                  <Input placeholder="Ex: 123456789 ou ISENTO" {...register("ie")} />
-                </Field>
-                <Field label="Inscrição Municipal (IM)" error={errors.im?.message}>
-                  <Input placeholder="Ex: 12345 (opcional)" {...register("im")} />
-                </Field>
-                <Field label="Regime Tributário (CRT) *" error={errors.crt?.message}>
-                  <select
-                    {...register("crt")}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-slate-700"
-                  >
-                    <option value="">Selecione...</option>
-                    {CRT_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
-              {regimeNormalSelecionado && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-                    <div className="space-y-3">
-                      <p className="font-semibold">Empresas do regime normal precisam de orçamento sob medida.</p>
-                      <p className="leading-relaxed text-amber-800">
-                        Os planos desta página são para MEI e Simples Nacional. Para lucro real ou lucro presumido,
-                        fale com a gente no WhatsApp para avaliarmos a melhor configuração do ZWeb.
-                      </p>
-                      <a
-                        href={WA_ORCAMENTO_LINK}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        Solicitar orçamento sob medida
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Endereço */}
           <div className="admin-panel p-6 sm:p-8">
             <div className="mb-6 flex items-center gap-3">
@@ -445,26 +372,14 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
               {errors.termos && <p className="mt-1.5 text-sm text-red-600 ml-7">{errors.termos.message}</p>}
             </div>
 
-            {regimeNormalSelecionado ? (
-              <a
-                href={WA_ORCAMENTO_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition-colors hover:bg-emerald-700"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Solicitar orçamento sob medida
-              </a>
-            ) : (
-              <Button type="submit" disabled={loading}
-                className="w-full h-12 bg-slate-950 hover:bg-blue-900 text-white font-bold text-base rounded-xl shadow-lg shadow-blue-900/20 mt-5">
-                {loading ? (
-                  <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processando...</>
-                ) : (
-                  <><Check className="h-4 w-4 mr-2" />{formaPagamento === "pix" ? "Gerar QR Code PIX" : "Continuar para pagamento"}</>
-                )}
-              </Button>
-            )}
+            <Button type="submit" disabled={loading}
+              className="w-full h-12 bg-slate-950 hover:bg-blue-900 text-white font-bold text-base rounded-xl shadow-lg shadow-blue-900/20 mt-5">
+              {loading ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processando...</>
+              ) : (
+                <><Check className="h-4 w-4 mr-2" />{formaPagamento === "pix" ? "Gerar QR Code PIX" : "Continuar para pagamento"}</>
+              )}
+            </Button>
 
             <p className="text-center text-xs text-slate-400 pt-3">
               🔒 Pagamento 100% seguro via Stripe. Não armazenamos dados de pagamento.
