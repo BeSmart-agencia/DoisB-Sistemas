@@ -1,0 +1,230 @@
+import type Anthropic from '@anthropic-ai/sdk'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { buscarChunksRelevantes } from '@/lib/rag/buscar-chunks'
+import type { AgentId } from '@/lib/agents/prompts'
+import type { Json } from '@/types/database'
+
+// -----------------------------------------------------------------------------
+// Definições (schemas enviados à Anthropic API)
+// -----------------------------------------------------------------------------
+
+const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
+  search_zweb_kb: {
+    name: 'search_zweb_kb',
+    description:
+      'Busca semântica na base de conhecimento oficial do ZWeb (manuais em PDF). Use SEMPRE antes de afirmar qualquer funcionalidade, integração ou condição técnica do produto.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        consulta: { type: 'string', description: 'Pergunta ou termo a buscar, em pt-BR' },
+        limite: { type: 'number', description: 'Quantidade de trechos (padrão 5, máx 10)' },
+      },
+      required: ['consulta'],
+    },
+  },
+  save_copy: {
+    name: 'save_copy',
+    description:
+      'Salva uma copy na biblioteca (copy_library) com status rascunho. Salve cada variação aprovável — nunca deixe copy só no texto da conversa.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        canal: { type: 'string', enum: ['meta_ad', 'google_ad', 'lp', 'email', 'whatsapp', 'organico'] },
+        formato: { type: 'string', description: "Ex.: 'reel', 'carrossel', 'search_rsa', 'headline'" },
+        angulo: { type: 'string', enum: ['dor', 'prova', 'oferta'] },
+        categoria: { type: 'string', enum: ['vendas', 'estoque', 'financeiro', 'fiscal', 'os', 'gestao'] },
+        titulo: { type: 'string' },
+        corpo: { type: 'string', description: 'Texto completo da copy' },
+      },
+      required: ['canal', 'angulo', 'corpo'],
+    },
+  },
+  get_top_copies: {
+    name: 'get_top_copies',
+    description: 'Lista as copies aprovadas/no ar mais recentes da biblioteca, opcionalmente filtradas por canal.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        canal: { type: 'string', enum: ['meta_ad', 'google_ad', 'lp', 'email', 'whatsapp', 'organico'] },
+        limite: { type: 'number', description: 'Padrão 10' },
+      },
+      required: [],
+    },
+  },
+  read_metrics: {
+    name: 'read_metrics',
+    description: 'Lê campanhas e métricas de anúncios (ad_metrics) dos últimos N dias direto do banco.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        periodo_dias: { type: 'number', description: 'Janela em dias (padrão 30)' },
+      },
+      required: [],
+    },
+  },
+  update_plan: {
+    name: 'update_plan',
+    description:
+      'Grava o plano do mês em marketing_plans (objetivos, alocação de orçamento e hipóteses). Use ao fechar um plano ou relatório com o usuário.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        mes: { type: 'string', description: "Primeiro dia do mês, formato 'YYYY-MM-01'" },
+        objetivos: { type: 'array', items: { type: 'string' } },
+        alocacao_orcamento: {
+          type: 'object',
+          description: 'Ex.: {"meta": 400, "google": 600}',
+          additionalProperties: { type: 'number' },
+        },
+        hipoteses: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['mes', 'objetivos'],
+    },
+  },
+  create_task: {
+    name: 'create_task',
+    description:
+      'Registra uma tarefa/prioridade da semana para a Laisa ou o Abel (fica em campaign_actions como pendente, visível na UI).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        titulo: { type: 'string' },
+        responsavel: { type: 'string', enum: ['laisa', 'abel'] },
+        descricao: { type: 'string' },
+        prazo: { type: 'string', description: 'Data alvo, formato YYYY-MM-DD (opcional)' },
+      },
+      required: ['titulo', 'responsavel'],
+    },
+  },
+  delegate_to_agent: {
+    name: 'delegate_to_agent',
+    description:
+      'Enfileira um briefing para outro agente (copywriter, trafego, tendencias, social, sdr). Na Fase 1 o pedido fica registrado como pendente para o usuário levar ao agente na UI.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        agente: { type: 'string', enum: ['copywriter', 'trafego', 'tendencias', 'social', 'sdr'] },
+        briefing: { type: 'string', description: 'Objetivo, ângulo, canal e prazo — claro e completo' },
+      },
+      required: ['agente', 'briefing'],
+    },
+  },
+}
+
+export function getToolsForAgent(toolNames: readonly string[]): Anthropic.Tool[] {
+  return toolNames
+    .filter((name) => name in TOOL_DEFINITIONS)
+    .map((name) => TOOL_DEFINITIONS[name])
+}
+
+// -----------------------------------------------------------------------------
+// Executores (rodam no servidor a cada tool_use)
+// -----------------------------------------------------------------------------
+
+type ToolInput = Record<string, unknown>
+
+export async function executeTool(agentId: AgentId, name: string, input: ToolInput): Promise<string> {
+  const supabase = createAdminClient()
+
+  switch (name) {
+    case 'search_zweb_kb': {
+      const consulta = String(input.consulta ?? '')
+      const limite = Math.min(Number(input.limite) || 5, 10)
+      const chunks = await buscarChunksRelevantes(consulta, limite)
+      if (!chunks.length) {
+        return 'Nenhum trecho relevante encontrado na base de conhecimento. NÃO afirme essa funcionalidade — diga que precisa confirmar.'
+      }
+      return chunks.map((c, i) => `[Fonte ${i + 1} | similaridade ${c.similarity.toFixed(2)}]\n${c.conteudo}`).join('\n\n---\n\n')
+    }
+
+    case 'save_copy': {
+      const { data, error } = await supabase
+        .from('copy_library')
+        .insert({
+          canal: String(input.canal),
+          formato: input.formato ? String(input.formato) : null,
+          angulo: String(input.angulo),
+          categoria: input.categoria ? String(input.categoria) : null,
+          titulo: input.titulo ? String(input.titulo) : null,
+          corpo: String(input.corpo),
+          status: 'rascunho',
+        })
+        .select('id')
+        .single()
+      if (error) return `Erro ao salvar copy: ${error.message}`
+      return `Copy salva na biblioteca com id ${data.id} (status: rascunho).`
+    }
+
+    case 'get_top_copies': {
+      let query = supabase
+        .from('copy_library')
+        .select('id, canal, formato, angulo, categoria, titulo, corpo, status, performance')
+        .in('status', ['aprovada', 'no_ar'])
+        .order('created_at', { ascending: false })
+        .limit(Math.min(Number(input.limite) || 10, 20))
+      if (input.canal) query = query.eq('canal', String(input.canal))
+      const { data, error } = await query
+      if (error) return `Erro ao buscar copies: ${error.message}`
+      return data.length ? JSON.stringify(data, null, 2) : 'Nenhuma copy aprovada na biblioteca ainda.'
+    }
+
+    case 'read_metrics': {
+      const dias = Math.min(Number(input.periodo_dias) || 30, 90)
+      const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      const [{ data: campanhas }, { data: metricas, error }] = await Promise.all([
+        supabase.from('campaigns').select('id, plataforma, nome, objetivo, orcamento_diario, status'),
+        supabase
+          .from('ad_metrics')
+          .select('ad_id, data, impressoes, cliques, gasto, ctr, cpm, cpl, leads, conversas_whatsapp, compras')
+          .gte('data', desde)
+          .order('data', { ascending: false })
+          .limit(300),
+      ])
+      if (error) return `Erro ao ler métricas: ${error.message}`
+      if (!campanhas?.length && !metricas?.length) {
+        return `Nenhuma campanha ou métrica registrada nos últimos ${dias} dias. As integrações de tráfego entram na Fase 3.`
+      }
+      return JSON.stringify({ campanhas: campanhas ?? [], metricas: metricas ?? [] }, null, 2)
+    }
+
+    case 'update_plan': {
+      const { error } = await supabase.from('marketing_plans').insert({
+        mes: String(input.mes),
+        objetivos: (input.objetivos ?? null) as Json,
+        alocacao_orcamento: (input.alocacao_orcamento ?? null) as Json,
+        hipoteses: (input.hipoteses ?? null) as Json,
+        created_by: agentId,
+      })
+      if (error) return `Erro ao gravar plano: ${error.message}`
+      return `Plano de ${input.mes} gravado em marketing_plans.`
+    }
+
+    case 'create_task': {
+      const { error } = await supabase.from('campaign_actions').insert({
+        agent: agentId,
+        acao: 'task',
+        payload: {
+          titulo: String(input.titulo),
+          responsavel: String(input.responsavel),
+          descricao: input.descricao ? String(input.descricao) : null,
+          prazo: input.prazo ? String(input.prazo) : null,
+        },
+      })
+      if (error) return `Erro ao criar tarefa: ${error.message}`
+      return `Tarefa registrada para ${input.responsavel} (pendente de aprovação na UI).`
+    }
+
+    case 'delegate_to_agent': {
+      const { error } = await supabase.from('campaign_actions').insert({
+        agent: agentId,
+        acao: 'delegacao',
+        payload: { agente: String(input.agente), briefing: String(input.briefing) },
+      })
+      if (error) return `Erro ao delegar: ${error.message}`
+      return `Briefing enfileirado para o agente ${input.agente}. Na Fase 1 a fila é manual: avise o usuário para abrir o chat do ${input.agente} e colar o briefing.`
+    }
+
+    default:
+      return `Tool ${name} ainda não implementada nesta fase.`
+  }
+}

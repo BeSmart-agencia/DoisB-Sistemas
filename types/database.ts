@@ -212,6 +212,195 @@ export interface Database {
         }
         Relationships: []
       }
+      brand_kit: {
+        Row: { id: string; key: string; value: Json; updated_at: string }
+        Insert: { id?: string; key: string; value: Json; updated_at?: string }
+        Update: { id?: string; key?: string; value?: Json; updated_at?: string }
+        Relationships: []
+      }
+      icp: {
+        Row: {
+          id: string; nome: string; segmento: string
+          dores: Json | null; objecoes: Json | null; gatilhos: Json | null; ativo: boolean
+        }
+        Insert: {
+          id?: string; nome: string; segmento: string
+          dores?: Json | null; objecoes?: Json | null; gatilhos?: Json | null; ativo?: boolean
+        }
+        Update: {
+          id?: string; nome?: string; segmento?: string
+          dores?: Json | null; objecoes?: Json | null; gatilhos?: Json | null; ativo?: boolean
+        }
+        Relationships: []
+      }
+      marketing_plans: {
+        Row: {
+          id: string; mes: string; objetivos: Json | null; alocacao_orcamento: Json | null
+          hipoteses: Json | null; created_by: string; created_at: string
+        }
+        Insert: {
+          id?: string; mes: string; objetivos?: Json | null; alocacao_orcamento?: Json | null
+          hipoteses?: Json | null; created_by?: string; created_at?: string
+        }
+        Update: {
+          id?: string; mes?: string; objetivos?: Json | null; alocacao_orcamento?: Json | null
+          hipoteses?: Json | null; created_by?: string; created_at?: string
+        }
+        Relationships: []
+      }
+      copy_library: {
+        Row: {
+          id: string; canal: string; formato: string | null; angulo: string | null
+          categoria: string | null; titulo: string | null; corpo: string; status: string
+          performance: Json | null; created_at: string
+        }
+        Insert: {
+          id?: string; canal: string; formato?: string | null; angulo?: string | null
+          categoria?: string | null; titulo?: string | null; corpo: string; status?: string
+          performance?: Json | null; created_at?: string
+        }
+        Update: {
+          id?: string; canal?: string; formato?: string | null; angulo?: string | null
+          categoria?: string | null; titulo?: string | null; corpo?: string; status?: string
+          performance?: Json | null; created_at?: string
+        }
+        Relationships: []
+      }
+      content_calendar: {
+        Row: {
+          id: string; data_prevista: string | null; pilar: string; formato: string | null
+          plataforma: string | null; roteiro: string | null; copy_legenda: string | null
+          hashtags: string | null; status: string; copy_id: string | null
+        }
+        Insert: {
+          id?: string; data_prevista?: string | null; pilar: string; formato?: string | null
+          plataforma?: string | null; roteiro?: string | null; copy_legenda?: string | null
+          hashtags?: string | null; status?: string; copy_id?: string | null
+        }
+        Update: {
+          id?: string; data_prevista?: string | null; pilar?: string; formato?: string | null
+          plataforma?: string | null; roteiro?: string | null; copy_legenda?: string | null
+          hashtags?: string | null; status?: string; copy_id?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "content_calendar_copy_id_fkey"; columns: ["copy_id"]; isOneToOne: false; referencedRelation: "copy_library"; referencedColumns: ["id"] }
+        ]
+      }
+      trend_briefs: {
+        Row: { id: string; semana: string; resumo: string | null; achados: Json | null; fontes: Json | null; created_at: string }
+        Insert: { id?: string; semana: string; resumo?: string | null; achados?: Json | null; fontes?: Json | null; created_at?: string }
+        Update: { id?: string; semana?: string; resumo?: string | null; achados?: Json | null; fontes?: Json | null; created_at?: string }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          id: string; plataforma: string; external_id: string | null; nome: string
+          objetivo: string | null; orcamento_diario: number | null; status: string
+          estrutura: Json | null; created_at: string
+        }
+        Insert: {
+          id?: string; plataforma: string; external_id?: string | null; nome: string
+          objetivo?: string | null; orcamento_diario?: number | null; status?: string
+          estrutura?: Json | null; created_at?: string
+        }
+        Update: {
+          id?: string; plataforma?: string; external_id?: string | null; nome?: string
+          objetivo?: string | null; orcamento_diario?: number | null; status?: string
+          estrutura?: Json | null; created_at?: string
+        }
+        Relationships: []
+      }
+      ads: {
+        Row: { id: string; campaign_id: string | null; external_id: string | null; copy_id: string | null; criativo_url: string | null; status: string }
+        Insert: { id?: string; campaign_id?: string | null; external_id?: string | null; copy_id?: string | null; criativo_url?: string | null; status?: string }
+        Update: { id?: string; campaign_id?: string | null; external_id?: string | null; copy_id?: string | null; criativo_url?: string | null; status?: string }
+        Relationships: [
+          { foreignKeyName: "ads_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "campaigns"; referencedColumns: ["id"] },
+          { foreignKeyName: "ads_copy_id_fkey"; columns: ["copy_id"]; isOneToOne: false; referencedRelation: "copy_library"; referencedColumns: ["id"] }
+        ]
+      }
+      ad_metrics: {
+        Row: {
+          id: string; ad_id: string | null; data: string
+          impressoes: number | null; cliques: number | null; gasto: number | null
+          ctr: number | null; cpm: number | null; cpl: number | null
+          leads: number | null; conversas_whatsapp: number | null; compras: number | null; raw: Json | null
+        }
+        Insert: {
+          id?: string; ad_id?: string | null; data: string
+          impressoes?: number | null; cliques?: number | null; gasto?: number | null
+          ctr?: number | null; cpm?: number | null; cpl?: number | null
+          leads?: number | null; conversas_whatsapp?: number | null; compras?: number | null; raw?: Json | null
+        }
+        Update: {
+          id?: string; ad_id?: string | null; data?: string
+          impressoes?: number | null; cliques?: number | null; gasto?: number | null
+          ctr?: number | null; cpm?: number | null; cpl?: number | null
+          leads?: number | null; conversas_whatsapp?: number | null; compras?: number | null; raw?: Json | null
+        }
+        Relationships: [
+          { foreignKeyName: "ad_metrics_ad_id_fkey"; columns: ["ad_id"]; isOneToOne: false; referencedRelation: "ads"; referencedColumns: ["id"] }
+        ]
+      }
+      campaign_actions: {
+        Row: { id: string; agent: string; acao: string; payload: Json | null; status: string; approved_at: string | null; created_at: string }
+        Insert: { id?: string; agent: string; acao: string; payload?: Json | null; status?: string; approved_at?: string | null; created_at?: string }
+        Update: { id?: string; agent?: string; acao?: string; payload?: Json | null; status?: string; approved_at?: string | null; created_at?: string }
+        Relationships: []
+      }
+      lp_variants: {
+        Row: { id: string; slug: string; hipotese: string | null; config: Json; peso: number; status: string; copy_id: string | null }
+        Insert: { id?: string; slug: string; hipotese?: string | null; config: Json; peso?: number; status?: string; copy_id?: string | null }
+        Update: { id?: string; slug?: string; hipotese?: string | null; config?: Json; peso?: number; status?: string; copy_id?: string | null }
+        Relationships: [
+          { foreignKeyName: "lp_variants_copy_id_fkey"; columns: ["copy_id"]; isOneToOne: false; referencedRelation: "copy_library"; referencedColumns: ["id"] }
+        ]
+      }
+      experiments: {
+        Row: {
+          id: string; nome: string | null; variant_a: string | null; variant_b: string | null
+          metrica_alvo: string; inicio: string | null; fim: string | null; vencedora: string | null; resultado: Json | null
+        }
+        Insert: {
+          id?: string; nome?: string | null; variant_a?: string | null; variant_b?: string | null
+          metrica_alvo?: string; inicio?: string | null; fim?: string | null; vencedora?: string | null; resultado?: Json | null
+        }
+        Update: {
+          id?: string; nome?: string | null; variant_a?: string | null; variant_b?: string | null
+          metrica_alvo?: string; inicio?: string | null; fim?: string | null; vencedora?: string | null; resultado?: Json | null
+        }
+        Relationships: [
+          { foreignKeyName: "experiments_variant_a_fkey"; columns: ["variant_a"]; isOneToOne: false; referencedRelation: "lp_variants"; referencedColumns: ["id"] },
+          { foreignKeyName: "experiments_variant_b_fkey"; columns: ["variant_b"]; isOneToOne: false; referencedRelation: "lp_variants"; referencedColumns: ["id"] }
+        ]
+      }
+      marketing_leads: {
+        Row: {
+          id: string; nome: string | null; telefone: string | null; email: string | null
+          empresa: string | null; segmento: string | null; cidade: string | null; origem: string | null
+          score: number | null; score_motivo: string | null; estagio: string
+          script_whatsapp: string | null; notas: Json | null; created_at: string
+        }
+        Insert: {
+          id?: string; nome?: string | null; telefone?: string | null; email?: string | null
+          empresa?: string | null; segmento?: string | null; cidade?: string | null; origem?: string | null
+          score?: number | null; score_motivo?: string | null; estagio?: string
+          script_whatsapp?: string | null; notas?: Json | null; created_at?: string
+        }
+        Update: {
+          id?: string; nome?: string | null; telefone?: string | null; email?: string | null
+          empresa?: string | null; segmento?: string | null; cidade?: string | null; origem?: string | null
+          score?: number | null; score_motivo?: string | null; estagio?: string
+          script_whatsapp?: string | null; notas?: Json | null; created_at?: string
+        }
+        Relationships: []
+      }
+      agent_conversations: {
+        Row: { id: string; agent: string; messages: Json; updated_at: string }
+        Insert: { id?: string; agent: string; messages?: Json; updated_at?: string }
+        Update: { id?: string; agent?: string; messages?: Json; updated_at?: string }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
