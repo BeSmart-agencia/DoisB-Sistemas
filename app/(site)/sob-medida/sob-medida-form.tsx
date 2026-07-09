@@ -37,6 +37,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 export function SobMedidaForm() {
   const [enviado, setEnviado] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -45,6 +46,7 @@ export function SobMedidaForm() {
 
   async function onSubmit(data: FormData) {
     setLoading(true)
+    setErro(null)
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
@@ -52,14 +54,19 @@ export function SobMedidaForm() {
         body: JSON.stringify({ ...data, linha: "sob_medida", origem: "lp:sob-medida" }),
       })
       if (!res.ok) {
-        const erro = await res.json().catch(() => null)
-        toast.error(erro?.error ?? "Erro ao enviar. Tente pelo WhatsApp.")
+        const corpo = await res.json().catch(() => null)
+        const mensagem = corpo?.error ?? "Erro ao enviar. Tente de novo ou chame a gente no WhatsApp."
+        setErro(mensagem)
+        toast.error(mensagem)
         return
       }
+      // Pixel só dispara em sucesso real (lead gravado no banco)
       pixelEvent("Lead", { linha: "sob_medida", origem: "lp:sob-medida" })
       setEnviado(true)
     } catch {
-      toast.error("Erro de conexão. Tente pelo WhatsApp.")
+      const mensagem = "Erro de conexão. Tente de novo ou chame a gente no WhatsApp."
+      setErro(mensagem)
+      toast.error(mensagem)
     } finally {
       setLoading(false)
     }
@@ -152,6 +159,19 @@ export function SobMedidaForm() {
           </>
         )}
       </button>
+      {erro && (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center">
+          <p className="text-sm font-semibold text-red-700">{erro}</p>
+          <a
+            href="https://wa.me/5551998518895"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block text-sm font-bold text-red-700 underline underline-offset-2"
+          >
+            Chamar no WhatsApp
+          </a>
+        </div>
+      )}
       <p className="text-center text-xs text-slate-400">
         Sem compromisso. A primeira conversa é para entender o seu processo, não para vender.
       </p>

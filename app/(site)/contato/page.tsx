@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Toaster } from 'sonner'
 
 const schema = z.object({
   nome: z.string().min(2, 'Informe seu nome'),
@@ -50,7 +49,6 @@ export default function ContatoPage() {
 
   return (
     <>
-      <Toaster richColors position="top-right" />
       <Header />
       <main className="min-h-screen bg-slate-50 pt-8 pb-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
