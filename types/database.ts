@@ -252,17 +252,17 @@ export interface Database {
         Row: {
           id: string; canal: string; formato: string | null; angulo: string | null
           categoria: string | null; titulo: string | null; corpo: string; status: string
-          performance: Json | null; created_at: string
+          performance: Json | null; linha: string; created_at: string
         }
         Insert: {
           id?: string; canal: string; formato?: string | null; angulo?: string | null
           categoria?: string | null; titulo?: string | null; corpo: string; status?: string
-          performance?: Json | null; created_at?: string
+          performance?: Json | null; linha?: string; created_at?: string
         }
         Update: {
           id?: string; canal?: string; formato?: string | null; angulo?: string | null
           categoria?: string | null; titulo?: string | null; corpo?: string; status?: string
-          performance?: Json | null; created_at?: string
+          performance?: Json | null; linha?: string; created_at?: string
         }
         Relationships: []
       }
@@ -270,17 +270,17 @@ export interface Database {
         Row: {
           id: string; data_prevista: string | null; pilar: string; formato: string | null
           plataforma: string | null; roteiro: string | null; copy_legenda: string | null
-          hashtags: string | null; status: string; copy_id: string | null
+          hashtags: string | null; status: string; copy_id: string | null; linha: string
         }
         Insert: {
           id?: string; data_prevista?: string | null; pilar: string; formato?: string | null
           plataforma?: string | null; roteiro?: string | null; copy_legenda?: string | null
-          hashtags?: string | null; status?: string; copy_id?: string | null
+          hashtags?: string | null; status?: string; copy_id?: string | null; linha?: string
         }
         Update: {
           id?: string; data_prevista?: string | null; pilar?: string; formato?: string | null
           plataforma?: string | null; roteiro?: string | null; copy_legenda?: string | null
-          hashtags?: string | null; status?: string; copy_id?: string | null
+          hashtags?: string | null; status?: string; copy_id?: string | null; linha?: string
         }
         Relationships: [
           { foreignKeyName: "content_calendar_copy_id_fkey"; columns: ["copy_id"]; isOneToOne: false; referencedRelation: "copy_library"; referencedColumns: ["id"] }
@@ -296,17 +296,17 @@ export interface Database {
         Row: {
           id: string; plataforma: string; external_id: string | null; nome: string
           objetivo: string | null; orcamento_diario: number | null; status: string
-          estrutura: Json | null; created_at: string
+          estrutura: Json | null; linha: string; created_at: string
         }
         Insert: {
           id?: string; plataforma: string; external_id?: string | null; nome: string
           objetivo?: string | null; orcamento_diario?: number | null; status?: string
-          estrutura?: Json | null; created_at?: string
+          estrutura?: Json | null; linha?: string; created_at?: string
         }
         Update: {
           id?: string; plataforma?: string; external_id?: string | null; nome?: string
           objetivo?: string | null; orcamento_diario?: number | null; status?: string
-          estrutura?: Json | null; created_at?: string
+          estrutura?: Json | null; linha?: string; created_at?: string
         }
         Relationships: []
       }
@@ -349,9 +349,9 @@ export interface Database {
         Relationships: []
       }
       lp_variants: {
-        Row: { id: string; slug: string; hipotese: string | null; config: Json; peso: number; status: string; copy_id: string | null }
-        Insert: { id?: string; slug: string; hipotese?: string | null; config: Json; peso?: number; status?: string; copy_id?: string | null }
-        Update: { id?: string; slug?: string; hipotese?: string | null; config?: Json; peso?: number; status?: string; copy_id?: string | null }
+        Row: { id: string; slug: string; hipotese: string | null; config: Json; peso: number; status: string; copy_id: string | null; linha: string }
+        Insert: { id?: string; slug: string; hipotese?: string | null; config: Json; peso?: number; status?: string; copy_id?: string | null; linha?: string }
+        Update: { id?: string; slug?: string; hipotese?: string | null; config?: Json; peso?: number; status?: string; copy_id?: string | null; linha?: string }
         Relationships: [
           { foreignKeyName: "lp_variants_copy_id_fkey"; columns: ["copy_id"]; isOneToOne: false; referencedRelation: "copy_library"; referencedColumns: ["id"] }
         ]
@@ -379,19 +379,19 @@ export interface Database {
           id: string; nome: string | null; telefone: string | null; email: string | null
           empresa: string | null; segmento: string | null; cidade: string | null; origem: string | null
           score: number | null; score_motivo: string | null; estagio: string
-          script_whatsapp: string | null; notas: Json | null; created_at: string
+          script_whatsapp: string | null; notas: Json | null; linha: string; created_at: string
         }
         Insert: {
           id?: string; nome?: string | null; telefone?: string | null; email?: string | null
           empresa?: string | null; segmento?: string | null; cidade?: string | null; origem?: string | null
           score?: number | null; score_motivo?: string | null; estagio?: string
-          script_whatsapp?: string | null; notas?: Json | null; created_at?: string
+          script_whatsapp?: string | null; notas?: Json | null; linha?: string; created_at?: string
         }
         Update: {
           id?: string; nome?: string | null; telefone?: string | null; email?: string | null
           empresa?: string | null; segmento?: string | null; cidade?: string | null; origem?: string | null
           score?: number | null; score_motivo?: string | null; estagio?: string
-          script_whatsapp?: string | null; notas?: Json | null; created_at?: string
+          script_whatsapp?: string | null; notas?: Json | null; linha?: string; created_at?: string
         }
         Relationships: []
       }

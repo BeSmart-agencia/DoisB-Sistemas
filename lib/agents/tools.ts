@@ -29,6 +29,7 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
     input_schema: {
       type: 'object',
       properties: {
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'], description: 'Linha de negócio da copy — obrigatório, nunca misture as duas' },
         canal: { type: 'string', enum: ['meta_ad', 'google_ad', 'lp', 'email', 'whatsapp', 'organico'] },
         formato: { type: 'string', description: "Ex.: 'reel', 'carrossel', 'search_rsa', 'headline'" },
         angulo: { type: 'string', enum: ['dor', 'prova', 'oferta'] },
@@ -36,16 +37,17 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
         titulo: { type: 'string' },
         corpo: { type: 'string', description: 'Texto completo da copy' },
       },
-      required: ['canal', 'angulo', 'corpo'],
+      required: ['linha', 'canal', 'angulo', 'corpo'],
     },
   },
   get_top_copies: {
     name: 'get_top_copies',
-    description: 'Lista as copies aprovadas/no ar mais recentes da biblioteca, opcionalmente filtradas por canal.',
+    description: 'Lista as copies aprovadas/no ar mais recentes da biblioteca, opcionalmente filtradas por canal e linha.',
     input_schema: {
       type: 'object',
       properties: {
         canal: { type: 'string', enum: ['meta_ad', 'google_ad', 'lp', 'email', 'whatsapp', 'organico'] },
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'] },
         limite: { type: 'number', description: 'Padrão 10' },
       },
       required: [],
@@ -138,9 +140,14 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
     }
 
     case 'save_copy': {
+      const linha = String(input.linha ?? '')
+      if (linha !== 'zweb' && linha !== 'sob_medida') {
+        return "Erro: informe a linha da copy ('zweb' ou 'sob_medida') — regra inviolável 7."
+      }
       const { data, error } = await supabase
         .from('copy_library')
         .insert({
+          linha,
           canal: String(input.canal),
           formato: input.formato ? String(input.formato) : null,
           angulo: String(input.angulo),
@@ -152,17 +159,18 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
         .select('id')
         .single()
       if (error) return `Erro ao salvar copy: ${error.message}`
-      return `Copy salva na biblioteca com id ${data.id} (status: rascunho).`
+      return `Copy salva na biblioteca com id ${data.id} (linha: ${linha}, status: rascunho).`
     }
 
     case 'get_top_copies': {
       let query = supabase
         .from('copy_library')
-        .select('id, canal, formato, angulo, categoria, titulo, corpo, status, performance')
+        .select('id, linha, canal, formato, angulo, categoria, titulo, corpo, status, performance')
         .in('status', ['aprovada', 'no_ar'])
         .order('created_at', { ascending: false })
         .limit(Math.min(Number(input.limite) || 10, 20))
       if (input.canal) query = query.eq('canal', String(input.canal))
+      if (input.linha) query = query.eq('linha', String(input.linha))
       const { data, error } = await query
       if (error) return `Erro ao buscar copies: ${error.message}`
       return data.length ? JSON.stringify(data, null, 2) : 'Nenhuma copy aprovada na biblioteca ainda.'

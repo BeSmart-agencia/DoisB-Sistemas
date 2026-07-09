@@ -80,14 +80,18 @@ export async function buildAgentContext(agentId: AgentId): Promise<Record<string
           break
         }
         case 'PIPELINE': {
-          const { data } = await supabase.from('marketing_leads').select('estagio')
+          const { data } = await supabase.from('marketing_leads').select('estagio, linha')
           if (!data?.length) {
             ctx[key] = 'Pipeline vazio — nenhum lead de marketing registrado ainda.'
             break
           }
           const porEstagio: Record<string, number> = {}
-          for (const l of data) porEstagio[l.estagio] = (porEstagio[l.estagio] ?? 0) + 1
-          ctx[key] = json({ total: data.length, por_estagio: porEstagio })
+          const porLinha: Record<string, number> = {}
+          for (const l of data) {
+            porEstagio[l.estagio] = (porEstagio[l.estagio] ?? 0) + 1
+            porLinha[l.linha] = (porLinha[l.linha] ?? 0) + 1
+          }
+          ctx[key] = json({ total: data.length, por_estagio: porEstagio, por_linha: porLinha })
           break
         }
         case 'TREND_BRIEFS': {
@@ -104,7 +108,7 @@ export async function buildAgentContext(agentId: AgentId): Promise<Record<string
         case 'COPIES_APROVADAS': {
           let query = supabase
             .from('copy_library')
-            .select('canal, formato, angulo, categoria, titulo, corpo, status, performance')
+            .select('linha, canal, formato, angulo, categoria, titulo, corpo, status, performance')
             .in('status', ['aprovada', 'no_ar'])
             .order('created_at', { ascending: false })
             .limit(10)

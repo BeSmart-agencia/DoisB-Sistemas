@@ -1,35 +1,30 @@
 import type { Metadata } from "next"
 import { Header } from "@/components/site/header"
-import { Hero } from "@/components/site/hero"
-import { Problemas } from "@/components/site/problemas"
-import { Vantagens } from "@/components/site/vantagens"
-import { Segmentos } from "@/components/site/segmentos"
-import { Planos } from "@/components/site/planos"
-import { SobreZucchetti } from "@/components/site/sobre-zucchetti"
-import { Faq } from "@/components/site/faq"
-import { CtaFinal } from "@/components/site/cta-final"
+import { HomeInstitucional } from "@/components/site/home-institucional"
 import { Footer } from "@/components/site/footer"
 
 export const metadata: Metadata = {
-  title: "DoisB Sistemas | Sistema de Gestão ZWeb para o Varejo Brasileiro",
+  title: "DoisB Sistemas | Software House — ZWeb e Sistemas Sob Medida",
   description:
-    "Revenda autorizada Zucchetti. O ZWeb é o sistema de gestão completo para varejo, com PDV, NF-e, controle de estoque, financeiro e ordens de serviço. Venda. Controle. Cresça.",
+    "Software house familiar do RS. Sistema de gestão ZWeb para o varejo (revenda autorizada Zucchetti) e desenvolvimento de sistemas sob medida e automação de processos para PMEs. Venda. Controle. Cresça.",
   keywords:
-    "sistema de gestão, ERP varejo, PDV, ZWeb, Zucchetti, NFCe, retaguarda offline, sistema para mercado, sistema para oficina, sistema para padaria, software de gestão, gestão de estoque, emissor NF-e",
+    "software house, desenvolvimento de sistemas, automação de processos, sistema sob medida, sistema personalizado para empresa, ZWeb, Zucchetti, sistema de gestão, ERP varejo, DoisB Sistemas",
   authors: [{ name: "DoisB Sistemas" }],
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "DoisB Sistemas | ZWeb para o Varejo Brasileiro",
+    title: "DoisB Sistemas | Software House",
     description:
-      "Tecnologia italiana, atendimento brasileiro. Sistema completo de gestão pra você vender, controlar e crescer.",
+      "O sistema certo para cada negócio: ZWeb para o varejo, sob medida para o seu processo. Tecnologia de nível mundial, atendimento de vizinho.",
     type: "website",
     locale: "pt_BR",
     siteName: "DoisB Sistemas",
+    url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "DoisB Sistemas | ZWeb para o Varejo Brasileiro",
+    title: "DoisB Sistemas | Software House",
     description:
-      "Tecnologia italiana, atendimento brasileiro. Sistema completo de gestão pra você vender, controlar e crescer.",
+      "O sistema certo para cada negócio: ZWeb para o varejo, sob medida para o seu processo.",
   },
   robots: {
     index: true,
@@ -41,15 +36,8 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main className="scroll-smooth">
-        <Hero />
-        <Problemas />
-        <Vantagens />
-        <Segmentos />
-        <Planos />
-        <SobreZucchetti />
-<Faq />
-        <CtaFinal />
+      <main>
+        <HomeInstitucional />
       </main>
       <Footer />
     </>
