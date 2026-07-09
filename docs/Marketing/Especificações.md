@@ -216,12 +216,17 @@ create table experiments (
   resultado jsonb
 );
 
--- Leads e pipeline
-create table leads (
+-- Leads e pipeline do MARKETING (inbound: LPs, anúncios, WhatsApp, GMB).
+-- ATENÇÃO: a tabela chama-se marketing_leads, NUNCA "leads" — já existe uma
+-- tabela `leads` no banco que pertence à prospecção outbound via Google Places
+-- (/admin/leads, /api/admin/leads, lead_interacoes). São features distintas.
+-- Schema real criado por supabase/migrations/marketing_os_fix_v2.sql.
+create table marketing_leads (
   id uuid primary key default gen_random_uuid(),
   nome text, telefone text, email text,
   empresa text, segmento text, cidade text,
   origem text,                       -- 'lp:slug' | 'meta_ad:id' | 'whatsapp' | 'gmb' | 'organico'
+  linha text not null default 'zweb',-- 'zweb' | 'sob_medida'
   score int,                         -- 0-100, calculado pelo agente SDR
   score_motivo text,
   estagio text default 'novo',       -- novo | contatado | demo | proposta | fechado | perdido

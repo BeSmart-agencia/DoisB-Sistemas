@@ -98,6 +98,62 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
       required: ['titulo', 'responsavel'],
     },
   },
+  get_lead: {
+    name: 'get_lead',
+    description:
+      'Busca leads de marketing no banco: por id, por texto (nome, empresa ou telefone) ou lista os mais recentes. Use para carregar o contexto de um lead que o usuário mencionar na conversa.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        lead_id: { type: 'string', description: 'id exato do lead (uuid), se conhecido' },
+        busca: { type: 'string', description: 'Trecho do nome, empresa ou telefone' },
+        limite: { type: 'number', description: 'Quantidade ao listar (padrão 10)' },
+      },
+      required: [],
+    },
+  },
+  score_lead: {
+    name: 'score_lead',
+    description:
+      'Grava o score (0-100), a justificativa e a linha de negócio no registro do lead. Use após o roteamento e o scoring — sempre com justificativa honesta em 1-2 linhas.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        lead_id: { type: 'string', description: 'id do lead (uuid)' },
+        score: { type: 'number', description: 'Score 0-100' },
+        motivo: { type: 'string', description: 'Justificativa do score em 1-2 linhas' },
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'], description: 'Linha após o roteamento (regra de ouro)' },
+      },
+      required: ['lead_id', 'score', 'motivo', 'linha'],
+    },
+  },
+  generate_whatsapp_script: {
+    name: 'generate_whatsapp_script',
+    description:
+      'Grava o script de WhatsApp pronto para o Abel no registro do lead (máx. 4 linhas, tom de vizinho). O texto que você passar aqui é o que o Abel vai enviar — capriche.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        lead_id: { type: 'string', description: 'id do lead (uuid)' },
+        script: { type: 'string', description: 'Texto final da mensagem, pronto para enviar' },
+      },
+      required: ['lead_id', 'script'],
+    },
+  },
+  update_lead_stage: {
+    name: 'update_lead_stage',
+    description:
+      'Atualiza o estágio do lead no pipeline (novo | contatado | demo | proposta | fechado | perdido) e, opcionalmente, a linha de negócio.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        lead_id: { type: 'string', description: 'id do lead (uuid)' },
+        estagio: { type: 'string', enum: ['novo', 'contatado', 'demo', 'proposta', 'fechado', 'perdido'] },
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'] },
+      },
+      required: ['lead_id', 'estagio'],
+    },
+  },
   delegate_to_agent: {
     name: 'delegate_to_agent',
     description:
@@ -220,6 +276,67 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
       })
       if (error) return `Erro ao criar tarefa: ${error.message}`
       return `Tarefa registrada para ${input.responsavel} (pendente de aprovação na UI).`
+    }
+
+    case 'get_lead': {
+      const campos = 'id, nome, telefone, email, empresa, segmento, cidade, origem, score, score_motivo, estagio, script_whatsapp, notas, linha, created_at'
+      if (input.lead_id) {
+        const { data, error } = await supabase
+          .from('marketing_leads')
+          .select(campos)
+          .eq('id', String(input.lead_id))
+          .maybeSingle()
+        if (error) return `Erro ao buscar lead: ${error.message}`
+        return data ? JSON.stringify(data, null, 2) : `Nenhum lead com id ${input.lead_id}.`
+      }
+      let query = supabase
+        .from('marketing_leads')
+        .select(campos)
+        .order('created_at', { ascending: false })
+        .limit(Math.min(Number(input.limite) || 10, 20))
+      if (input.busca) {
+        const termo = String(input.busca).replaceAll(',', ' ').trim()
+        query = query.or(`nome.ilike.%${termo}%,empresa.ilike.%${termo}%,telefone.ilike.%${termo}%`)
+      }
+      const { data, error } = await query
+      if (error) return `Erro ao buscar leads: ${error.message}`
+      return data.length ? JSON.stringify(data, null, 2) : 'Nenhum lead encontrado.'
+    }
+
+    case 'score_lead': {
+      const linha = String(input.linha ?? '')
+      if (linha !== 'zweb' && linha !== 'sob_medida') {
+        return "Erro: informe a linha do lead ('zweb' ou 'sob_medida') — faça o roteamento antes do scoring."
+      }
+      const score = Math.max(0, Math.min(100, Math.round(Number(input.score))))
+      const { error } = await supabase
+        .from('marketing_leads')
+        .update({ score, score_motivo: String(input.motivo), linha })
+        .eq('id', String(input.lead_id))
+      if (error) return `Erro ao gravar score: ${error.message}`
+      return `Score ${score} (linha: ${linha}) gravado no lead ${input.lead_id}.`
+    }
+
+    case 'generate_whatsapp_script': {
+      const script = String(input.script ?? '').trim()
+      if (!script) return 'Erro: script vazio.'
+      const { error } = await supabase
+        .from('marketing_leads')
+        .update({ script_whatsapp: script })
+        .eq('id', String(input.lead_id))
+      if (error) return `Erro ao gravar script: ${error.message}`
+      return `Script de WhatsApp gravado no lead ${input.lead_id}.`
+    }
+
+    case 'update_lead_stage': {
+      const update: { estagio: string; linha?: string } = { estagio: String(input.estagio) }
+      if (input.linha === 'zweb' || input.linha === 'sob_medida') update.linha = input.linha
+      const { error } = await supabase
+        .from('marketing_leads')
+        .update(update)
+        .eq('id', String(input.lead_id))
+      if (error) return `Erro ao atualizar estágio: ${error.message}`
+      return `Lead ${input.lead_id} atualizado para estágio '${update.estagio}'${update.linha ? ` (linha: ${update.linha})` : ''}.`
     }
 
     case 'delegate_to_agent': {

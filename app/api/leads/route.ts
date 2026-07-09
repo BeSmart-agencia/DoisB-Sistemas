@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { processarLeadMarketing } from '@/lib/agents/sdr'
 
 // Entrada pública de leads das LPs (spec Marketing OS, seção 4).
 // Fase atual: form de briefing da linha sob_medida (/sob-medida).
@@ -32,22 +34,34 @@ export async function POST(req: NextRequest) {
   const { nome, telefone, email, empresa, setor, tamanho_equipe, processo, linha, origem } = parsed.data
 
   const supabase = createAdminClient()
-  const { error } = await supabase.from('marketing_leads').insert({
-    nome,
-    telefone,
-    email: email || null,
-    empresa,
-    segmento: setor,
-    origem,
-    linha,
-    estagio: 'novo',
-    notas: { processo, tamanho_equipe },
-  })
+  const { data: lead, error } = await supabase
+    .from('marketing_leads')
+    .insert({
+      nome,
+      telefone,
+      email: email || null,
+      empresa,
+      segmento: setor,
+      origem,
+      linha,
+      estagio: 'novo',
+      notas: { processo, tamanho_equipe },
+    })
+    .select('id')
+    .single()
 
   if (error) {
     console.error('[leads] Erro ao inserir lead:', error.message)
     return NextResponse.json({ error: 'Erro ao registrar. Tente pelo WhatsApp.' }, { status: 500 })
   }
+
+  // SDR roda depois da resposta (roteamento + scoring + script + e-mail interno).
+  // Falha do agente não pode quebrar o form: o lead já está salvo.
+  waitUntil(
+    processarLeadMarketing(lead.id).catch((err) => {
+      console.error(`[leads] SDR falhou para o lead ${lead.id}:`, err)
+    })
+  )
 
   return NextResponse.json({ ok: true })
 }

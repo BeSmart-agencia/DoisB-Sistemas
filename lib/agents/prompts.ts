@@ -425,7 +425,7 @@ export const AGENTS_CONFIG = {
   sdr: {
     prompt: SDR_PROMPT,
     context: ['BRAND_KIT', 'ICP', 'OFERTA_ATUAL', 'LEAD_DATA', 'LEAD_ORIGEM', 'LEAD_ESTAGIO'],
-    tools: ['score_lead', 'generate_whatsapp_script', 'update_lead_stage', 'search_zweb_kb'],
+    tools: ['get_lead', 'score_lead', 'generate_whatsapp_script', 'update_lead_stage', 'search_zweb_kb'],
   },
 } as const;
 

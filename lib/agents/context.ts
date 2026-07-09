@@ -9,13 +9,22 @@ function json(value: unknown): string {
 
 // Monta os valores dos placeholders {{CHAVE}} que o prompt do agente espera,
 // consultando a memória compartilhada no Supabase (ver AGENTS_CONFIG.context).
-export async function buildAgentContext(agentId: AgentId): Promise<Record<string, string>> {
+// `overrides` permite que fluxos específicos (ex.: SDR disparado por lead novo)
+// injetem valores prontos sem consultar o banco.
+export async function buildAgentContext(
+  agentId: AgentId,
+  overrides: Record<string, string> = {}
+): Promise<Record<string, string>> {
   const supabase = createAdminClient()
   const keys = AGENTS_CONFIG[agentId].context as readonly string[]
   const ctx: Record<string, string> = {}
 
   await Promise.all(
     keys.map(async (key) => {
+      if (key in overrides) {
+        ctx[key] = overrides[key]
+        return
+      }
       switch (key) {
         case 'BRAND_KIT': {
           const { data } = await supabase.from('brand_kit').select('key, value')
@@ -147,9 +156,11 @@ export async function buildAgentContext(agentId: AgentId): Promise<Record<string
           break
         }
         default:
-          // LEAD_DATA / LEAD_ORIGEM / LEAD_ESTAGIO etc. — preenchidos por
-          // fluxos específicos (SDR, Fase 4+); no chat genérico ficam vazios.
-          ctx[key] = SEM_DADOS
+          // LEAD_DATA / LEAD_ORIGEM / LEAD_ESTAGIO — preenchidos via overrides
+          // pelo disparo automático; no chat genérico o agente busca via tool.
+          ctx[key] = key.startsWith('LEAD_')
+            ? '(nenhum lead específico carregado — quando o usuário mencionar um lead, busque-o via tool get_lead por nome, empresa ou telefone)'
+            : SEM_DADOS
       }
     })
   )

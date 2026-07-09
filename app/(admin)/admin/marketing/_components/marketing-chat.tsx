@@ -24,7 +24,7 @@ const AGENTES = [
   { id: "trafego", nome: "Gestor de Tráfego", papel: "Meta e Google Ads (Fase 3)", icon: Megaphone, ativo: false },
   { id: "tendencias", nome: "Tendências", papel: "Pesquisa e briefings semanais (Fase 4)", icon: TrendingUp, ativo: false },
   { id: "social", nome: "Social", papel: "Calendário e roteiros orgânicos (Fase 2)", icon: CalendarDays, ativo: false },
-  { id: "sdr", nome: "SDR", papel: "Scoring e scripts de WhatsApp (Fase 4)", icon: MessageSquare, ativo: false },
+  { id: "sdr", nome: "SDR", papel: "Roteamento, scoring e scripts de WhatsApp", icon: MessageSquare, ativo: true },
 ] as const
 
 type AgenteId = (typeof AGENTES)[number]["id"]
@@ -41,6 +41,10 @@ const TOOL_LABELS: Record<string, string> = {
   update_plan: "gravando plano do mês",
   create_task: "registrando tarefa",
   delegate_to_agent: "delegando briefing a outro agente",
+  get_lead: "buscando lead no banco",
+  score_lead: "gravando score do lead",
+  generate_whatsapp_script: "gravando script de WhatsApp",
+  update_lead_stage: "atualizando estágio do lead",
 }
 
 export function MarketingChat() {
@@ -225,7 +229,9 @@ export function MarketingChat() {
               <p className="text-xs text-slate-400 mt-1.5 max-w-sm">
                 {agente === "estrategista"
                   ? 'Ex.: "Monte o plano deste mês com o orçamento de R$ 1.000" ou "Quais as 3 prioridades da semana?"'
-                  : 'Ex.: "Escreva um anúncio de Meta para mercados, ângulo retaguarda offline" — ele confirma tudo na base ZWeb.'}
+                  : agente === "sdr"
+                    ? 'Ex.: "Mostre os leads mais recentes" ou "Refaça o score do lead da Transportadora X" — ele busca o lead no banco pelo nome ou empresa.'
+                    : 'Ex.: "Escreva um anúncio de Meta para mercados, ângulo retaguarda offline" — ele confirma tudo na base ZWeb.'}
               </p>
             </div>
           ) : (

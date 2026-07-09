@@ -68,6 +68,15 @@ Esse roteamento vale para: o SDR (scoring e script), o site (CTAs distintos), e 
 | Metas | 16–25 clientes ZWeb até mês 3 | Mantidas + 1 projeto sob medida fechado até o mês 3 |
 | Papéis | Laisa: marketing/técnico; Abel: prospecção | Iguais + Laisa lidera desenvolvimento sob medida; diagnóstico de processo feito em dupla |
 
+## 6.1. Nota de schema (para não recriar a tabela errada)
+
+No banco existem DUAS tabelas de leads, de features distintas — **não são duplicata e nenhuma deve ser removida ou renomeada**:
+
+- **`marketing_leads`** — pipeline inbound do Marketing OS (form das LPs, anúncios, WhatsApp). Tem `linha`, `score`, `script_whatsapp`. É a tabela canônica de leads de marketing; criada por `supabase/migrations/marketing_os_fix_v2.sql`.
+- **`leads`** — prospecção outbound via Google Places, usada por `/admin/leads` (com `lead_interacoes` apontando pra ela via FK).
+
+O consolidado antigo usava `create table if not exists leads` para o pipeline de marketing e por isso nunca criou a tabela (a `leads` da prospecção já existia). Qualquer SQL novo do Marketing OS deve usar `marketing_leads`.
+
 ## 7. O que NÃO muda
 
 Identidade visual (azul #1472B5, Bungee/Press Start 2P/JetBrains Mono, estética terminal retrô-futurista). Tom de voz (direto, caloroso, concreto, de vizinho). A estrutura antes/depois como assinatura de copy — agora com versão para processos ("Sem sistema: a planilha do Fulano / Com a DoisB: qualquer um da equipe resolve"). Oferta vigente do ZWeb. Estratégia de dark posts e o guardrail de aprovação humana no Marketing OS.

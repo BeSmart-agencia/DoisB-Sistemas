@@ -13,8 +13,8 @@ const MODEL = 'claude-sonnet-5'
 const MAX_TOOL_ITERATIONS = 8
 const MAX_HISTORY_MESSAGES = 30
 
-// Agentes funcionais na Fase 1; os demais entram nas Fases 2–4.
-const AGENTES_ATIVOS: AgentId[] = ['estrategista', 'copywriter']
+// Agentes funcionais; os demais entram nas Fases 2–4.
+const AGENTES_ATIVOS: AgentId[] = ['estrategista', 'copywriter', 'sdr']
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

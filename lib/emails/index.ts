@@ -12,6 +12,7 @@ import { templateInternaNovaVenda } from "./templates/interna-nova-venda"
 import { templateInternaNewChamado } from "./templates/interna-novo-chamado"
 import { templatePixCobranca } from "./templates/pix-cobranca"
 import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pendente"
+import { templateInternaLeadMarketing, type DadosLeadMarketing } from "./templates/interna-lead-marketing"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = "DoisB Sistemas <noreply@doisbsistemas.com.br>"
@@ -99,6 +100,16 @@ export async function enviarEmailInternoAtivacaoPendente(dados: DadosAtivacaoPen
     to: INTERNO,
     subject: `⚡ Ativar no ZWeb — ${dados.nome_empresa} (${dados.plano})`,
     html: templateInternaAtivacaoPendente(dados),
+  })
+}
+
+export async function enviarEmailInternoLeadMarketing(dados: DadosLeadMarketing) {
+  const scoreTag = dados.score !== null ? ` — score ${dados.score}` : ""
+  await resend.emails.send({
+    from: FROM,
+    to: INTERNO,
+    subject: `📥 Lead novo — ${dados.empresa} (${dados.linha === "sob_medida" ? "sob medida" : "ZWeb"})${scoreTag}`,
+    html: templateInternaLeadMarketing(dados),
   })
 }
 
