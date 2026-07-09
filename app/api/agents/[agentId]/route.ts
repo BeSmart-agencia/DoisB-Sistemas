@@ -14,7 +14,7 @@ const MAX_TOOL_ITERATIONS = 8
 const MAX_HISTORY_MESSAGES = 30
 
 // Agentes funcionais; os demais entram nas Fases 2–4.
-const AGENTES_ATIVOS: AgentId[] = ['estrategista', 'copywriter', 'sdr']
+const AGENTES_ATIVOS: AgentId[] = ['estrategista', 'copywriter', 'sdr', 'social']
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

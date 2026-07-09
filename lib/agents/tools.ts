@@ -98,6 +98,54 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
       required: ['titulo', 'responsavel'],
     },
   },
+  get_calendar: {
+    name: 'get_calendar',
+    description:
+      'Lê o calendário editorial (content_calendar) com filtros opcionais de período, status e linha. Use antes de planejar novos conteúdos para não repetir pilar/formato em sequência.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        data_inicio: { type: 'string', description: 'Filtra itens a partir desta data (YYYY-MM-DD)' },
+        data_fim: { type: 'string', description: 'Filtra itens até esta data (YYYY-MM-DD)' },
+        status: { type: 'string', enum: ['ideia', 'roteiro_pronto', 'gravado', 'publicado'] },
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'] },
+        limite: { type: 'number', description: 'Padrão 30, máx 60' },
+      },
+      required: [],
+    },
+  },
+  create_calendar_item: {
+    name: 'create_calendar_item',
+    description:
+      'Grava um item completo no calendário editorial (content_calendar). Salve TODO conteúdo entregue — roteiro, legenda e hashtags nunca ficam só no texto da conversa.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'], description: 'Linha de negócio — obrigatório, nunca misture as duas' },
+        data_prevista: { type: 'string', description: 'Data planejada de publicação (YYYY-MM-DD)' },
+        pilar: { type: 'string', description: 'Um dos 6 pilares (ex.: dores_varejo, tutorial, reforma_tributaria, bastidores, prova_social, automacao_processos)' },
+        formato: { type: 'string', description: "Ex.: 'reel', 'carrossel', 'fake_live', 'stories'" },
+        plataforma: { type: 'string', description: "Ex.: 'instagram', 'tiktok', 'instagram+tiktok'" },
+        roteiro: { type: 'string', description: 'Roteiro com marcação de cena: [FALA], [TEXTO NA TELA], [AÇÃO/ENQUADRAMENTO]' },
+        copy_legenda: { type: 'string', description: 'Legenda com gancho na primeira linha + CTA' },
+        hashtags: { type: 'string', description: '5 a 8 hashtags separadas por espaço' },
+        status: { type: 'string', enum: ['ideia', 'roteiro_pronto', 'gravado', 'publicado'], description: "Padrão 'roteiro_pronto' quando o roteiro está completo; 'ideia' se for só pauta" },
+        copy_id: { type: 'string', description: 'id da copy da biblioteca que originou este conteúdo, quando houver' },
+      },
+      required: ['linha', 'pilar'],
+    },
+  },
+  get_trend_briefs: {
+    name: 'get_trend_briefs',
+    description: 'Lê os briefings semanais mais recentes do Analista de Tendências (trend_briefs). Pode estar vazio enquanto esse agente não roda.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        limite: { type: 'number', description: 'Padrão 2, máx 5' },
+      },
+      required: [],
+    },
+  },
   get_lead: {
     name: 'get_lead',
     description:
@@ -276,6 +324,62 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
       })
       if (error) return `Erro ao criar tarefa: ${error.message}`
       return `Tarefa registrada para ${input.responsavel} (pendente de aprovação na UI).`
+    }
+
+    case 'get_calendar': {
+      let query = supabase
+        .from('content_calendar')
+        .select('id, linha, data_prevista, pilar, formato, plataforma, roteiro, copy_legenda, hashtags, status, copy_id')
+        .order('data_prevista', { ascending: true })
+        .limit(Math.min(Number(input.limite) || 30, 60))
+      if (input.data_inicio) query = query.gte('data_prevista', String(input.data_inicio))
+      if (input.data_fim) query = query.lte('data_prevista', String(input.data_fim))
+      if (input.status) query = query.eq('status', String(input.status))
+      if (input.linha) query = query.eq('linha', String(input.linha))
+      const { data, error } = await query
+      if (error) return `Erro ao ler calendário: ${error.message}`
+      return data.length ? JSON.stringify(data, null, 2) : 'Nenhum item no calendário para esses filtros.'
+    }
+
+    case 'create_calendar_item': {
+      const linha = String(input.linha ?? '')
+      if (linha !== 'zweb' && linha !== 'sob_medida') {
+        return "Erro: informe a linha do conteúdo ('zweb' ou 'sob_medida') — regra inviolável 7."
+      }
+      const status = String(input.status ?? 'roteiro_pronto')
+      if (!['ideia', 'roteiro_pronto', 'gravado', 'publicado'].includes(status)) {
+        return "Erro: status deve ser 'ideia', 'roteiro_pronto', 'gravado' ou 'publicado'."
+      }
+      const { data, error } = await supabase
+        .from('content_calendar')
+        .insert({
+          linha,
+          data_prevista: input.data_prevista ? String(input.data_prevista) : null,
+          pilar: String(input.pilar),
+          formato: input.formato ? String(input.formato) : null,
+          plataforma: input.plataforma ? String(input.plataforma) : null,
+          roteiro: input.roteiro ? String(input.roteiro) : null,
+          copy_legenda: input.copy_legenda ? String(input.copy_legenda) : null,
+          hashtags: input.hashtags ? String(input.hashtags) : null,
+          status,
+          copy_id: input.copy_id ? String(input.copy_id) : null,
+        })
+        .select('id')
+        .single()
+      if (error) return `Erro ao gravar item no calendário: ${error.message}`
+      return `Item gravado no calendário com id ${data.id} (${linha}, ${input.data_prevista ?? 'sem data'}, status: ${status}).`
+    }
+
+    case 'get_trend_briefs': {
+      const { data, error } = await supabase
+        .from('trend_briefs')
+        .select('semana, resumo, achados')
+        .order('semana', { ascending: false })
+        .limit(Math.min(Number(input.limite) || 2, 5))
+      if (error) return `Erro ao ler briefings: ${error.message}`
+      return data.length
+        ? JSON.stringify(data, null, 2)
+        : 'Nenhum briefing de tendências ainda — o agente de Tendências entra na Fase 4. Siga com os pilares e formatos já validados.'
     }
 
     case 'get_lead': {

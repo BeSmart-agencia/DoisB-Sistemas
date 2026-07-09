@@ -108,16 +108,17 @@ export async function buildAgentContext(
             .from('trend_briefs')
             .select('semana, resumo, achados')
             .order('semana', { ascending: false })
-            .limit(3)
+            .limit(2)
           ctx[key] = data?.length ? json(data) : 'Nenhum briefing de tendências ainda (agente de Tendências entra na Fase 4).'
           break
         }
         case 'TOP_COPIES':
         case 'TOP_COPIES_ORGANICO':
         case 'COPIES_APROVADAS': {
+          // id incluso para o agente poder referenciar copy_id ao derivar conteúdo
           let query = supabase
             .from('copy_library')
-            .select('linha, canal, formato, angulo, categoria, titulo, corpo, status, performance')
+            .select('id, linha, canal, formato, angulo, categoria, titulo, corpo, status, performance')
             .in('status', ['aprovada', 'no_ar'])
             .order('created_at', { ascending: false })
             .limit(10)
@@ -137,12 +138,20 @@ export async function buildAgentContext(
           break
         }
         case 'CALENDARIO': {
+          // Janela útil para planejamento: últimos 7 dias + próximos 30.
+          const dia = 24 * 60 * 60 * 1000
+          const desde = new Date(Date.now() - 7 * dia).toISOString().slice(0, 10)
+          const ate = new Date(Date.now() + 30 * dia).toISOString().slice(0, 10)
           const { data } = await supabase
             .from('content_calendar')
-            .select('data_prevista, pilar, formato, plataforma, status')
+            .select('id, linha, data_prevista, pilar, formato, plataforma, status')
+            .gte('data_prevista', desde)
+            .lte('data_prevista', ate)
             .order('data_prevista', { ascending: true })
-            .limit(40)
-          ctx[key] = data?.length ? json(data) : 'Calendário vazio.'
+            .limit(60)
+          ctx[key] = data?.length
+            ? json(data)
+            : 'Calendário vazio no período (últimos 7 e próximos 30 dias).'
           break
         }
         case 'ACOES_PENDENTES': {
