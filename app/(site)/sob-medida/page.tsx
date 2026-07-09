@@ -161,6 +161,10 @@ export default function SobMedidaPage() {
                 </div>
               ))}
             </div>
+            <p className="mt-10 text-center text-sm text-slate-500 max-w-2xl mx-auto">
+              Projetos a partir de R$ 3 mil, com escopo fechado e primeira entrega
+              funcional em semanas. O diagnóstico é gratuito.
+            </p>
           </div>
         </section>
 

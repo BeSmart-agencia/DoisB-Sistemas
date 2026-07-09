@@ -48,11 +48,12 @@ Esse roteamento vale para: o SDR (scoring e script), o site (CTAs distintos), e 
 
 **Gatilhos:** automatizar processo manual, integrar pontas soltas, dashboard para o dono, acabar com a planilha-mestre que só um funcionário entende.
 
-## 5. Modelo comercial da Linha 2 [DECIDIR valores]
+## 5. Modelo comercial da Linha 2 [DECIDIDO — valores salvos no banco em brand_kit → modelo_comercial_sob_medida]
 
-- Diagnóstico do processo (reunião com Abel/Laisa) → proposta de escopo fechado.
-- Preço: projeto (entrada + parcelas por entrega) + mensalidade de manutenção/hospedagem/evolução.
-- Piso de projeto sugerido para não atrair projeto que não se paga: [DECIDIR].
+- Diagnóstico do processo (reunião com Abel/Laisa, 20 min, gratuito) → proposta de escopo fechado.
+- Preço: projetos **a partir de R$ 3.000**, faixa típica **R$ 3–7 mil**. Pagamento **40/30/30** (entrada + parcelas por entrega).
+- Mensalidade de manutenção/hospedagem/evolução: **R$ 450/mês**, mínimo 12 meses.
+- Piso de projeto para não atrair projeto que não se paga: **R$ 3.000**.
 - Prazo padrão comunicado: por fases, primeira entrega funcional rápida (semanas, não meses).
 
 ## 6. O que muda na prática
@@ -64,7 +65,7 @@ Esse roteamento vale para: o SDR (scoring e script), o site (CTAs distintos), e 
 | Marketing OS | Tudo assume ZWeb | Campo `linha` em leads, campanhas, copies e ICPs; agentes cientes das duas linhas |
 | SDR | Qualifica para ZWeb | Roteia entre linhas; lead fora do varejo deixa de ser descartado |
 | Orçamento de mídia | 100% ZWeb | ZWeb continua prioritário; sob medida começa orgânico/indicação [DECIDIR % quando houver dados] |
-| Metas | 16–25 clientes ZWeb até mês 3 | Mantidas + [DECIDIR: meta de projetos sob medida, ex.: 1 projeto fechado até mês 3] |
+| Metas | 16–25 clientes ZWeb até mês 3 | Mantidas + 1 projeto sob medida fechado até o mês 3 |
 | Papéis | Laisa: marketing/técnico; Abel: prospecção | Iguais + Laisa lidera desenvolvimento sob medida; diagnóstico de processo feito em dupla |
 
 ## 7. O que NÃO muda

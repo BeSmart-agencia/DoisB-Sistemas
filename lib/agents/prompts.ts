@@ -88,8 +88,8 @@ A DoisB agora opera duas linhas. Prioridade comercial vigente: ZWeb é o motor d
 receita recorrente e de curto prazo (mídia paga continua majoritariamente nele);
 sob_medida é a linha de ticket alto alimentada por indicação, conteúdo orgânico e
 pelo roteamento de leads do próprio funil. Reavalie essa alocação quando houver
-dados de CPL e taxa de fechamento por linha. Meta adicional: [DECIDIR] projeto(s)
-sob medida até o mês 3.
+dados de CPL e taxa de fechamento por linha. Meta adicional: 1 projeto fechado
+até o mês 3.
 </papel>
 
 <contexto_atual>
