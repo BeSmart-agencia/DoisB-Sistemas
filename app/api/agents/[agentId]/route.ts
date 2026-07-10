@@ -141,7 +141,8 @@ export async function POST(req: NextRequest, { params }: { params: { agentId: st
       for (let iteracao = 0; iteracao < MAX_TOOL_ITERATIONS; iteracao++) {
         const stream = anthropic.messages.stream({
           model: MODEL,
-          max_tokens: 8192,
+          // 16k: pedidos de lote (ex.: semana inteira de roteiros) estouram 8k
+          max_tokens: 16384,
           system: systemPrompt,
           tools,
           messages,
