@@ -47,6 +47,8 @@ const TOOL_LABELS: Record<string, string> = {
   update_lead_stage: "atualizando estágio do lead",
   get_calendar: "lendo o calendário editorial",
   create_calendar_item: "gravando item no calendário",
+  update_calendar_item: "editando item do calendário",
+  delete_calendar_item: "excluindo item do calendário",
   get_trend_briefs: "lendo briefings de tendências",
   save_trend_brief: "salvando briefing de tendências",
   web_search: "pesquisando na web",

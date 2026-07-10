@@ -420,7 +420,7 @@ export const AGENTS_CONFIG = {
   social: {
     prompt: SOCIAL_PROMPT,
     context: ['BRAND_KIT', 'ICP', 'OFERTA_ATUAL', 'CALENDARIO', 'TREND_BRIEFS', 'TOP_COPIES_ORGANICO'],
-    tools: ['get_calendar', 'create_calendar_item', 'search_zweb_kb', 'get_trend_briefs'],
+    tools: ['get_calendar', 'create_calendar_item', 'update_calendar_item', 'delete_calendar_item', 'search_zweb_kb', 'get_trend_briefs'],
   },
   sdr: {
     prompt: SDR_PROMPT,

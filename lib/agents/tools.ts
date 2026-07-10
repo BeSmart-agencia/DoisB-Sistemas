@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buscarChunksRelevantes } from '@/lib/rag/buscar-chunks'
 import type { AgentId } from '@/lib/agents/prompts'
-import type { Json } from '@/types/database'
+import type { Database, Json } from '@/types/database'
 
 // -----------------------------------------------------------------------------
 // Definições (schemas enviados à Anthropic API)
@@ -172,6 +172,44 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
         copy_id: { type: 'string', description: 'id da copy da biblioteca que originou este conteúdo, quando houver' },
       },
       required: ['linha', 'pilar'],
+    },
+  },
+  update_calendar_item: {
+    name: 'update_calendar_item',
+    description:
+      'Edita campos de um item existente do calendário editorial (content_calendar) pelo id. Envie apenas os campos que devem mudar. Use get_calendar antes para confirmar o id.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'id do item (uuid)' },
+        linha: { type: 'string', enum: ['zweb', 'sob_medida'] },
+        data_prevista: { type: 'string', description: 'YYYY-MM-DD' },
+        pilar: { type: 'string' },
+        formato: { type: 'string' },
+        plataforma: { type: 'string' },
+        roteiro: { type: 'string' },
+        copy_legenda: { type: 'string' },
+        hashtags: { type: 'string' },
+        status: { type: 'string', enum: ['ideia', 'roteiro_pronto', 'gravado', 'publicado'] },
+        copy_id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  delete_calendar_item: {
+    name: 'delete_calendar_item',
+    description:
+      'Exclui um item do calendário editorial pelo id. IRREVERSÍVEL: só chame depois de o usuário confirmar explicitamente a exclusão na conversa — descreva o item (data, pilar, formato) e pergunte antes.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'id do item (uuid)' },
+        confirmado_pelo_usuario: {
+          type: 'boolean',
+          description: 'true SOMENTE se o usuário confirmou a exclusão deste item nesta conversa',
+        },
+      },
+      required: ['id', 'confirmado_pelo_usuario'],
     },
   },
   get_trend_briefs: {
@@ -434,6 +472,55 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
         .single()
       if (error) return `Erro ao gravar item no calendário: ${error.message}`
       return `Item gravado no calendário com id ${data.id} (${linha}, ${input.data_prevista ?? 'sem data'}, status: ${status}).`
+    }
+
+    case 'update_calendar_item': {
+      const id = String(input.id ?? '')
+      if (!id) return 'Erro: informe o id do item.'
+      const update: Database['public']['Tables']['content_calendar']['Update'] = {}
+      if (input.data_prevista !== undefined) update.data_prevista = input.data_prevista == null ? null : String(input.data_prevista)
+      if (input.pilar !== undefined) update.pilar = String(input.pilar)
+      if (input.formato !== undefined) update.formato = input.formato == null ? null : String(input.formato)
+      if (input.plataforma !== undefined) update.plataforma = input.plataforma == null ? null : String(input.plataforma)
+      if (input.roteiro !== undefined) update.roteiro = input.roteiro == null ? null : String(input.roteiro)
+      if (input.copy_legenda !== undefined) update.copy_legenda = input.copy_legenda == null ? null : String(input.copy_legenda)
+      if (input.hashtags !== undefined) update.hashtags = input.hashtags == null ? null : String(input.hashtags)
+      if (input.copy_id !== undefined) update.copy_id = input.copy_id == null ? null : String(input.copy_id)
+      if (input.linha !== undefined) {
+        if (input.linha !== 'zweb' && input.linha !== 'sob_medida') return "Erro: linha deve ser 'zweb' ou 'sob_medida'."
+        update.linha = input.linha
+      }
+      if (input.status !== undefined) {
+        if (!['ideia', 'roteiro_pronto', 'gravado', 'publicado'].includes(String(input.status))) {
+          return "Erro: status deve ser 'ideia', 'roteiro_pronto', 'gravado' ou 'publicado'."
+        }
+        update.status = String(input.status)
+      }
+      if (Object.keys(update).length === 0) return 'Erro: nenhum campo para atualizar foi enviado.'
+      const { data, error } = await supabase
+        .from('content_calendar')
+        .update(update)
+        .eq('id', id)
+        .select('id')
+        .maybeSingle()
+      if (error) return `Erro ao atualizar item: ${error.message}`
+      if (!data) return `Nenhum item com id ${id}.`
+      return `Item ${id} atualizado (campos: ${Object.keys(update).join(', ')}).`
+    }
+
+    case 'delete_calendar_item': {
+      if (input.confirmado_pelo_usuario !== true) {
+        return 'BLOQUEADO: exclusão não confirmada. Descreva o item ao usuário (data, pilar, formato) e peça confirmação explícita antes de chamar de novo com confirmado_pelo_usuario=true.'
+      }
+      const { data, error } = await supabase
+        .from('content_calendar')
+        .delete()
+        .eq('id', String(input.id))
+        .select('id, data_prevista, pilar, formato')
+        .maybeSingle()
+      if (error) return `Erro ao excluir item: ${error.message}`
+      if (!data) return `Nenhum item com id ${input.id}.`
+      return `Item excluído: ${data.pilar}${data.formato ? ` (${data.formato})` : ''} de ${data.data_prevista ?? 'sem data'}.`
     }
 
     case 'get_trend_briefs': {

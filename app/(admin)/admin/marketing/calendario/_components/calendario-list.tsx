@@ -11,6 +11,7 @@ import {
   Clapperboard,
   Hash,
   MessageSquareText,
+  Trash2,
 } from "lucide-react"
 
 interface ItemRow {
@@ -98,6 +99,23 @@ export function CalendarioList({ itens }: { itens: ItemRow[] }) {
   function copiar(rotulo: string, texto: string) {
     navigator.clipboard.writeText(texto)
     toast.success(`${rotulo} copiado para a área de transferência.`)
+  }
+
+  async function excluir(item: ItemRow) {
+    const descricao = `${item.pilar}${item.formato ? ` (${item.formato})` : ""}${item.data_prevista ? ` de ${diaCurto(item.data_prevista)}` : ""}`
+    if (!confirm(`Excluir o item "${descricao}" do calendário? Essa ação não tem volta.`)) return
+    setSalvando(item.id)
+    try {
+      const res = await fetch(`/api/admin/calendario/${item.id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error()
+      setSelecionado(null)
+      toast.success("Item excluído do calendário.")
+      router.refresh()
+    } catch {
+      toast.error("Erro ao excluir o item.")
+    } finally {
+      setSalvando(null)
+    }
   }
 
   const statusMeta = (valor: string) => STATUS.find((s) => s.valor === valor)
@@ -292,6 +310,18 @@ export function CalendarioList({ itens }: { itens: ItemRow[] }) {
                   Item ainda sem roteiro — peça ao agente Social para desenvolver esta pauta.
                 </p>
               )}
+
+              {/* Excluir */}
+              <div className="border-t border-slate-100 pt-4">
+                <button
+                  onClick={() => excluir(selecionado)}
+                  disabled={salvando === selecionado.id}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Excluir item
+                </button>
+              </div>
             </div>
           </div>
         </div>
