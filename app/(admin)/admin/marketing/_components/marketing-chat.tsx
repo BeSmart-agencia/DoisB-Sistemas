@@ -22,7 +22,7 @@ const AGENTES = [
   { id: "estrategista", nome: "Estrategista", papel: "CMO virtual — plano, funil e prioridades", icon: Compass, ativo: true },
   { id: "copywriter", nome: "Copywriter", papel: "Anúncios, LPs, e-mails e WhatsApp", icon: Pencil, ativo: true },
   { id: "trafego", nome: "Gestor de Tráfego", papel: "Meta e Google Ads (Fase 3)", icon: Megaphone, ativo: false },
-  { id: "tendencias", nome: "Tendências", papel: "Pesquisa e briefings semanais (Fase 4)", icon: TrendingUp, ativo: false },
+  { id: "tendencias", nome: "Tendências", papel: "Pesquisa na web e briefings semanais", icon: TrendingUp, ativo: true },
   { id: "social", nome: "Social", papel: "Calendário e roteiros orgânicos", icon: CalendarDays, ativo: true },
   { id: "sdr", nome: "SDR", papel: "Roteamento, scoring e scripts de WhatsApp", icon: MessageSquare, ativo: true },
 ] as const
@@ -48,6 +48,8 @@ const TOOL_LABELS: Record<string, string> = {
   get_calendar: "lendo o calendário editorial",
   create_calendar_item: "gravando item no calendário",
   get_trend_briefs: "lendo briefings de tendências",
+  save_trend_brief: "salvando briefing de tendências",
+  web_search: "pesquisando na web",
 }
 
 export function MarketingChat() {
@@ -236,7 +238,9 @@ export function MarketingChat() {
                     ? 'Ex.: "Mostre os leads mais recentes" ou "Refaça o score do lead da Transportadora X" — ele busca o lead no banco pelo nome ou empresa.'
                     : agente === "social"
                       ? 'Ex.: "Monte a próxima semana com 3 conteúdos, alternando pilares" — cada roteiro sai pronto para gravar em menos de 30 minutos.'
-                      : 'Ex.: "Escreva um anúncio de Meta para mercados, ângulo retaguarda offline" — ele confirma tudo na base ZWeb.'}
+                      : agente === "tendencias"
+                        ? 'Ex.: "Rode o briefing desta semana" — ele pesquisa a web e salva os achados, que viram contexto dos outros agentes. Também roda sozinho toda segunda de manhã.'
+                        : 'Ex.: "Escreva um anúncio de Meta para mercados, ângulo retaguarda offline" — ele confirma tudo na base ZWeb.'}
               </p>
             </div>
           ) : (

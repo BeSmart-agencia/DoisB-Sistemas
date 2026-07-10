@@ -1,13 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { AGENTS_CONFIG, COMMON_CONTEXT } from '@/lib/agents/prompts'
-import { buildAgentContext, renderPrompt } from '@/lib/agents/context'
-import { getToolsForAgent, executeTool } from '@/lib/agents/tools'
+import { runAgent } from '@/lib/agents/run'
 import { enviarEmailInternoLeadMarketing } from '@/lib/emails'
 import type { DadosLeadMarketing } from '@/lib/emails/templates/interna-lead-marketing'
-
-const MODEL = 'claude-sonnet-5'
-const MAX_TOOL_ITERATIONS = 8
 
 type LeadRow = {
   id: string
@@ -65,66 +59,27 @@ async function carregarLead(leadId: string): Promise<LeadRow | null> {
 // Roda o agente SDR sobre um lead recém-gravado: roteamento de linha, scoring
 // e script de WhatsApp (tudo salvo via tools), depois notifica Abel e Laisa
 // por e-mail. Chamado via waitUntil no POST /api/leads — qualquer erro aqui
-// não afeta o form (o chamador loga e segue).
+// não afeta o form (o lead salva mesmo assim; o chamador loga).
 export async function processarLeadMarketing(leadId: string): Promise<void> {
   const lead = await carregarLead(leadId)
   if (!lead) throw new Error(`Lead ${leadId} não encontrado.`)
 
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
-  const config = AGENTS_CONFIG.sdr
-
-  const contexto = await buildAgentContext('sdr', {
-    LEAD_DATA: JSON.stringify(lead, null, 2),
-    LEAD_ORIGEM: lead.origem ?? '(origem não informada)',
-    LEAD_ESTAGIO: lead.estagio,
-  })
-  const systemPrompt = renderPrompt(
-    config.prompt.replace('{{COMMON_CONTEXT}}', COMMON_CONTEXT),
-    contexto
-  )
-  const tools = getToolsForAgent(config.tools)
-
-  const messages: Anthropic.MessageParam[] = [
+  await runAgent(
+    'sdr',
+    `Lead novo acabou de entrar (id: ${lead.id}). Processe-o agora:\n` +
+      `1. Roteamento de linha pela regra de ouro.\n` +
+      `2. Scoring honesto com justificativa (salve via score_lead).\n` +
+      `3. Script de WhatsApp pronto para o Abel (salve via generate_whatsapp_script).\n` +
+      `Os dados completos do lead já estão no seu contexto. Ao final, resuma em 2-3 linhas o que decidiu.`,
     {
-      role: 'user',
-      content:
-        `Lead novo acabou de entrar (id: ${lead.id}). Processe-o agora:\n` +
-        `1. Roteamento de linha pela regra de ouro.\n` +
-        `2. Scoring honesto com justificativa (salve via score_lead).\n` +
-        `3. Script de WhatsApp pronto para o Abel (salve via generate_whatsapp_script).\n` +
-        `Os dados completos do lead já estão no seu contexto. Ao final, resuma em 2-3 linhas o que decidiu.`,
-    },
-  ]
-
-  for (let iteracao = 0; iteracao < MAX_TOOL_ITERATIONS; iteracao++) {
-    const resposta = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 4096,
-      system: systemPrompt,
-      tools,
-      messages,
-    })
-
-    if (resposta.stop_reason !== 'tool_use') break
-
-    const toolUses = resposta.content.filter(
-      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use'
-    )
-    messages.push({ role: 'assistant', content: resposta.content })
-
-    const toolResults: Anthropic.ToolResultBlockParam[] = []
-    for (const toolUse of toolUses) {
-      let resultado: string
-      try {
-        resultado = await executeTool('sdr', toolUse.name, toolUse.input as Record<string, unknown>)
-      } catch (err) {
-        console.error(`[sdr] Erro na tool ${toolUse.name}:`, err)
-        resultado = `Erro interno ao executar ${toolUse.name}.`
-      }
-      toolResults.push({ type: 'tool_result', tool_use_id: toolUse.id, content: resultado })
+      contextOverrides: {
+        LEAD_DATA: JSON.stringify(lead, null, 2),
+        LEAD_ORIGEM: lead.origem ?? '(origem não informada)',
+        LEAD_ESTAGIO: lead.estagio,
+      },
+      maxTokens: 4096,
     }
-    messages.push({ role: 'user', content: toolResults })
-  }
+  )
 
   // Recarrega o lead com o que o agente gravou e notifica a equipe.
   const leadFinal = (await carregarLead(leadId)) ?? lead

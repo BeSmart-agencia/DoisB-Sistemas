@@ -13,6 +13,7 @@ import { templateInternaNewChamado } from "./templates/interna-novo-chamado"
 import { templatePixCobranca } from "./templates/pix-cobranca"
 import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pendente"
 import { templateInternaLeadMarketing, type DadosLeadMarketing } from "./templates/interna-lead-marketing"
+import { templateInternaResumoSemanal, type DadosResumoSemanal } from "./templates/interna-resumo-semanal"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = "DoisB Sistemas <noreply@doisbsistemas.com.br>"
@@ -110,6 +111,16 @@ export async function enviarEmailInternoLeadMarketing(dados: DadosLeadMarketing)
     to: INTERNO,
     subject: `📥 Lead novo — ${dados.empresa} (${dados.linha === "sob_medida" ? "sob medida" : "ZWeb"})${scoreTag}`,
     html: templateInternaLeadMarketing(dados),
+  })
+}
+
+export async function enviarEmailResumoSemanal(assunto: string, dados: DadosResumoSemanal) {
+  // Rotina semanal do Marketing OS — vai só para a Laisa (quem lê na segunda)
+  await resend.emails.send({
+    from: FROM,
+    to: ["barthlaisa@gmail.com", "laisabarth@doisbsistemas.com.br"],
+    subject: assunto,
+    html: templateInternaResumoSemanal(dados),
   })
 }
 

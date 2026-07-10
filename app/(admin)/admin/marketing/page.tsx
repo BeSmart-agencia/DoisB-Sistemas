@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CalendarDays, Library, Users } from "lucide-react"
+import { CalendarDays, Library, TrendingUp, Users } from "lucide-react"
 import { MarketingChat } from "./_components/marketing-chat"
 
 export const metadata = { title: "Marketing OS | DoisB Admin" }
@@ -35,6 +35,13 @@ export default function MarketingPage() {
           >
             <CalendarDays className="h-4 w-4" />
             Calendário
+          </Link>
+          <Link
+            href="/admin/marketing/briefings"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <TrendingUp className="h-4 w-4" />
+            Briefings
           </Link>
         </div>
       </div>

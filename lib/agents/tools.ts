@@ -98,6 +98,45 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
       required: ['titulo', 'responsavel'],
     },
   },
+  save_trend_brief: {
+    name: 'save_trend_brief',
+    description:
+      'Salva o briefing semanal de tendências em trend_briefs. Use ao finalizar a pesquisa — o briefing vira contexto dos outros agentes ({{TREND_BRIEFS}}).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        semana: { type: 'string', description: 'Segunda-feira da semana do briefing (YYYY-MM-DD). Se omitido, usa a semana atual.' },
+        resumo: { type: 'string', description: 'Resumo em até 3 linhas: o que importa esta semana' },
+        achados: {
+          type: 'array',
+          description: 'Até 5 achados acionáveis',
+          items: {
+            type: 'object',
+            properties: {
+              tema: { type: 'string' },
+              evidencia: { type: 'string', description: 'Fato verificado, com referência à fonte' },
+              recomendacao: { type: 'string', description: 'Ação concreta recomendada' },
+              para_quem: { type: 'string', enum: ['copywriter', 'social', 'trafego', 'estrategista'] },
+            },
+            required: ['tema', 'evidencia', 'recomendacao', 'para_quem'],
+          },
+        },
+        fontes: {
+          type: 'array',
+          description: 'Fontes consultadas',
+          items: {
+            type: 'object',
+            properties: {
+              titulo: { type: 'string' },
+              url: { type: 'string' },
+            },
+            required: ['url'],
+          },
+        },
+      },
+      required: ['resumo', 'achados'],
+    },
+  },
   get_calendar: {
     name: 'get_calendar',
     description:
@@ -217,10 +256,18 @@ const TOOL_DEFINITIONS: Record<string, Anthropic.Tool> = {
   },
 }
 
-export function getToolsForAgent(toolNames: readonly string[]): Anthropic.Tool[] {
+// Tool de servidor da Anthropic API: a pesquisa roda do lado da API, sem
+// executor local (nunca chega ao executeTool).
+const WEB_SEARCH_TOOL: Anthropic.ToolUnion = {
+  type: 'web_search_20250305',
+  name: 'web_search',
+  max_uses: 8,
+}
+
+export function getToolsForAgent(toolNames: readonly string[]): Anthropic.ToolUnion[] {
   return toolNames
-    .filter((name) => name in TOOL_DEFINITIONS)
-    .map((name) => TOOL_DEFINITIONS[name])
+    .map((name) => (name === 'web_search' ? WEB_SEARCH_TOOL : TOOL_DEFINITIONS[name]))
+    .filter((t): t is Anthropic.ToolUnion => Boolean(t))
 }
 
 // -----------------------------------------------------------------------------
@@ -324,6 +371,25 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
       })
       if (error) return `Erro ao criar tarefa: ${error.message}`
       return `Tarefa registrada para ${input.responsavel} (pendente de aprovação na UI).`
+    }
+
+    case 'save_trend_brief': {
+      // Segunda-feira da semana corrente como padrão
+      const hoje = new Date()
+      hoje.setDate(hoje.getDate() - ((hoje.getDay() + 6) % 7))
+      const semanaPadrao = hoje.toISOString().slice(0, 10)
+      const { data, error } = await supabase
+        .from('trend_briefs')
+        .insert({
+          semana: input.semana ? String(input.semana) : semanaPadrao,
+          resumo: String(input.resumo ?? ''),
+          achados: (input.achados ?? []) as Json,
+          fontes: (input.fontes ?? []) as Json,
+        })
+        .select('id, semana')
+        .single()
+      if (error) return `Erro ao salvar briefing: ${error.message}`
+      return `Briefing da semana ${data.semana} salvo com id ${data.id}. Ele já entra no contexto {{TREND_BRIEFS}} dos outros agentes.`
     }
 
     case 'get_calendar': {
