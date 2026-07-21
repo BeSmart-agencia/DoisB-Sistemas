@@ -8,30 +8,30 @@ export const dynamic = "force-dynamic"
 const FOLHA = [
   { nome: "Laisa", valor: "R$ 7.000", pct: 100, tipo: "Sócia" },
   { nome: "Abel", valor: "R$ 7.000", pct: 100, tipo: "Sócio" },
-  { nome: "Douglas", valor: "R$ 4.300", pct: 61, tipo: "Equipe" },
-  { nome: "Ailla", valor: "R$ 2.700", pct: 39, tipo: "Equipe" },
+  { nome: "Douglas", valor: "R$ 2.500", pct: 36, tipo: "Equipe" },
+  { nome: "Ailla", valor: "R$ 2.000", pct: 29, tipo: "Equipe" },
 ]
 
 const MOTORES = [
   {
     rotulo: "Motor 1 · Indústria",
-    valor: "R$ 21 mil",
+    valor: "R$ 16 mil",
     hipotese: true,
-    desc: "6 clientes ativos a ~R$ 3.500/mês. Sistema Zucchetti para indústrias — produto, preço e margem a confirmar com a Zucchetti.",
+    desc: "6 clientes ativos a ~R$ 2.650/mês. Sistema Zucchetti para indústrias — produto, preço e margem a confirmar com a Zucchetti.",
     quem: "Abel · venda presencial, ticket alto",
   },
   {
     rotulo: "Motor 2 · ZWeb",
-    valor: "R$ 6 mil",
+    valor: "R$ 10 mil",
     hipotese: false,
-    desc: "60 clientes ativos com margem média de R$ 100/cliente. Volume, base e indicações — o motor que constrói presença.",
-    quem: "Laisa · anúncios em escala",
+    desc: "60 clientes ativos com margem média de ~R$ 165/cliente. Volume, base e indicações — o motor que constrói presença. Reforço: vendedora externa com meta de 5 ZWeb/mês (comissão = 1ª mensalidade).",
+    quem: "Laisa + vendedora externa · anúncios em escala",
   },
   {
     rotulo: "Motor 3 · Sob medida",
-    valor: "R$ 6–7,5 mil",
+    valor: "R$ 4 mil",
     hipotese: false,
-    desc: "1 projeto/mês (média R$ 3 mil) + mensalidade de R$ 450 que acumula a cada projeto entregue — a anuidade silenciosa.",
+    desc: "1 projeto/mês (projeto menor) + mensalidade de R$ 450 que acumula a cada projeto entregue — a anuidade silenciosa.",
     quem: "Laisa · desenvolvimento",
   },
 ]
@@ -82,10 +82,10 @@ export default async function MetasPage() {
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-sky-300">A meta-mãe · mês 12</p>
-            <p className="text-3xl font-black mt-1 text-white">R$ 33 mil<span className="text-lg font-bold text-sky-200">/mês recorrente</span></p>
+            <p className="text-3xl font-black mt-1 text-white">R$ 30 mil<span className="text-lg font-bold text-sky-200">/mês recorrente</span></p>
             <p className="text-sm text-slate-100 mt-2 max-w-2xl leading-relaxed">
-              Receita necessária para sustentar a folha de <b className="text-white">R$ 21 mil</b> com folga saudável
-              (folha ≤ 65% da receita) — sobrando para impostos, marketing, ferramentas e reserva.
+              Receita necessária para sustentar a folha de <b className="text-white">R$ 18,5 mil</b> com folga saudável
+              (folha ≈ 62% da receita) — sobrando para impostos, marketing, ferramentas e reserva.
             </p>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default async function MetasPage() {
           ))}
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
-          <p className="text-lg font-black text-slate-950">Total: <span className="text-blue-800">R$ 21.000/mês</span></p>
+          <p className="text-lg font-black text-slate-950">Total: <span className="text-blue-800">R$ 18.500/mês</span></p>
           <p className="text-xs text-slate-500 max-w-md">
             Regra de prioridade: <b className="text-slate-700">equipe primeiro, sócios por último.</b> Douglas e Ailla
             saem da agência para a DoisB quando a receita sustentar seus salários.

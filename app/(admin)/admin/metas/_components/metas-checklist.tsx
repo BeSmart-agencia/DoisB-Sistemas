@@ -21,6 +21,7 @@ export interface MetaRow {
 const RESP: Record<string, { label: string; badge: string }> = {
   laisa: { label: "Laisa", badge: "bg-blue-50 text-blue-700 border-blue-200" },
   abel: { label: "Abel", badge: "bg-violet-50 text-violet-700 border-violet-200" },
+  vendedora: { label: "Vendedora externa", badge: "bg-amber-50 text-amber-700 border-amber-200" },
   ambos: { label: "Laisa + Abel", badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 }
 
