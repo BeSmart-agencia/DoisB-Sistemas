@@ -75,7 +75,7 @@ export default async function MetasPage() {
       </div>
 
       {/* Meta-mãe */}
-      <div className="admin-panel p-6 bg-gradient-to-br from-blue-900 to-slate-950 text-white border-0">
+      <div className="p-6 rounded-2xl shadow-lg text-white bg-gradient-to-br from-blue-900 to-slate-950">
         <div className="flex items-start gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
             <Target className="h-5 w-5" />
