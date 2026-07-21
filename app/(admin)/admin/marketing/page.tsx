@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CalendarDays, Library, TrendingUp, Users } from "lucide-react"
+import { BookOpen, CalendarDays, Library, TrendingUp, Users } from "lucide-react"
 import { MarketingChat } from "./_components/marketing-chat"
 
 export const metadata = { title: "Marketing OS | DoisB Admin" }
@@ -15,6 +15,13 @@ export default function MarketingPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/marketing/como-usar"
+            className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            Como usar os agentes
+          </Link>
           <Link
             href="/admin/marketing/leads"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
