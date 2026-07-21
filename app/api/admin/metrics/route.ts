@@ -73,12 +73,26 @@ export async function GET() {
     .select("*", { count: "exact", head: true })
     .in("status", ["a_atender", "em_andamento", "aguardando_cliente"])
 
+  // Sob Medida: MRR das mensalidades ativas + desenvolvimento a receber
+  const { data: projetos } = await supabase!
+    .from("sob_medida_projetos")
+    .select("valor_desenvolvimento, valor_recebido, mensalidade_valor, mensalidade_status")
+
+  const sobMedidaMrr = (projetos ?? [])
+    .filter((p) => p.mensalidade_status === "ativa")
+    .reduce((s, p) => s + Number(p.mensalidade_valor), 0)
+  const sobMedidaReceber = (projetos ?? [])
+    .reduce((s, p) => s + (Number(p.valor_desenvolvimento) - Number(p.valor_recebido)), 0)
+
   return NextResponse.json({
     totalAtivos: totalAtivos ?? 0,
     mrr,
     vendasMes: vendasMes ?? 0,
     chamadosAbertos: chamadosAbertos ?? 0,
     leadsNegociacao: 0,
+    sobMedidaMrr,
+    sobMedidaReceber,
+    mrrTotal: mrr + sobMedidaMrr,
     grafico: meses.map(({ mes, vendas }) => ({ mes, vendas })),
   })
 }

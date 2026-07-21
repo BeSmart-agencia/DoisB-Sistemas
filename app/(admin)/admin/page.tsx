@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { Users, DollarSign, ShoppingCart, Headphones, Target, Activity } from "lucide-react"
+import { Users, DollarSign, ShoppingCart, Headphones, Activity, Repeat, Boxes, Wallet } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface Metrics {
@@ -11,6 +11,9 @@ interface Metrics {
   vendasMes: number
   chamadosAbertos: number
   leadsNegociacao: number
+  sobMedidaMrr: number
+  sobMedidaReceber: number
+  mrrTotal: number
   grafico: { mes: string; vendas: number }[]
 }
 
@@ -31,10 +34,12 @@ export default function AdminDashboard() {
 
   const cards = [
     { label: "Clientes ativos", value: data?.totalAtivos ?? 0, format: (v: number) => v.toString(), icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "MRR", value: data?.mrr ?? 0, format: formatBRL, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "MRR total", value: data?.mrrTotal ?? 0, format: formatBRL, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "MRR ZWeb", value: data?.mrr ?? 0, format: formatBRL, icon: Repeat, color: "text-sky-600", bg: "bg-sky-50" },
+    { label: "MRR Sob Medida", value: data?.sobMedidaMrr ?? 0, format: formatBRL, icon: Boxes, color: "text-indigo-600", bg: "bg-indigo-50" },
+    { label: "Sob Medida a receber", value: data?.sobMedidaReceber ?? 0, format: formatBRL, icon: Wallet, color: "text-amber-600", bg: "bg-amber-50" },
     { label: "Vendas no mês", value: data?.vendasMes ?? 0, format: (v: number) => v.toString(), icon: ShoppingCart, color: "text-violet-600", bg: "bg-violet-50" },
     { label: "Chamados abertos", value: data?.chamadosAbertos ?? 0, format: (v: number) => v.toString(), icon: Headphones, color: "text-orange-600", bg: "bg-orange-50" },
-    { label: "Leads em negociação", value: data?.leadsNegociacao ?? 0, format: (v: number) => v.toString(), icon: Target, color: "text-rose-600", bg: "bg-rose-50" },
   ]
 
   return (

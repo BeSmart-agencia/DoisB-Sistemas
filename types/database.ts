@@ -292,6 +292,44 @@ export interface Database {
         Update: { id?: string; semana?: string; resumo?: string | null; achados?: Json | null; fontes?: Json | null; created_at?: string }
         Relationships: []
       }
+      sob_medida_projetos: {
+        Row: {
+          id: string; cliente_id: string | null; cliente_nome: string; cliente_doc: string | null
+          cliente_email: string | null; cliente_telefone: string | null
+          nome_projeto: string; descricao: string | null; tipo_sistema: string | null; status: string
+          responsavel: string | null; tecnologias: string | null; repo_url: string | null; deploy_url: string | null
+          observacoes: string | null; data_inicio: string | null; previsao_entrega: string | null; data_entrega: string | null
+          valor_desenvolvimento: number; valor_recebido: number
+          mensalidade_valor: number; mensalidade_dia: number | null; mensalidade_inicio: string | null; mensalidade_status: string
+          stripe_customer_id: string | null; stripe_subscription_id: string | null; stripe_checkout_url: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; cliente_id?: string | null; cliente_nome: string; cliente_doc?: string | null
+          cliente_email?: string | null; cliente_telefone?: string | null
+          nome_projeto: string; descricao?: string | null; tipo_sistema?: string | null; status?: string
+          responsavel?: string | null; tecnologias?: string | null; repo_url?: string | null; deploy_url?: string | null
+          observacoes?: string | null; data_inicio?: string | null; previsao_entrega?: string | null; data_entrega?: string | null
+          valor_desenvolvimento?: number; valor_recebido?: number
+          mensalidade_valor?: number; mensalidade_dia?: number | null; mensalidade_inicio?: string | null; mensalidade_status?: string
+          stripe_customer_id?: string | null; stripe_subscription_id?: string | null; stripe_checkout_url?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; cliente_id?: string | null; cliente_nome?: string; cliente_doc?: string | null
+          cliente_email?: string | null; cliente_telefone?: string | null
+          nome_projeto?: string; descricao?: string | null; tipo_sistema?: string | null; status?: string
+          responsavel?: string | null; tecnologias?: string | null; repo_url?: string | null; deploy_url?: string | null
+          observacoes?: string | null; data_inicio?: string | null; previsao_entrega?: string | null; data_entrega?: string | null
+          valor_desenvolvimento?: number; valor_recebido?: number
+          mensalidade_valor?: number; mensalidade_dia?: number | null; mensalidade_inicio?: string | null; mensalidade_status?: string
+          stripe_customer_id?: string | null; stripe_subscription_id?: string | null; stripe_checkout_url?: string | null
+          created_at?: string; updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "sob_medida_projetos_cliente_id_fkey"; columns: ["cliente_id"]; isOneToOne: false; referencedRelation: "clientes"; referencedColumns: ["id"] }
+        ]
+      }
       metas_checklist: {
         Row: {
           id: string; mes: string; responsavel: string; categoria: string; tarefa: string

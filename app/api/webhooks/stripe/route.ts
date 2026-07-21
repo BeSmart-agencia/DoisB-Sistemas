@@ -66,6 +66,24 @@ export async function POST(request: Request) {
         const customerId = session.customer as string
         const subscriptionId = session.subscription as string
 
+        // Mensalidade de projeto Sob Medida (não é cliente ZWeb)
+        const projetoId = session.metadata?.sob_medida_projeto_id
+        if (projetoId) {
+          await supabase
+            .from("sob_medida_projetos")
+            .update({
+              mensalidade_status: "ativa",
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscriptionId,
+              stripe_checkout_url: null,
+              mensalidade_inicio: new Date().toISOString().slice(0, 10),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", projetoId)
+          console.log("[webhook] Mensalidade sob medida ativada:", projetoId)
+          break
+        }
+
         const { data: cliente } = await supabase
           .from("clientes")
           .select("*")
@@ -119,6 +137,25 @@ export async function POST(request: Request) {
         const sub = event.data.object as Stripe.Subscription
         const customerId = sub.customer as string
 
+        // Mensalidade de projeto Sob Medida
+        const projetoId = sub.metadata?.sob_medida_projeto_id
+        if (projetoId) {
+          const mensalidadeMap: Record<string, string> = {
+            active: "ativa", trialing: "ativa",
+            past_due: "pendente", unpaid: "pendente", incomplete: "pendente",
+            paused: "pausada",
+            canceled: "cancelada", incomplete_expired: "cancelada",
+          }
+          const novoStatus = sub.cancel_at_period_end
+            ? "cancelada"
+            : (mensalidadeMap[sub.status] ?? "pendente")
+          await supabase
+            .from("sob_medida_projetos")
+            .update({ mensalidade_status: novoStatus, updated_at: new Date().toISOString() })
+            .eq("id", projetoId)
+          break
+        }
+
         const statusMap: Record<string, string> = {
           active: "ativo",
           past_due: "atrasado",
@@ -144,6 +181,16 @@ export async function POST(request: Request) {
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription
         const customerId = sub.customer as string
+
+        // Mensalidade de projeto Sob Medida
+        const projetoId = sub.metadata?.sob_medida_projeto_id
+        if (projetoId) {
+          await supabase
+            .from("sob_medida_projetos")
+            .update({ mensalidade_status: "cancelada", updated_at: new Date().toISOString() })
+            .eq("id", projetoId)
+          break
+        }
 
         await supabase
           .from("clientes")
