@@ -51,9 +51,9 @@ const REGRAS = [
 ]
 
 const MARCO_COR: Record<string, string> = {
-  amber: "text-amber-600",
-  emerald: "text-emerald-600 font-semibold",
-  slate: "text-slate-400",
+  amber: "text-amber-700 font-semibold",
+  emerald: "text-emerald-700 font-semibold",
+  slate: "text-slate-600",
 }
 
 export default async function MetasPage() {
@@ -68,7 +68,7 @@ export default async function MetasPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-950">Metas — Ano 1</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-slate-700 mt-1">
           Jul/2026 → Jul/2027. O plano para a DoisB pagar todos os salários — equipe e sócios — em 12 meses,
           com três motores de receita e regras claras de prioridade.
         </p>
@@ -94,8 +94,8 @@ export default async function MetasPage() {
       {/* A folha */}
       <div className="admin-panel p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Wallet className="h-4 w-4 text-slate-400" />
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-400">A folha que a DoisB vai sustentar</h2>
+          <Wallet className="h-4 w-4 text-blue-900" />
+          <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">A folha que a DoisB vai sustentar</h2>
         </div>
         <div className="space-y-3">
           {FOLHA.map((p) => (
@@ -110,7 +110,7 @@ export default async function MetasPage() {
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
           <p className="text-lg font-black text-slate-950">Total: <span className="text-blue-800">R$ 18.500/mês</span></p>
-          <p className="text-xs text-slate-500 max-w-md">
+          <p className="text-xs text-slate-700 max-w-md">
             Regra de prioridade: <b className="text-slate-700">equipe primeiro, sócios por último.</b> Douglas e Ailla
             saem da agência para a DoisB quando a receita sustentar seus salários.
           </p>
@@ -120,8 +120,8 @@ export default async function MetasPage() {
       {/* 3 motores */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Rocket className="h-4 w-4 text-slate-400" />
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-400">De onde vem o dinheiro · três motores</h2>
+          <Rocket className="h-4 w-4 text-blue-900" />
+          <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">De onde vem o dinheiro · três motores</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {MOTORES.map((m) => (
@@ -133,7 +133,7 @@ export default async function MetasPage() {
               )}
               <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{m.rotulo}</p>
               <p className="text-2xl font-black text-slate-950 mt-1.5">{m.valor}</p>
-              <p className="text-xs text-slate-500 mt-2 leading-relaxed">{m.desc}</p>
+              <p className="text-xs text-slate-700 mt-2 leading-relaxed">{m.desc}</p>
               <p className="text-xs text-slate-700 mt-3 pt-3 border-t border-slate-100">{m.quem}</p>
             </div>
           ))}
@@ -142,37 +142,37 @@ export default async function MetasPage() {
 
       {/* Trimestres */}
       <div className="admin-panel p-6">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-400 mb-4">O caminho · trimestre a trimestre</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 mb-4">O caminho · trimestre a trimestre</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[560px]">
             <thead>
               <tr className="border-b border-slate-100 text-left">
-                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-slate-400">Quando</th>
-                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-slate-400">Indústria (Abel)</th>
-                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-slate-400">ZWeb (Laisa)</th>
-                <th className="pb-2.5 text-xs font-bold uppercase tracking-wide text-slate-400">Marco de folha</th>
+                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-blue-900">Quando</th>
+                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-blue-900">Indústria (Abel)</th>
+                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-blue-900">ZWeb (Laisa)</th>
+                <th className="pb-2.5 text-xs font-bold uppercase tracking-wide text-blue-900">Marco de folha</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {TRIMESTRES.map((t) => (
                 <tr key={t.quando}>
                   <td className="py-3 pr-4 font-bold text-slate-900 whitespace-nowrap">{t.quando}</td>
-                  <td className="py-3 pr-4 text-slate-600">{t.industria}</td>
-                  <td className="py-3 pr-4 text-slate-600">{t.zweb}</td>
+                  <td className="py-3 pr-4 text-slate-800">{t.industria}</td>
+                  <td className="py-3 pr-4 text-slate-800">{t.zweb}</td>
                   <td className={`py-3 ${MARCO_COR[t.cor]}`}>{t.marco}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-slate-500 mt-4">
+        <p className="text-xs text-slate-700 mt-4">
           Sob medida em ritmo constante o ano todo: 1 projeto por mês, base de manutenção crescendo junto.
         </p>
       </div>
 
       {/* Regras */}
       <div className="admin-panel p-6">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-400 mb-4">Regras do jogo · o que protege o plano</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 mb-4">Regras do jogo · o que protege o plano</h2>
         <div className="space-y-3">
           {REGRAS.map((r) => (
             <div key={r.chave} className="flex gap-3">
@@ -186,7 +186,7 @@ export default async function MetasPage() {
       {/* Checklist mês a mês */}
       <div className="pt-2">
         <h2 className="text-xl font-bold text-slate-950 mb-1">Checklist mês a mês</h2>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-slate-700 mb-4">
           Laisa e Abel marcam cada meta conforme concluem. O sistema registra quem marcou.
         </p>
         <MetasChecklist metas={(metas ?? []) as MetaRow[]} />

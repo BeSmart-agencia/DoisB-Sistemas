@@ -83,7 +83,7 @@ export function MetasChecklist({ metas }: { metas: MetaRow[] }) {
     return (
       <div className="admin-panel p-14 text-center">
         <ListChecks className="h-8 w-8 text-slate-300 mx-auto mb-3" />
-        <p className="text-sm font-medium text-slate-500">
+        <p className="text-sm font-medium text-slate-700">
           Checklist ainda não criado. Rode a migration{" "}
           <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">supabase/migrations/metas_checklist.sql</code>{" "}
           no Supabase e recarregue esta página.
@@ -130,7 +130,7 @@ export function MetasChecklist({ metas }: { metas: MetaRow[] }) {
                 <div
                   className={cn(
                     "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                    tudoFeito ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-500"
+                    tudoFeito ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"
                   )}
                 >
                   {tudoFeito ? <CheckCircle2 className="h-5 w-5" /> : <span className="text-xs font-bold">{pct}%</span>}
@@ -144,7 +144,7 @@ export function MetasChecklist({ metas }: { metas: MetaRow[] }) {
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-700 mt-0.5">
                     {feitas} de {lista.length} concluídas
                   </p>
                 </div>
@@ -156,7 +156,7 @@ export function MetasChecklist({ metas }: { metas: MetaRow[] }) {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-slate-400 transition-transform", expandido && "rotate-180")} />
+                <ChevronDown className={cn("h-4 w-4 text-slate-600 transition-transform", expandido && "rotate-180")} />
               </div>
             </button>
 
@@ -180,7 +180,7 @@ export function MetasChecklist({ metas }: { metas: MetaRow[] }) {
                         {item.concluido && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
                       </button>
                       <div className="min-w-0 flex-1">
-                        <p className={cn("text-sm leading-snug", item.concluido ? "text-slate-400 line-through" : "text-slate-800")}>
+                        <p className={cn("text-sm leading-snug", item.concluido ? "text-slate-500 line-through" : "text-slate-800")}>
                           {item.tarefa}
                         </p>
                         <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -188,7 +188,7 @@ export function MetasChecklist({ metas }: { metas: MetaRow[] }) {
                             {resp.label}
                           </span>
                           {item.concluido && item.concluido_por && (
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-[11px] text-slate-600">
                               marcada por {item.concluido_por}
                             </span>
                           )}
