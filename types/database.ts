@@ -292,6 +292,21 @@ export interface Database {
         Update: { id?: string; semana?: string; resumo?: string | null; achados?: Json | null; fontes?: Json | null; created_at?: string }
         Relationships: []
       }
+      metas_checklist: {
+        Row: {
+          id: string; mes: string; responsavel: string; categoria: string; tarefa: string
+          ordem: number; concluido: boolean; concluido_em: string | null; concluido_por: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; mes: string; responsavel: string; categoria: string; tarefa: string
+          ordem?: number; concluido?: boolean; concluido_em?: string | null; concluido_por?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; mes?: string; responsavel?: string; categoria?: string; tarefa?: string
+          ordem?: number; concluido?: boolean; concluido_em?: string | null; concluido_por?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           id: string; plataforma: string; external_id: string | null; nome: string
