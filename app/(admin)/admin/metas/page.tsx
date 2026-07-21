@@ -81,9 +81,9 @@ export default async function MetasPage() {
             <Target className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-200">A meta-mãe · mês 12</p>
-            <p className="text-3xl font-black mt-1">R$ 33 mil<span className="text-lg font-bold text-blue-200">/mês recorrente</span></p>
-            <p className="text-sm text-blue-100/90 mt-2 max-w-2xl leading-relaxed">
+            <p className="text-xs font-bold uppercase tracking-wide text-sky-300">A meta-mãe · mês 12</p>
+            <p className="text-3xl font-black mt-1 text-white">R$ 33 mil<span className="text-lg font-bold text-sky-200">/mês recorrente</span></p>
+            <p className="text-sm text-slate-100 mt-2 max-w-2xl leading-relaxed">
               Receita necessária para sustentar a folha de <b className="text-white">R$ 21 mil</b> com folga saudável
               (folha ≤ 65% da receita) — sobrando para impostos, marketing, ferramentas e reserva.
             </p>
