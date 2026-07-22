@@ -54,7 +54,7 @@ export function FinanceiroCalc() {
     let ativosAntes = 0
     return Array.from({ length: 12 }, (_, i) => {
       const m = i + 1
-      const newJucele = novos
+      const newJucele = m === 1 ? 0 : novos // julho: Jucele ainda organizando rota
       const newSocios = m === 1 ? sociosMes1 : sociosDemais
       const newTotal = newJucele + newSocios
       const ativosFim = ativosAntes + newTotal
@@ -159,7 +159,7 @@ export function FinanceiroCalc() {
         <p className="text-xs text-slate-600 mt-3">
           Ticket médio ZWeb: <b className="text-slate-800">{brl(avgPrice)}</b> · custo médio: <b className="text-slate-800">{brl(avgCost)}</b> ·
           margem por cliente: <b className="text-slate-800">{brl(avgPrice - avgCost)}</b>. Vendas ZWeb:
-          <b className="text-slate-800"> {novos} Jucele + {sociosMes1} sócios no mês 1, depois {novos} Jucele + {sociosDemais} sócios/mês</b>, mais 1 projeto sob medida/mês.
+          <b className="text-slate-800"> mês 1 só {sociosMes1} dos sócios (Jucele começa no mês 2); depois {novos} Jucele + {sociosDemais} sócios/mês</b>, mais 1 projeto sob medida/mês.
         </p>
       </div>
 
