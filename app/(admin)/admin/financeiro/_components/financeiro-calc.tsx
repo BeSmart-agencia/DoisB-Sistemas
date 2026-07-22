@@ -38,7 +38,9 @@ export function FinanceiroCalc() {
   const [devSM, setDevSM] = useState(2000)
   const [mensSM, setMensSM] = useState(350)
   const [proLaborePct, setProLaborePct] = useState(70)
-  const [outrosCustos, setOutrosCustos] = useState(0)
+  const [outrosCustos, setOutrosCustos] = useState(80) // DAS do MEI (fixo/mês) + outros
+
+  const LIMITE_MEI = 81000 // teto de faturamento anual do MEI
 
   const mixTotal = mixE + mixS + mixP || 1
   const avgPrice = (mixE * PLANOS.essencial.preco + mixS * PLANOS.standard.preco + mixP * PLANOS.premium.preco) / mixTotal
@@ -46,6 +48,7 @@ export function FinanceiroCalc() {
 
   const linhas = useMemo(() => {
     let caixaAcum = 0
+    let faturAcum = 0
     return Array.from({ length: 12 }, (_, i) => {
       const m = i + 1
       const prevAtivos = novos * (m - 1)
@@ -68,15 +71,20 @@ export function FinanceiroCalc() {
       const caixaMes = lucro - proLaboreTotal
       caixaAcum += caixaMes
 
+      // Faturamento bruto (tudo que passa pelo CNPJ, inclui a parte da Jucele) — conta pro teto do MEI
+      const faturamentoBruto = recZWeb + bonusJucele + recSM
+      faturAcum += faturamentoBruto
+
       return {
         m, rotulo: rotuloMes(i), novos, ativosFim,
         recZWeb, recSM, smDev, smMens, bonusJucele, custos, lucro,
-        proLaboreCada, caixaMes, caixaAcum,
+        proLaboreCada, caixaMes, caixaAcum, faturamentoBruto, faturAcum,
       }
     })
   }, [novos, avgPrice, avgCost, devSM, mensSM, proLaborePct, outrosCustos])
 
   const ultimo = linhas[linhas.length - 1]
+  const mesLimiteMEI = linhas.find((l) => l.faturAcum > LIMITE_MEI)
   const totalProLaboreCada = linhas.reduce((s, l) => s + l.proLaboreCada, 0)
   const mrr12 = ultimo.recZWeb + ultimo.smMens // receita recorrente no mês 12
 
@@ -125,7 +133,7 @@ export function FinanceiroCalc() {
             <input type="number" min={0} max={100} value={proLaborePct} onChange={(e) => setProLaborePct(num(e.target.value))} className={inputCls} />
           </div>
           <div>
-            <label className={labelCls}>Outros custos/mês (R$)</label>
+            <label className={labelCls}>Imposto MEI (DAS)/mês (R$)</label>
             <input type="number" min={0} value={outrosCustos} onChange={(e) => setOutrosCustos(num(e.target.value))} className={inputCls} />
           </div>
         </div>
@@ -150,6 +158,18 @@ export function FinanceiroCalc() {
         ))}
       </div>
 
+      {/* Alerta teto MEI */}
+      {mesLimiteMEI && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
+          <Info className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
+          <div className="text-sm text-amber-900">
+            <b>Teto do MEI (R$ 81.000/ano) é ultrapassado em {mesLimiteMEI.rotulo}.</b> O faturamento acumulado passa de{" "}
+            {brl(mesLimiteMEI.faturAcum)} nesse mês. A partir daí é preciso migrar para <b>ME (Simples Nacional)</b> — o
+            imposto deixa de ser o DAS fixo e passa a ser um percentual do faturamento (some ao campo de imposto quando fizer a troca).
+          </div>
+        </div>
+      )}
+
       {/* Tabela mês a mês */}
       <div className="admin-panel overflow-hidden">
         <div className="overflow-x-auto">
@@ -171,9 +191,15 @@ export function FinanceiroCalc() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-right">
-              {linhas.map((l) => (
-                <tr key={l.m} className="hover:bg-slate-50/70">
-                  <td className="px-3 py-2.5 text-left font-bold text-slate-900 capitalize sticky left-0 bg-white">{l.rotulo}</td>
+              {linhas.map((l) => {
+                const acimaTeto = l.faturAcum > LIMITE_MEI
+                const primeiroAcima = mesLimiteMEI?.m === l.m
+                return (
+                <tr key={l.m} className={acimaTeto ? "bg-amber-50/60 hover:bg-amber-50" : "hover:bg-slate-50/70"}>
+                  <td className={`px-3 py-2.5 text-left font-bold text-slate-900 capitalize sticky left-0 ${acimaTeto ? "bg-amber-50" : "bg-white"}`}>
+                    {l.rotulo}
+                    {primeiroAcima && <span className="ml-1.5 rounded bg-amber-200 px-1 py-0.5 text-[9px] font-bold text-amber-800 align-middle">teto MEI</span>}
+                  </td>
                   <td className="px-3 py-2.5 text-slate-700">{l.novos}</td>
                   <td className="px-3 py-2.5 font-semibold text-slate-900">{l.ativosFim}</td>
                   <td className="px-3 py-2.5 text-slate-800">{brl(l.recZWeb)}</td>
@@ -186,7 +212,8 @@ export function FinanceiroCalc() {
                   <td className="px-3 py-2.5 text-slate-800">{brl(l.caixaMes)}</td>
                   <td className="px-3 py-2.5 font-bold text-emerald-700">{brl(l.caixaAcum)}</td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -198,7 +225,8 @@ export function FinanceiroCalc() {
         <ul className="space-y-1.5 text-sm text-slate-700">
           <li>• <b>Prioridade:</b> primeiro o pró-labore de Laisa e Abel (cresce com a receita). Os salários de Ailla e Douglas entram <b>depois de fechar o 1º ano</b> (mês 13) — por isso não aparecem aqui.</li>
           <li>• <b>Bônus Jucele:</b> a 1ª mensalidade de cada cliente novo vai para a Jucele (comissão) e por isso não entra no caixa da DoisB naquele mês. Do 2º mês em diante o cliente vira receita recorrente.</li>
-          <li>• <b>Custos:</b> só o custo do ZWeb por cliente ativo (Essencial 31,79 · Standard 45,49 · Premium 69,70) + o campo “outros custos”. Indústria fica de fora por enquanto; sob medida não tem custo.</li>
+          <li>• <b>Custos:</b> custo do ZWeb por cliente ativo (Essencial 31,79 · Standard 45,49 · Premium 69,70) + o imposto do MEI (DAS fixo/mês — ajuste o valor vigente). Indústria fica de fora por enquanto; sob medida não tem custo.</li>
+          <li>• <b>MEI:</b> imposto é o DAS fixo mensal. O teto de faturamento do MEI é R$ 81.000/ano — quando o acumulado passa disso (linha em âmbar), é hora de migrar para ME (Simples Nacional) e trocar o imposto para um % do faturamento.</li>
           <li>• <b>Sob medida:</b> 1 projeto por mês (o dev entra no mês) e a mensalidade de R$ {mensSM} acumula a partir do mês seguinte.</li>
           <li>• <b>Caixa:</b> o que sobra do lucro depois do pró-labore ({100 - proLaborePct}% do lucro do mês), somado mês a mês.</li>
         </ul>
