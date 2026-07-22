@@ -31,7 +31,9 @@ const inputCls =
 const labelCls = "block text-[11px] font-bold uppercase tracking-wide text-blue-900 mb-1"
 
 export function FinanceiroCalc() {
-  const [novos, setNovos] = useState(5)
+  const [novos, setNovos] = useState(5) // Jucele
+  const [sociosMes1, setSociosMes1] = useState(2) // Abel/Laisa no 1º mês
+  const [sociosDemais, setSociosDemais] = useState(10) // Abel/Laisa nos demais meses
   const [mixE, setMixE] = useState(70)
   const [mixS, setMixS] = useState(20)
   const [mixP, setMixP] = useState(10)
@@ -49,13 +51,20 @@ export function FinanceiroCalc() {
   const linhas = useMemo(() => {
     let caixaAcum = 0
     let faturAcum = 0
+    let ativosAntes = 0
     return Array.from({ length: 12 }, (_, i) => {
       const m = i + 1
-      const prevAtivos = novos * (m - 1)
-      const ativosFim = novos * m
+      const newJucele = novos
+      const newSocios = m === 1 ? sociosMes1 : sociosDemais
+      const newTotal = newJucele + newSocios
+      const ativosFim = ativosAntes + newTotal
 
-      const recZWeb = prevAtivos * avgPrice // recorrente dos clientes antigos
-      const bonusJucele = novos * avgPrice // 1ª mensalidade dos novos → Jucele
+      // Bônus Jucele: só os clientes dela dão a 1ª mensalidade de comissão
+      const bonusJucele = newJucele * avgPrice
+      // Receita ZWeb da DoisB: todos os ativos pagam, menos a 1ª mensalidade
+      // dos clientes novos da Jucele (que vai como bônus). Os que Abel/Laisa
+      // fecham entram inteiros já no 1º mês.
+      const recZWeb = (ativosFim - newJucele) * avgPrice
       const custoZWeb = ativosFim * avgCost // custo da plataforma p/ todos ativos
 
       const smDev = devSM // 1 projeto entregue no mês
@@ -72,16 +81,18 @@ export function FinanceiroCalc() {
       caixaAcum += caixaMes
 
       // Faturamento bruto (tudo que passa pelo CNPJ, inclui a parte da Jucele) — conta pro teto do MEI
-      const faturamentoBruto = recZWeb + bonusJucele + recSM
+      const faturamentoBruto = ativosFim * avgPrice + recSM
       faturAcum += faturamentoBruto
 
+      ativosAntes = ativosFim // base para o próximo mês
+
       return {
-        m, rotulo: rotuloMes(i), novos, ativosFim,
+        m, rotulo: rotuloMes(i), newJucele, newSocios, newTotal, ativosFim,
         recZWeb, recSM, smDev, smMens, bonusJucele, custos, lucro,
         proLaboreCada, caixaMes, caixaAcum, faturamentoBruto, faturAcum,
       }
     })
-  }, [novos, avgPrice, avgCost, devSM, mensSM, proLaborePct, outrosCustos])
+  }, [novos, sociosMes1, sociosDemais, avgPrice, avgCost, devSM, mensSM, proLaborePct, outrosCustos])
 
   const ultimo = linhas[linhas.length - 1]
   const mesLimiteMEI = linhas.find((l) => l.faturAcum > LIMITE_MEI)
@@ -105,8 +116,16 @@ export function FinanceiroCalc() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <div>
-            <label className={labelCls}>ZWeb novos / mês (Jucele)</label>
+            <label className={labelCls}>ZWeb Jucele / mês</label>
             <input type="number" min={0} value={novos} onChange={(e) => setNovos(num(e.target.value))} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>ZWeb Abel/Laisa — mês 1</label>
+            <input type="number" min={0} value={sociosMes1} onChange={(e) => setSociosMes1(num(e.target.value))} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>ZWeb Abel/Laisa — demais</label>
+            <input type="number" min={0} value={sociosDemais} onChange={(e) => setSociosDemais(num(e.target.value))} className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>% Essencial</label>
@@ -139,8 +158,8 @@ export function FinanceiroCalc() {
         </div>
         <p className="text-xs text-slate-600 mt-3">
           Ticket médio ZWeb: <b className="text-slate-800">{brl(avgPrice)}</b> · custo médio: <b className="text-slate-800">{brl(avgCost)}</b> ·
-          margem por cliente: <b className="text-slate-800">{brl(avgPrice - avgCost)}</b>. Meta de vendas/mês:
-          <b className="text-slate-800"> {novos} ZWeb + 1 projeto sob medida</b>.
+          margem por cliente: <b className="text-slate-800">{brl(avgPrice - avgCost)}</b>. Vendas ZWeb:
+          <b className="text-slate-800"> {novos} Jucele + {sociosMes1} sócios no mês 1, depois {novos} Jucele + {sociosDemais} sócios/mês</b>, mais 1 projeto sob medida/mês.
         </p>
       </div>
 
@@ -200,7 +219,7 @@ export function FinanceiroCalc() {
                     {l.rotulo}
                     {primeiroAcima && <span className="ml-1.5 rounded bg-amber-200 px-1 py-0.5 text-[9px] font-bold text-amber-800 align-middle">teto MEI</span>}
                   </td>
-                  <td className="px-3 py-2.5 text-slate-700">{l.novos}</td>
+                  <td className="px-3 py-2.5 text-slate-700" title={`Jucele ${l.newJucele} + sócios ${l.newSocios}`}>{l.newTotal}</td>
                   <td className="px-3 py-2.5 font-semibold text-slate-900">{l.ativosFim}</td>
                   <td className="px-3 py-2.5 text-slate-800">{brl(l.recZWeb)}</td>
                   <td className="px-3 py-2.5 text-slate-800" title={`Dev ${brl(l.smDev)} + mensalidades ${brl(l.smMens)}`}>{brl(l.recSM)}</td>
