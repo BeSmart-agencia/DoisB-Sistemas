@@ -121,6 +121,43 @@ export async function POST(request: Request) {
           } else {
             console.error("[webhook] agendab: falha no provisionamento")
           }
+
+          // Faturamento: assinante do AgendaB entra no painel Sob Medida
+          // como mensalidade recorrente (conta no MRR)
+          const nomeCliente = session.customer_details?.name || emailCliente
+          const { data: projExistente } = await supabase
+            .from("sob_medida_projetos")
+            .select("id")
+            .eq("stripe_customer_id", customerId)
+            .maybeSingle()
+          if (projExistente) {
+            await supabase
+              .from("sob_medida_projetos")
+              .update({
+                mensalidade_status: "ativa",
+                stripe_subscription_id: subscriptionId,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", projExistente.id)
+          } else {
+            await supabase.from("sob_medida_projetos").insert({
+              cliente_nome: nomeCliente,
+              cliente_email: emailCliente,
+              cliente_telefone: session.customer_details?.phone ?? null,
+              nome_projeto: `AgendaB — ${nomeCliente}`,
+              descricao: "Assinatura do AgendaB (gestão para clínicas). Criado automaticamente pelo checkout.",
+              tipo_sistema: "web",
+              status: "entregue",
+              valor_desenvolvimento: 0,
+              valor_recebido: 0,
+              mensalidade_valor: 175,
+              mensalidade_status: "ativa",
+              mensalidade_inicio: new Date().toISOString().slice(0, 10),
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscriptionId,
+            })
+            console.log("[webhook] agendab: mensalidade registrada no sob medida")
+          }
           break
         }
 
@@ -197,11 +234,23 @@ export async function POST(request: Request) {
 
         // Assinatura do AgendaB → ativa/suspende conforme o status
         if (sub.metadata?.produto === "agendab") {
-          const ativa = ["active", "trialing"].includes(sub.status)
+          const ativa = ["active", "trialing"].includes(sub.status) && !sub.cancel_at_period_end
           await chamarAgendab({
             evento: ativa ? "reativar" : "desativar",
             stripe_customer_id: customerId,
           })
+          // Reflete no faturamento (Sob Medida)
+          const mensStatus = sub.cancel_at_period_end
+            ? "cancelada"
+            : ativa
+              ? "ativa"
+              : ["past_due", "unpaid"].includes(sub.status)
+                ? "pendente"
+                : "cancelada"
+          await supabase
+            .from("sob_medida_projetos")
+            .update({ mensalidade_status: mensStatus, updated_at: new Date().toISOString() })
+            .eq("stripe_customer_id", customerId)
           console.log(`[webhook] agendab: assinatura ${ativa ? "ativa" : "suspensa"} (${sub.status})`)
           break
         }
@@ -254,6 +303,10 @@ export async function POST(request: Request) {
         // Assinatura do AgendaB cancelada → suspende a clínica
         if (sub.metadata?.produto === "agendab") {
           await chamarAgendab({ evento: "desativar", stripe_customer_id: customerId })
+          await supabase
+            .from("sob_medida_projetos")
+            .update({ mensalidade_status: "cancelada", updated_at: new Date().toISOString() })
+            .eq("stripe_customer_id", customerId)
           console.log("[webhook] agendab: assinatura cancelada, clínica suspensa")
           break
         }
