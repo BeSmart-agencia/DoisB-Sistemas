@@ -285,6 +285,12 @@ export default function AgendabPage() {
               <div className="flex justify-center">
                 <AssinarButton />
               </div>
+              <p className="mt-8 text-xs text-slate-400">
+                Ao assinar você concorda com os{" "}
+                <a href="/termos-de-uso" className="underline hover:text-slate-600">termos de uso</a>{" "}
+                e a{" "}
+                <a href="/agendab/privacidade" className="underline hover:text-slate-600">política de privacidade do AgendaB</a>.
+              </p>
             </div>
           </div>
         </section>
