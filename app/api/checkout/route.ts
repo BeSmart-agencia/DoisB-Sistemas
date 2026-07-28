@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { stripe } from "@/lib/stripe/client"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { resolverVendedorId } from "@/lib/vendedores"
 
 const PRICE_IDS: Record<string, string> = {
   essencial: process.env.STRIPE_PRICE_ESSENCIAL!,
@@ -48,6 +49,7 @@ const schema = z.object({
   nome_responsavel: z.string().min(2),
   plano: z.enum(["essencial", "standard", "premium"]),
   forma_pagamento: z.enum(["cartao", "boleto"]).default("cartao"),
+  vendedor_codigo: z.string().optional(),
   nome_fantasia: z.string().optional(),
   ie: z.string().optional(),
   im: z.string().optional(),
@@ -74,10 +76,13 @@ export async function POST(request: Request) {
   }
 
   const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano, forma_pagamento,
-    nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
+    vendedor_codigo, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
+
+  // Atribuição a vendedor externo (link exclusivo). Null se não houver.
+  const vendedorId = await resolverVendedorId(supabase, vendedor_codigo)
 
   // Verificar se CNPJ já existe com assinatura ativa
   const { data: existente } = await supabase
@@ -111,6 +116,7 @@ export async function POST(request: Request) {
       status_pagamento: "aguardando",
       acesso_liberado: false,
       forma_pagamento,
+      vendedor_id: vendedorId,
       nome_fantasia,
       ie,
       im,

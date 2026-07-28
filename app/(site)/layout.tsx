@@ -1,4 +1,5 @@
 import { Toaster } from "sonner"
+import { VendorTracker } from "@/components/site/vendor-tracker"
 
 export default function SiteLayout({
   children,
@@ -7,6 +8,7 @@ export default function SiteLayout({
 }) {
   return (
     <>
+      <VendorTracker />
       {children}
       <Toaster richColors position="top-right" />
     </>

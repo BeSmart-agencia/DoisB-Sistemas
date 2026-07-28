@@ -120,14 +120,20 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
     }
   }
 
+  function lerCodigoVendedor(): string | undefined {
+    const m = document.cookie.match(/(?:^|;\s*)vend_ref=([^;]+)/)
+    return m ? decodeURIComponent(m[1]) : undefined
+  }
+
   async function onSubmit(data: FormData) {
     setLoading(true)
+    const vendedor_codigo = lerCodigoVendedor()
     try {
       if (formaPagamento === "pix") {
         const res = await fetch("/api/checkout/pix", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, plano }),
+          body: JSON.stringify({ ...data, plano, vendedor_codigo }),
         })
         const json = await res.json()
         if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }
@@ -141,7 +147,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, plano, forma_pagamento: formaPagamento }),
+          body: JSON.stringify({ ...data, plano, forma_pagamento: formaPagamento, vendedor_codigo }),
         })
         const json = await res.json()
         if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }

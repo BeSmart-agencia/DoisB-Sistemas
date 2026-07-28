@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   Users,
+  UserRound,
   Target,
   Goal,
   Headphones,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/sob-medida", label: "Sob Medida", icon: Boxes },
   { href: "/admin/leads", label: "Leads", icon: Target },
+  { href: "/admin/vendedores", label: "Vendedores", icon: UserRound },
   { href: "/admin/marketing", label: "Marketing OS", icon: Megaphone },
   { href: "/admin/metas", label: "Metas", icon: Goal },
   { href: "/admin/financeiro", label: "Financeiro", icon: LineChart },

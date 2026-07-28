@@ -33,6 +33,7 @@ export interface Database {
           nome_fantasia: string | null; ie: string | null; im: string | null; crt: string | null
           cep: string | null; logradouro: string | null; numero: string | null; complemento: string | null
           bairro: string | null; cidade: string | null; estado: string | null
+          vendedor_id: string | null; comissao_paga: boolean; comissao_paga_em: string | null
         }
         Insert: {
           id?: string; nome_empresa: string; cnpj: string; email: string; telefone: string
@@ -44,6 +45,7 @@ export interface Database {
           nome_fantasia?: string | null; ie?: string | null; im?: string | null; crt?: string | null
           cep?: string | null; logradouro?: string | null; numero?: string | null; complemento?: string | null
           bairro?: string | null; cidade?: string | null; estado?: string | null
+          vendedor_id?: string | null; comissao_paga?: boolean; comissao_paga_em?: string | null
         }
         Update: {
           id?: string; nome_empresa?: string; cnpj?: string; email?: string; telefone?: string
@@ -55,6 +57,27 @@ export interface Database {
           nome_fantasia?: string | null; ie?: string | null; im?: string | null; crt?: string | null
           cep?: string | null; logradouro?: string | null; numero?: string | null; complemento?: string | null
           bairro?: string | null; cidade?: string | null; estado?: string | null
+          vendedor_id?: string | null; comissao_paga?: boolean; comissao_paga_em?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "clientes_vendedor_id_fkey"; columns: ["vendedor_id"]; isOneToOne: false; referencedRelation: "vendedores"; referencedColumns: ["id"] }
+        ]
+      }
+      vendedores: {
+        Row: {
+          id: string; nome: string; email: string | null; telefone: string | null
+          chave_pix: string | null; codigo: string; ativo: boolean
+          observacoes: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; nome: string; email?: string | null; telefone?: string | null
+          chave_pix?: string | null; codigo: string; ativo?: boolean
+          observacoes?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; nome?: string; email?: string | null; telefone?: string | null
+          chave_pix?: string | null; codigo?: string; ativo?: boolean
+          observacoes?: string | null; created_at?: string
         }
         Relationships: []
       }
