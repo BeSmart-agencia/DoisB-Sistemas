@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import {
   Store,
   Workflow,
+  CalendarDays,
   ArrowRight,
   Check,
   Heart,
@@ -41,6 +42,16 @@ const LINHAS = [
     cta: "Conheça o ZWeb",
     href: "/zweb",
     destaque: "Pra varejo e quem emite nota",
+  },
+  {
+    icon: CalendarDays,
+    titulo: "AgendaB — gestão para clínicas",
+    tipo: "Produto DoisB",
+    desc: "Agenda, pacientes, prontuário eletrônico e financeiro da sua clínica em um só lugar. Simples de usar, funciona no computador e no celular, sem instalar nada.",
+    pontos: ["Prontuário com histórico, exames anexados e documentos", "Agenda com bloqueio de conflitos e expediente", "Até 5 usuários — R$ 175/mês, sem fidelidade"],
+    cta: "Conheça o AgendaB",
+    href: "/agendab",
+    destaque: "Pra clínicas e consultórios",
   },
   {
     icon: Workflow,
@@ -106,20 +117,20 @@ export function HomeInstitucional() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp(0)} className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
-              Dois caminhos. Um jeito de atender.
+              O sistema certo para cada negócio.
             </h2>
             <p className="mt-4 text-slate-500 max-w-2xl mx-auto">
-              Varejo ou precisa emitir nota? É ZWeb. Processo interno específico, sem
-              necessidade fiscal? É sob medida. Simples assim.
+              Varejo ou precisa emitir nota? É ZWeb. Clínica ou consultório? É AgendaB.
+              Processo interno específico? É sob medida. Simples assim.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {LINHAS.map((linha, i) => (
               <motion.div
                 key={linha.href}
                 {...fadeUp(0.1 + i * 0.1)}
-                className="group rounded-3xl border border-slate-200 bg-slate-50/60 p-8 sm:p-10 flex flex-col transition-all hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100/60"
+                className="group rounded-3xl border border-slate-200 bg-slate-50/60 p-8 flex flex-col transition-all hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100/60"
               >
                 <div className="flex items-center gap-4 mb-6">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-md">
@@ -129,7 +140,7 @@ export function HomeInstitucional() {
                     {linha.tipo}
                   </span>
                 </div>
-                <h3 className="text-2xl font-black text-slate-950 leading-snug">{linha.titulo}</h3>
+                <h3 className="text-xl font-black text-slate-950 leading-snug">{linha.titulo}</h3>
                 <p className="mt-3 text-sm text-slate-600 leading-relaxed">{linha.desc}</p>
                 <ul className="mt-6 space-y-2.5 flex-1">
                   {linha.pontos.map((p) => (

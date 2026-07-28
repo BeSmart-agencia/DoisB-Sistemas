@@ -14,6 +14,7 @@ import { templatePixCobranca } from "./templates/pix-cobranca"
 import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pendente"
 import { templateInternaLeadMarketing, type DadosLeadMarketing } from "./templates/interna-lead-marketing"
 import { templateInternaResumoSemanal, type DadosResumoSemanal } from "./templates/interna-resumo-semanal"
+import { templateAgendabConvite } from "./templates/agendab-convite"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = "DoisB Sistemas <noreply@doisbsistemas.com.br>"
@@ -38,6 +39,27 @@ export async function enviarEmailAcessoLiberado(
     to: email,
     subject: "Seu acesso ao ZWeb está liberado!",
     html: templateAcessoLiberado(nome, credenciais),
+  })
+}
+
+export async function enviarEmailConviteAgendab(email: string, conviteUrl: string) {
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Seu AgendaB está pronto — crie sua clínica!",
+    html: templateAgendabConvite(conviteUrl),
+  })
+}
+
+export async function enviarEmailInternoVendaAgendab(email: string, customerId: string) {
+  await resend.emails.send({
+    from: FROM,
+    to: INTERNO,
+    subject: "🎉 Nova assinatura AgendaB!",
+    html: `<p>Nova assinatura do <strong>AgendaB</strong> (R$ 175/mês).</p>
+           <p>E-mail do cliente: <strong>${email}</strong><br/>
+           Stripe customer: ${customerId}</p>
+           <p>O convite de cadastro foi enviado automaticamente ao cliente.</p>`,
   })
 }
 

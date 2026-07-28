@@ -7,9 +7,40 @@ import {
   enviarEmailInternoNovaVenda,
   enviarEmailPagamentoFalho,
   enviarEmailInternoAtivacaoPendente,
+  enviarEmailConviteAgendab,
+  enviarEmailInternoVendaAgendab,
 } from "@/lib/emails"
 
 export const dynamic = "force-dynamic"
+
+/** Chama a API de integração do AgendaB (provisionamento/suspensão). */
+async function chamarAgendab(
+  payload: Record<string, string>
+): Promise<{ ok: boolean; convite_url?: string; ja_cliente?: boolean }> {
+  const url = process.env.AGENDAB_API_URL
+  const secret = process.env.AGENDAB_INTEGRACAO_SECRET
+  if (!url || !secret) {
+    console.error("[agendab] AGENDAB_API_URL/SECRET não configurados")
+    return { ok: false }
+  }
+  const res = await fetch(`${url}/api/integracao/assinatura`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${secret}`,
+    },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    console.error("[agendab] API respondeu", res.status, await res.text().catch(() => ""))
+    return { ok: false }
+  }
+  const data = (await res.json().catch(() => ({}))) as {
+    convite_url?: string
+    ja_cliente?: boolean
+  }
+  return { ok: true, ...data }
+}
 
 function addDays(isoDate: string, days: number): string {
   const d = new Date(isoDate + "T12:00:00Z")
@@ -65,6 +96,33 @@ export async function POST(request: Request) {
         const session = event.data.object as Stripe.Checkout.Session
         const customerId = session.customer as string
         const subscriptionId = session.subscription as string
+
+        // Assinatura do AgendaB → provisiona via API e envia o convite
+        if (session.metadata?.produto === "agendab") {
+          const emailCliente = session.customer_details?.email
+          if (!emailCliente) {
+            console.error("[webhook] agendab: sessão sem e-mail do cliente")
+            break
+          }
+          const resultado = await chamarAgendab({
+            evento: "ativar",
+            email: emailCliente,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+          })
+          if (resultado.ok && resultado.convite_url) {
+            await Promise.allSettled([
+              enviarEmailConviteAgendab(emailCliente, resultado.convite_url),
+              enviarEmailInternoVendaAgendab(emailCliente, customerId),
+            ])
+            console.log("[webhook] agendab: convite enviado para", emailCliente)
+          } else if (resultado.ja_cliente) {
+            console.log("[webhook] agendab: cliente já existia, reativado")
+          } else {
+            console.error("[webhook] agendab: falha no provisionamento")
+          }
+          break
+        }
 
         // Mensalidade de projeto Sob Medida (não é cliente ZWeb)
         const projetoId = session.metadata?.sob_medida_projeto_id
@@ -137,6 +195,17 @@ export async function POST(request: Request) {
         const sub = event.data.object as Stripe.Subscription
         const customerId = sub.customer as string
 
+        // Assinatura do AgendaB → ativa/suspende conforme o status
+        if (sub.metadata?.produto === "agendab") {
+          const ativa = ["active", "trialing"].includes(sub.status)
+          await chamarAgendab({
+            evento: ativa ? "reativar" : "desativar",
+            stripe_customer_id: customerId,
+          })
+          console.log(`[webhook] agendab: assinatura ${ativa ? "ativa" : "suspensa"} (${sub.status})`)
+          break
+        }
+
         // Mensalidade de projeto Sob Medida
         const projetoId = sub.metadata?.sob_medida_projeto_id
         if (projetoId) {
@@ -181,6 +250,13 @@ export async function POST(request: Request) {
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription
         const customerId = sub.customer as string
+
+        // Assinatura do AgendaB cancelada → suspende a clínica
+        if (sub.metadata?.produto === "agendab") {
+          await chamarAgendab({ evento: "desativar", stripe_customer_id: customerId })
+          console.log("[webhook] agendab: assinatura cancelada, clínica suspensa")
+          break
+        }
 
         // Mensalidade de projeto Sob Medida
         const projetoId = sub.metadata?.sob_medida_projeto_id
