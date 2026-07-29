@@ -325,6 +325,7 @@ export interface Database {
           valor_desenvolvimento: number; valor_recebido: number
           mensalidade_valor: number; mensalidade_dia: number | null; mensalidade_inicio: string | null; mensalidade_status: string
           stripe_customer_id: string | null; stripe_subscription_id: string | null; stripe_checkout_url: string | null
+          vendedor_id: string | null; comissao_paga: boolean; comissao_paga_em: string | null
           created_at: string; updated_at: string
         }
         Insert: {
@@ -336,6 +337,7 @@ export interface Database {
           valor_desenvolvimento?: number; valor_recebido?: number
           mensalidade_valor?: number; mensalidade_dia?: number | null; mensalidade_inicio?: string | null; mensalidade_status?: string
           stripe_customer_id?: string | null; stripe_subscription_id?: string | null; stripe_checkout_url?: string | null
+          vendedor_id?: string | null; comissao_paga?: boolean; comissao_paga_em?: string | null
           created_at?: string; updated_at?: string
         }
         Update: {
@@ -347,6 +349,7 @@ export interface Database {
           valor_desenvolvimento?: number; valor_recebido?: number
           mensalidade_valor?: number; mensalidade_dia?: number | null; mensalidade_inicio?: string | null; mensalidade_status?: string
           stripe_customer_id?: string | null; stripe_subscription_id?: string | null; stripe_checkout_url?: string | null
+          vendedor_id?: string | null; comissao_paga?: boolean; comissao_paga_em?: string | null
           created_at?: string; updated_at?: string
         }
         Relationships: [

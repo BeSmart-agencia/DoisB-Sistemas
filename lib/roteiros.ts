@@ -10,6 +10,11 @@ export interface Objecao {
   resposta: string
 }
 
+export interface PassoMensagem {
+  quando: string // "1ª mensagem", "Se não responder em 2 dias"...
+  mensagem: string // texto pronto pra colar no WhatsApp
+}
+
 export interface Roteiro {
   id: "zweb" | "agendab" | "sobmedida"
   produto: string
@@ -21,6 +26,7 @@ export interface Roteiro {
   dores: string[]
   argumentos: { titulo: string; texto: string }[]
   objecoes: Objecao[]
+  sequencia: PassoMensagem[]
   fechamento: string[]
   regraDeOuro: string
 }
@@ -96,6 +102,33 @@ export const ROTEIROS: Roteiro[] = [
           "Ele continua cuidando do imposto. O que muda é que a NOTA sai na hora, por você, sem pagar avulso e sem esperar. O contador vai gostar de receber tudo organizado.",
       },
     ],
+    sequencia: [
+      {
+        quando: "1ª mensagem — quebra o gelo",
+        mensagem:
+          "Oi [nome], tudo bem? Aqui é o [seu nome]. Trabalho com o ZWeb, um sistema de gestão pra loja (estoque, caixa, nota fiscal). Posso te fazer uma pergunta rápida sobre a sua operação?",
+      },
+      {
+        quando: "2ª — investiga a dor (depois do 'pode')",
+        mensagem:
+          "Hoje você controla o estoque e o caixa no caderno/planilha ou já usa algum sistema? Pergunto porque a maioria dos lojistas perde venda por falta de produto e nem percebe o quanto.",
+      },
+      {
+        quando: "3ª — mostra o valor",
+        mensagem:
+          "Com o ZWeb você vende no balcão (PDV), já baixa o estoque, emite a própria nota fiscal e vê quanto vendeu no dia direto no celular. Sem depender do contador pra cada nota. E não tem fidelidade — se não gostar, cancela.",
+      },
+      {
+        quando: "4ª — envia o link (quando houver interesse)",
+        mensagem:
+          "Te mando o link pra começar? O mais escolhido é o Standard (PDV + financeiro completo). Você preenche em 3 minutinhos: [SEU LINK]",
+      },
+      {
+        quando: "Follow-up — se sumir por 2-3 dias",
+        mensagem:
+          "Oi [nome]! Só passando pra ver se ficou alguma dúvida sobre o ZWeb. Se quiser, faço uma demonstração rápida te mostrando a tela funcionando. 😉",
+      },
+    ],
     fechamento: [
       "Recomende o Standard: é o queridinho do varejo (8 em cada 10 escolhem) — tem PDV + financeiro completo.",
       "\"Vou te mandar o link. Você preenche em 3 minutos, escolhe cartão ou boleto, e o acesso já entra em liberação.\"",
@@ -110,7 +143,7 @@ export const ROTEIROS: Roteiro[] = [
     tagline: "A gestão da clínica, simples e moderna.",
     preco: "R$ 175/mês · plano único · até 5 usuários · sem fidelidade",
     comoGanho:
-      "Levantou uma clínica interessada? Passe o contato pra equipe DoisB fechar — a comissão do AgendaB é combinada e paga por fora (fale com a Laisa). O roteiro abaixo é pra você qualificar e despertar o interesse.",
+      "Comissão automática pelo seu link: quando a clínica assina o AgendaB pelo seu link, você recebe 100% da 1ª mensalidade (R$ 175). Use o mesmo link do topo do portal — ele vale pro ZWeb e pro AgendaB.",
     paraQuem: [
       "Clínicas e consultórios de qualquer especialidade: odontologia, medicina, psicologia, fisioterapia, estética, nutrição.",
       "Profissional que atende sozinho ou com 1 secretária e ainda usa agenda de papel.",
@@ -165,6 +198,33 @@ export const ROTEIROS: Roteiro[] = [
         objecao: "\"Tenho medo de mudar de sistema / do papel.\"",
         resposta:
           "Não instala nada, funciona no navegador, e tem um guia passo a passo dentro do próprio sistema. O acesso sai na hora que confirma. Se não gostar, cancela quando quiser.",
+      },
+    ],
+    sequencia: [
+      {
+        quando: "1ª mensagem — quebra o gelo",
+        mensagem:
+          "Oi [nome], tudo bem? Aqui é o [seu nome]. Trabalho com o AgendaB, um sistema pra clínicas organizarem agenda, prontuário e financeiro num lugar só. Posso te fazer uma pergunta rápida?",
+      },
+      {
+        quando: "2ª — investiga a dor",
+        mensagem:
+          "Hoje a agenda da clínica é no caderno/WhatsApp ou num sistema? E os pacientes que faltam sem avisar — isso acontece bastante aí?",
+      },
+      {
+        quando: "3ª — mostra o valor",
+        mensagem:
+          "O AgendaB organiza a agenda do dia, guarda o prontuário completo de cada paciente (com exames anexados) e gera receita e atestado em segundos, com o timbre da clínica. Funciona até no celular como app. São R$ 175/mês, até 5 pessoas, sem fidelidade.",
+      },
+      {
+        quando: "4ª — envia o link (quando houver interesse)",
+        mensagem:
+          "Te mando o link pra criar a conta da clínica? O acesso libera na hora que o pagamento confirma: [SEU LINK]",
+      },
+      {
+        quando: "Follow-up — se sumir por 2-3 dias",
+        mensagem:
+          "Oi [nome]! Passando pra saber se posso te mostrar o AgendaB funcionando numa call rápida. Acho que a parte do prontuário e das receitas vai te economizar um tempão. 🙂",
       },
     ],
     fechamento: [
@@ -236,6 +296,33 @@ export const ROTEIROS: Roteiro[] = [
         objecao: "\"Meu sobrinho / um freela faz mais barato.\"",
         resposta:
           "E quando quebrar, quem mantém? Aqui tem escopo fechado, entrega por fase e mensalidade de manutenção — o sistema não fica órfão no meio do caminho.",
+      },
+    ],
+    sequencia: [
+      {
+        quando: "1ª mensagem — quebra o gelo",
+        mensagem:
+          "Oi [nome], tudo bem? Aqui é o [seu nome], da DoisB Sistemas. A gente desenvolve sistemas sob medida pra empresas que já se enrolaram com planilha e WhatsApp. Posso te fazer uma pergunta rápida sobre o processo aí?",
+      },
+      {
+        quando: "2ª — investiga a dor",
+        mensagem:
+          "Existe alguma planilha ou controle na empresa que, se a pessoa que cuida dela sair, trava tudo? Ou algum processo que é digitado em vários lugares (WhatsApp, planilha, caderno)?",
+      },
+      {
+        quando: "3ª — oferece o diagnóstico (não vende sistema)",
+        mensagem:
+          "Isso é exatamente o que a gente resolve. E a primeira conversa é um diagnóstico gratuito de uns 20 minutos, sem compromisso, só pra entender onde trava e o que dá pra melhorar. Já sai valendo pra você.",
+      },
+      {
+        quando: "4ª — agenda a conversa",
+        mensagem:
+          "Consigo encaixar essa conversa com o pessoal técnico da DoisB. Qual o melhor dia e horário pra você? Me passa também o nome da empresa e o seu melhor contato que eu já organizo.",
+      },
+      {
+        quando: "Follow-up — se sumir por 2-3 dias",
+        mensagem:
+          "Oi [nome]! Só retomando: o diagnóstico é gratuito e sem compromisso, e costuma abrir uns caminhos bem legais pra economizar tempo. Quer que eu já reserve um horário essa semana?",
       },
     ],
     fechamento: [

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/admin/require-admin"
+import { listarComissoes } from "@/lib/comissoes"
 
 function normalizarCodigo(v: unknown): string {
   // NFD separa a letra do acento (é -> e + ´); o filtro final descarta
@@ -24,16 +25,10 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Vendas atribuídas a qualquer vendedor (para calcular comissões no client)
-  const { data: vendas, error: erroVendas } = await supabase!
-    .from("clientes")
-    .select("id, nome_empresa, plano, status_pagamento, data_assinatura, created_at, comissao_paga, comissao_paga_em, vendedor_id")
-    .not("vendedor_id", "is", null)
-    .order("created_at", { ascending: false })
+  // Comissões unificadas (ZWeb + AgendaB) atribuídas a qualquer vendedor.
+  const comissoes = await listarComissoes(supabase!)
 
-  if (erroVendas) return NextResponse.json({ error: erroVendas.message }, { status: 500 })
-
-  return NextResponse.json({ vendedores: vendedores ?? [], vendas: vendas ?? [] })
+  return NextResponse.json({ vendedores: vendedores ?? [], comissoes })
 }
 
 export async function POST(request: Request) {

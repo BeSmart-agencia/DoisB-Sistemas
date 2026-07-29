@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe/client"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { resolverVendedorId } from "@/lib/vendedores"
 
 // Checkout do AgendaB (assinatura mensal). O provisionamento acontece no
 // webhook (checkout.session.completed com metadata.produto === "agendab").
-export async function POST() {
+export async function POST(request: Request) {
   const price = process.env.STRIPE_PRICE_AGENDAB
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
@@ -11,6 +13,11 @@ export async function POST() {
     console.error("[checkout/agendab] STRIPE_PRICE_AGENDAB não configurado")
     return NextResponse.json({ error: "Configuração ausente" }, { status: 500 })
   }
+
+  // Atribuição a vendedor externo (link /?v=). Vai no metadata da sessão;
+  // o webhook grava em sob_medida_projetos ao provisionar.
+  const body = await request.json().catch(() => null)
+  const vendedorId = await resolverVendedorId(createAdminClient(), body?.vendedor_codigo)
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -20,7 +27,7 @@ export async function POST() {
       cancel_url: `${appUrl}/agendab?erro=cancelado`,
       locale: "pt-BR",
       allow_promotion_codes: true,
-      metadata: { produto: "agendab" },
+      metadata: { produto: "agendab", ...(vendedorId && { vendedor_id: vendedorId }) },
       subscription_data: {
         metadata: { produto: "agendab" },
       },

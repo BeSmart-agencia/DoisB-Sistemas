@@ -155,6 +155,8 @@ export async function POST(request: Request) {
               mensalidade_inicio: new Date().toISOString().slice(0, 10),
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
+              // Atribuição a vendedor externo (veio do link /?v= no checkout)
+              vendedor_id: session.metadata?.vendedor_id || null,
             })
             console.log("[webhook] agendab: mensalidade registrada no sob medida")
           }

@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { PortalClient, type VendaPortal } from "./portal-client"
+import { listarComissoes } from "@/lib/comissoes"
+import { PortalClient } from "./portal-client"
 
 export const metadata: Metadata = {
   title: "Portal do Vendedor — DoisB Sistemas",
@@ -32,11 +33,7 @@ export default async function PortalVendedorPage({
 
   if (!vendedor) notFound()
 
-  const { data: vendas } = await supabase
-    .from("clientes")
-    .select("id, nome_empresa, cidade, estado, plano, status_pagamento, data_assinatura, created_at, comissao_paga")
-    .eq("vendedor_id", vendedor.id)
-    .order("created_at", { ascending: false })
+  const comissoes = await listarComissoes(supabase, vendedor.id)
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.doisbsistemas.com.br"
 
@@ -46,7 +43,7 @@ export default async function PortalVendedorPage({
       ativo={vendedor.ativo}
       chavePix={vendedor.chave_pix}
       linkVenda={`${appUrl}/?v=${vendedor.codigo}`}
-      vendas={(vendas ?? []) as VendaPortal[]}
+      comissoes={comissoes}
     />
   )
 }

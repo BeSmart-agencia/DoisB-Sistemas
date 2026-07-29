@@ -31,7 +31,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { PLANO_PRECO, PLANO_LABEL } from "@/lib/planos"
 import { cn } from "@/lib/utils"
 
 interface Vendedor {
@@ -47,21 +46,23 @@ interface Vendedor {
   created_at: string
 }
 
-interface Venda {
+interface Comissao {
   id: string
-  nome_empresa: string
-  plano: "essencial" | "standard" | "premium"
-  status_pagamento: "aguardando" | "ativo" | "atrasado" | "cancelado"
-  data_assinatura: string | null
-  created_at: string
-  comissao_paga: boolean
-  comissao_paga_em: string | null
+  tipo: "zweb" | "agendab"
   vendedor_id: string
+  cliente: string
+  local: string | null
+  produto: string
+  valor: number
+  status: "aguardando" | "ativo" | "atrasado" | "cancelado"
+  convertido: boolean
+  data: string
+  comissao_paga: boolean
 }
 
 interface ApiResponse {
   vendedores: Vendedor[]
-  vendas: Venda[]
+  comissoes: Comissao[]
 }
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
@@ -74,11 +75,6 @@ function baseUrl() {
     (typeof window !== "undefined" ? window.location.origin : "https://www.doisbsistemas.com.br")
   )
 }
-
-// Uma venda vira comissão quando o cliente pagou a 1ª mensalidade,
-// sinalizado por data_assinatura preenchida no webhook do Stripe.
-const converteu = (v: Venda) => !!v.data_assinatura
-const valorComissao = (v: Venda) => PLANO_PRECO[v.plano] ?? 0
 
 export default function VendedoresPage() {
   const qc = useQueryClient()
@@ -96,34 +92,34 @@ export default function VendedoresPage() {
     },
   })
 
-  const vendasPorVendedor = useMemo(() => {
-    const map = new Map<string, Venda[]>()
-    for (const v of data?.vendas ?? []) {
-      const arr = map.get(v.vendedor_id) ?? []
-      arr.push(v)
-      map.set(v.vendedor_id, arr)
+  const comissoesPorVendedor = useMemo(() => {
+    const map = new Map<string, Comissao[]>()
+    for (const c of data?.comissoes ?? []) {
+      const arr = map.get(c.vendedor_id) ?? []
+      arr.push(c)
+      map.set(c.vendedor_id, arr)
     }
     return map
-  }, [data?.vendas])
+  }, [data?.comissoes])
 
   const totais = useMemo(() => {
     let aPagar = 0
     let pago = 0
-    for (const v of data?.vendas ?? []) {
-      if (!converteu(v)) continue
-      if (v.comissao_paga) pago += valorComissao(v)
-      else aPagar += valorComissao(v)
+    for (const c of data?.comissoes ?? []) {
+      if (!c.convertido) continue
+      if (c.comissao_paga) pago += c.valor
+      else aPagar += c.valor
     }
     const ativos = (data?.vendedores ?? []).filter((x) => x.ativo).length
     return { aPagar, pago, ativos }
   }, [data])
 
   const comissaoMut = useMutation({
-    mutationFn: async ({ cliente_id, paga }: { cliente_id: string; paga: boolean }) => {
+    mutationFn: async ({ id, tipo, paga }: { id: string; tipo: "zweb" | "agendab"; paga: boolean }) => {
       const res = await fetch("/api/admin/vendedores/comissao", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cliente_id, paga }),
+        body: JSON.stringify({ id, tipo, paga }),
       })
       if (!res.ok) throw new Error((await res.json()).error ?? "Erro")
     },
@@ -222,11 +218,11 @@ export default function VendedoresPage() {
       ) : (
         <div className="space-y-3">
           {vendedores.map((v) => {
-            const vendas = vendasPorVendedor.get(v.id) ?? []
-            const convertidas = vendas.filter(converteu)
-            const aPagar = convertidas.filter((s) => !s.comissao_paga).reduce((a, s) => a + valorComissao(s), 0)
-            const pago = convertidas.filter((s) => s.comissao_paga).reduce((a, s) => a + valorComissao(s), 0)
-            const pendentes = vendas.length - convertidas.length
+            const comissoes = comissoesPorVendedor.get(v.id) ?? []
+            const convertidas = comissoes.filter((c) => c.convertido)
+            const aPagar = convertidas.filter((s) => !s.comissao_paga).reduce((a, s) => a + s.valor, 0)
+            const pago = convertidas.filter((s) => s.comissao_paga).reduce((a, s) => a + s.valor, 0)
+            const pendentes = comissoes.length - convertidas.length
             const aberto = expandido.has(v.id)
             const link = `${baseUrl()}/?v=${v.codigo}`
             const portalLink = `${baseUrl()}/vendedor/${v.portal_token}`
@@ -314,56 +310,53 @@ export default function VendedoresPage() {
                     <Metrica label="Aguardando pgto" valor={String(pendentes)} />
                   </div>
 
-                  {vendas.length > 0 && (
+                  {comissoes.length > 0 && (
                     <button
                       onClick={() => toggleExpandir(v.id)}
                       className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900"
                     >
                       {aberto ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      {vendas.length} venda{vendas.length > 1 ? "s" : ""} atribuída{vendas.length > 1 ? "s" : ""}
+                      {comissoes.length} venda{comissoes.length > 1 ? "s" : ""} atribuída{comissoes.length > 1 ? "s" : ""}
                     </button>
                   )}
                 </div>
 
                 {/* Detalhe das vendas */}
-                {aberto && vendas.length > 0 && (
+                {aberto && comissoes.length > 0 && (
                   <div className="border-t border-slate-100 bg-slate-50/60 divide-y divide-slate-100">
-                    {vendas.map((s) => {
-                      const conv = converteu(s)
-                      return (
-                        <div key={s.id} className="px-5 py-3 flex flex-wrap items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-800 truncate">{s.nome_empresa}</p>
-                            <p className="text-xs text-slate-500">
-                              {PLANO_LABEL[s.plano]} · {BRL.format(valorComissao(s))} · cadastro {fmtData(s.created_at)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {!conv ? (
-                              <Badge className="bg-slate-100 text-slate-500 border-slate-200 gap-1">
-                                <Clock className="h-3 w-3" /> Aguardando pagamento
-                              </Badge>
-                            ) : s.comissao_paga ? (
-                              <button
-                                onClick={() => comissaoMut.mutate({ cliente_id: s.id, paga: false })}
-                                title={`Paga em ${fmtData(s.comissao_paga_em)} — clique para desfazer`}
-                                className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
-                              >
-                                <BadgeCheck className="h-3.5 w-3.5" /> Comissão paga
-                              </button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                onClick={() => comissaoMut.mutate({ cliente_id: s.id, paga: true })}
-                                className="h-8 bg-slate-950 hover:bg-blue-900 text-white text-xs"
-                              >
-                                Marcar comissão paga
-                              </Button>
-                            )}
-                          </div>
+                    {comissoes.map((s) => (
+                      <div key={`${s.tipo}:${s.id}`} className="px-5 py-3 flex flex-wrap items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-slate-800 truncate">{s.cliente}</p>
+                          <p className="text-xs text-slate-500">
+                            {s.produto} · {BRL.format(s.valor)} · {fmtData(s.data)}
+                          </p>
                         </div>
-                      )
-                    })}
+                        <div className="flex items-center gap-2">
+                          {!s.convertido ? (
+                            <Badge className="bg-slate-100 text-slate-500 border-slate-200 gap-1">
+                              <Clock className="h-3 w-3" /> Aguardando pagamento
+                            </Badge>
+                          ) : s.comissao_paga ? (
+                            <button
+                              onClick={() => comissaoMut.mutate({ id: s.id, tipo: s.tipo, paga: false })}
+                              title="Clique para desfazer"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              <BadgeCheck className="h-3.5 w-3.5" /> Comissão paga
+                            </button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => comissaoMut.mutate({ id: s.id, tipo: s.tipo, paga: true })}
+                              className="h-8 bg-slate-950 hover:bg-blue-900 text-white text-xs"
+                            >
+                              Marcar comissão paga
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

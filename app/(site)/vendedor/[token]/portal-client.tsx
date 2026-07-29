@@ -17,36 +17,22 @@ import {
   Flag,
   Sparkles,
   CircleDollarSign,
+  MessagesSquare,
 } from "lucide-react"
-import { PLANO_PRECO, PLANO_LABEL } from "@/lib/planos"
 import { ROTEIROS, type Roteiro } from "@/lib/roteiros"
+import type { ComissaoEntry, StatusComissao } from "@/lib/comissoes"
 import { cn } from "@/lib/utils"
-
-export interface VendaPortal {
-  id: string
-  nome_empresa: string
-  cidade: string | null
-  estado: string | null
-  plano: "essencial" | "standard" | "premium"
-  status_pagamento: "aguardando" | "ativo" | "atrasado" | "cancelado"
-  data_assinatura: string | null
-  created_at: string
-  comissao_paga: boolean
-}
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
 const fmtData = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "—"
 
-const STATUS_CLIENTE: Record<VendaPortal["status_pagamento"], { label: string; cls: string }> = {
+const STATUS_CLIENTE: Record<StatusComissao, { label: string; cls: string }> = {
   aguardando: { label: "Aguardando pagamento", cls: "bg-amber-50 text-amber-700 border-amber-200" },
   ativo: { label: "Cliente ativo", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   atrasado: { label: "Pagamento atrasado", cls: "bg-orange-50 text-orange-700 border-orange-200" },
   cancelado: { label: "Cancelado", cls: "bg-slate-100 text-slate-500 border-slate-200" },
 }
-
-const converteu = (v: VendaPortal) => !!v.data_assinatura
-const valor = (v: VendaPortal) => PLANO_PRECO[v.plano] ?? 0
 
 type Tab = "vendas" | "roteiro"
 
@@ -55,20 +41,20 @@ export function PortalClient({
   ativo,
   chavePix,
   linkVenda,
-  vendas,
+  comissoes,
 }: {
   nome: string
   ativo: boolean
   chavePix: string | null
   linkVenda: string
-  vendas: VendaPortal[]
+  comissoes: ComissaoEntry[]
 }) {
   const [tab, setTab] = useState<Tab>("vendas")
   const [copiado, setCopiado] = useState(false)
 
-  const confirmadas = vendas.filter(converteu)
-  const aReceber = confirmadas.filter((v) => !v.comissao_paga).reduce((a, v) => a + valor(v), 0)
-  const recebido = confirmadas.filter((v) => v.comissao_paga).reduce((a, v) => a + valor(v), 0)
+  const confirmadas = comissoes.filter((v) => v.convertido)
+  const aReceber = confirmadas.filter((v) => !v.comissao_paga).reduce((a, v) => a + v.valor, 0)
+  const recebido = confirmadas.filter((v) => v.comissao_paga).reduce((a, v) => a + v.valor, 0)
 
   function copiar() {
     navigator.clipboard.writeText(linkVenda)
@@ -137,7 +123,7 @@ export function PortalClient({
       <main className="max-w-5xl mx-auto px-4 py-8">
         {tab === "vendas" ? (
           <VendasView
-            vendas={vendas}
+            comissoes={comissoes}
             confirmadas={confirmadas.length}
             aReceber={aReceber}
             recebido={recebido}
@@ -181,13 +167,13 @@ function TabBtn({
 }
 
 function VendasView({
-  vendas,
+  comissoes,
   confirmadas,
   aReceber,
   recebido,
   chavePix,
 }: {
-  vendas: VendaPortal[]
+  comissoes: ComissaoEntry[]
   confirmadas: number
   aReceber: number
   recebido: number
@@ -209,7 +195,7 @@ function VendasView({
       )}
 
       {/* Lista */}
-      {vendas.length === 0 ? (
+      {comissoes.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
           <Target className="h-8 w-8 mx-auto text-slate-300" />
           <p className="mt-3 font-semibold text-slate-700">Nenhuma venda ainda</p>
@@ -219,18 +205,18 @@ function VendasView({
         </div>
       ) : (
         <div className="space-y-3">
-          {vendas.map((v) => {
-            const conv = converteu(v)
-            const st = STATUS_CLIENTE[v.status_pagamento]
+          {comissoes.map((v) => {
+            const conv = v.convertido
+            const st = STATUS_CLIENTE[v.status]
             return (
               <div
-                key={v.id}
+                key={`${v.tipo}:${v.id}`}
                 className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4"
               >
                 <div className="min-w-0">
-                  <p className="font-bold text-slate-950 truncate">{v.nome_empresa}</p>
+                  <p className="font-bold text-slate-950 truncate">{v.cliente}</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {PLANO_LABEL[v.plano]} · {[v.cidade, v.estado].filter(Boolean).join("/") || "—"} · cadastro {fmtData(v.created_at)}
+                    {v.produto} · {v.local ?? "—"} · {fmtData(v.data)}
                   </p>
                   <span className={cn("inline-flex items-center mt-2 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", st.cls)}>
                     {st.label}
@@ -238,7 +224,7 @@ function VendasView({
                 </div>
 
                 <div className="text-right">
-                  <p className="text-lg font-black text-slate-950">{BRL.format(valor(v))}</p>
+                  <p className="text-lg font-black text-slate-950">{BRL.format(v.valor)}</p>
                   {!conv ? (
                     <span className="text-xs text-slate-400">comissão em espera</span>
                   ) : v.comissao_paga ? (
@@ -293,7 +279,15 @@ function Kpi({
 
 function RoteiroView() {
   const [sel, setSel] = useState<Roteiro["id"]>("zweb")
+  const [msgCopiada, setMsgCopiada] = useState<string | null>(null)
   const roteiro = ROTEIROS.find((r) => r.id === sel)!
+
+  function copiarMsg(key: string, texto: string) {
+    navigator.clipboard.writeText(texto)
+    setMsgCopiada(key)
+    toast.success("Mensagem copiada!")
+    setTimeout(() => setMsgCopiada((c) => (c === key ? null : c)), 2000)
+  }
 
   return (
     <div className="space-y-6">
@@ -334,6 +328,43 @@ function RoteiroView() {
           <p className="mt-1 text-sm font-medium text-blue-950">{roteiro.regraDeOuro}</p>
         </div>
       </div>
+
+      {/* Sequência de mensagens — o script na ordem certa */}
+      <section className="rounded-2xl border-2 border-emerald-100 bg-white p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+            <MessagesSquare className="h-4 w-4" />
+          </div>
+          <h3 className="font-bold text-slate-950">Sequência de mensagens</h3>
+        </div>
+        <p className="text-sm text-slate-500 mb-4">
+          O passo a passo do WhatsApp, na ordem. Troque [nome], [seu nome] e [SEU LINK]. Toque pra copiar.
+        </p>
+        <ol className="space-y-3">
+          {roteiro.sequencia.map((passo, i) => {
+            const key = `${roteiro.id}:${i}`
+            return (
+              <li key={key} className="relative rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[11px]">
+                      {i + 1}
+                    </span>
+                    {passo.quando}
+                  </span>
+                  <button
+                    onClick={() => copiarMsg(key, passo.mensagem)}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-blue-700 hover:border-blue-200"
+                  >
+                    {msgCopiada === key ? <><Check className="h-3.5 w-3.5" /> Copiado</> : <><Copy className="h-3.5 w-3.5" /> Copiar</>}
+                  </button>
+                </div>
+                <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-line">{passo.mensagem}</p>
+              </li>
+            )
+          })}
+        </ol>
+      </section>
 
       <Secao icon={Target} titulo="Para quem é">
         <ul className="space-y-2">

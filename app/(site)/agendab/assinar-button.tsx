@@ -11,7 +11,13 @@ export function AssinarButton({ className }: { className?: string }) {
     setErro("")
     setCarregando(true)
     try {
-      const res = await fetch("/api/checkout/agendab", { method: "POST" })
+      const m = document.cookie.match(/(?:^|;\s*)vend_ref=([^;]+)/)
+      const vendedor_codigo = m ? decodeURIComponent(m[1]) : undefined
+      const res = await fetch("/api/checkout/agendab", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vendedor_codigo }),
+      })
       const data = await res.json()
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Erro ao iniciar o pagamento.")
