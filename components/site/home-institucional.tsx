@@ -48,7 +48,7 @@ const LINHAS = [
     titulo: "AgendaB — gestão para clínicas",
     tipo: "Produto DoisB",
     desc: "Agenda, pacientes, prontuário eletrônico e financeiro da sua clínica em um só lugar. Simples de usar, funciona no computador e no celular, sem instalar nada.",
-    pontos: ["Prontuário com histórico, exames anexados e documentos", "Agenda com bloqueio de conflitos e expediente", "Até 5 usuários — R$ 175/mês, sem fidelidade"],
+    pontos: ["Prontuário com histórico, exames anexados e documentos", "Agenda com bloqueio de conflitos e expediente", "Até 5 usuários — R$ 249/mês, sem fidelidade"],
     cta: "Conheça o AgendaB",
     href: "/agendab",
     destaque: "Pra clínicas e consultórios",

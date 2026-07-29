@@ -45,7 +45,7 @@ export function AssinarButton({ className }: { className?: string }) {
           </>
         ) : (
           <>
-            Assinar por R$ 175/mês
+            Assinar por R$ 249/mês
             <ArrowRight className="h-5 w-5" />
           </>
         )}

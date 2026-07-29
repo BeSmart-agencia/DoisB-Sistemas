@@ -141,9 +141,9 @@ export const ROTEIROS: Roteiro[] = [
     id: "agendab",
     produto: "AgendaB",
     tagline: "A gestão da clínica, simples e moderna.",
-    preco: "R$ 175/mês · plano único · até 5 usuários · sem fidelidade",
+    preco: "R$ 249/mês · plano único · até 5 usuários · sem fidelidade",
     comoGanho:
-      "Comissão automática pelo seu link: quando a clínica assina o AgendaB pelo seu link, você recebe 100% da 1ª mensalidade (R$ 175). Use o mesmo link do topo do portal — ele vale pro ZWeb e pro AgendaB.",
+      "Comissão automática pelo seu link: quando a clínica assina o AgendaB pelo seu link, você recebe 100% da 1ª mensalidade (R$ 249). Use o mesmo link do topo do portal — ele vale pro ZWeb e pro AgendaB.",
     paraQuem: [
       "Clínicas e consultórios de qualquer especialidade: odontologia, medicina, psicologia, fisioterapia, estética, nutrição.",
       "Profissional que atende sozinho ou com 1 secretária e ainda usa agenda de papel.",
@@ -192,7 +192,7 @@ export const ROTEIROS: Roteiro[] = [
       {
         objecao: "\"É caro pra mim.\"",
         resposta:
-          "É R$ 175 no mês inteiro, sem fidelidade. Uma única consulta que deixaria de faltar já paga isso. E até 5 pessoas usam no mesmo valor.",
+          "É R$ 249 no mês inteiro, sem fidelidade. Uma única consulta que deixaria de faltar já paga isso. E até 5 pessoas usam no mesmo valor.",
       },
       {
         objecao: "\"Tenho medo de mudar de sistema / do papel.\"",
@@ -214,7 +214,7 @@ export const ROTEIROS: Roteiro[] = [
       {
         quando: "3ª — mostra o valor",
         mensagem:
-          "O AgendaB organiza a agenda do dia, guarda o prontuário completo de cada paciente (com exames anexados) e gera receita e atestado em segundos, com o timbre da clínica. Funciona até no celular como app. São R$ 175/mês, até 5 pessoas, sem fidelidade.",
+          "O AgendaB organiza a agenda do dia, guarda o prontuário completo de cada paciente (com exames anexados) e gera receita e atestado em segundos, com o timbre da clínica. Funciona até no celular como app. São R$ 249/mês, até 5 pessoas, sem fidelidade.",
       },
       {
         quando: "4ª — envia o link (quando houver interesse)",

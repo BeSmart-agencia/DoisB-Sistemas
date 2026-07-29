@@ -18,12 +18,12 @@ import { AssinarButton } from "./assinar-button"
 export const metadata: Metadata = {
   title: "AgendaB — Sistema de gestão para clínicas | DoisB Sistemas",
   description:
-    "Agenda, pacientes, prontuário eletrônico e financeiro da sua clínica em um só lugar. Simples, moderno, funciona no celular. R$ 175/mês, sem fidelidade.",
+    "Agenda, pacientes, prontuário eletrônico e financeiro da sua clínica em um só lugar. Simples, moderno, funciona no celular. R$ 249/mês, sem fidelidade.",
   alternates: { canonical: "/agendab" },
   openGraph: {
     title: "AgendaB — Gestão para clínicas",
     description:
-      "Agenda, pacientes, prontuário e financeiro em um sistema leve e fácil de usar. R$ 175/mês.",
+      "Agenda, pacientes, prontuário e financeiro em um sistema leve e fácil de usar. R$ 249/mês.",
     type: "website",
     locale: "pt_BR",
   },
@@ -142,7 +142,7 @@ export default function AgendabPage() {
               <AssinarButton />
             </div>
             <p className="mt-4 text-sm text-slate-400">
-              R$ 175/mês · sem fidelidade · acesso na hora
+              R$ 249/mês · sem fidelidade · acesso na hora
             </p>
           </div>
         </section>
@@ -234,7 +234,7 @@ export default function AgendabPage() {
               </p>
               <div className="mt-4 flex items-end justify-center gap-1">
                 <span className="text-xl font-bold text-slate-500 mb-2">R$</span>
-                <span className="text-6xl font-black text-slate-950 tracking-tight">175</span>
+                <span className="text-6xl font-black text-slate-950 tracking-tight">249</span>
                 <span className="text-slate-500 mb-2">/mês</span>
               </div>
               <p className="mt-2 text-sm text-slate-500">

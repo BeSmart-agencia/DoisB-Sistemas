@@ -150,7 +150,7 @@ export async function POST(request: Request) {
               status: "entregue",
               valor_desenvolvimento: 0,
               valor_recebido: 0,
-              mensalidade_valor: 175,
+              mensalidade_valor: 249,
               mensalidade_status: "ativa",
               mensalidade_inicio: new Date().toISOString().slice(0, 10),
               stripe_customer_id: customerId,

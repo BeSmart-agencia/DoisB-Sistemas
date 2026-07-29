@@ -56,7 +56,7 @@ export async function enviarEmailInternoVendaAgendab(email: string, customerId: 
     from: FROM,
     to: INTERNO,
     subject: "🎉 Nova assinatura AgendaB!",
-    html: `<p>Nova assinatura do <strong>AgendaB</strong> (R$ 175/mês).</p>
+    html: `<p>Nova assinatura do <strong>AgendaB</strong> (R$ 249/mês).</p>
            <p>E-mail do cliente: <strong>${email}</strong><br/>
            Stripe customer: ${customerId}</p>
            <p>O convite de cadastro foi enviado automaticamente ao cliente.</p>`,
