@@ -67,17 +67,17 @@ export interface Database {
         Row: {
           id: string; nome: string; email: string | null; telefone: string | null
           chave_pix: string | null; codigo: string; ativo: boolean
-          observacoes: string | null; created_at: string
+          observacoes: string | null; portal_token: string; created_at: string
         }
         Insert: {
           id?: string; nome: string; email?: string | null; telefone?: string | null
           chave_pix?: string | null; codigo: string; ativo?: boolean
-          observacoes?: string | null; created_at?: string
+          observacoes?: string | null; portal_token?: string; created_at?: string
         }
         Update: {
           id?: string; nome?: string; email?: string | null; telefone?: string | null
           chave_pix?: string | null; codigo?: string; ativo?: boolean
-          observacoes?: string | null; created_at?: string
+          observacoes?: string | null; portal_token?: string; created_at?: string
         }
         Relationships: []
       }

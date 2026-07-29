@@ -43,6 +43,7 @@ interface Vendedor {
   codigo: string
   ativo: boolean
   observacoes: string | null
+  portal_token: string
   created_at: string
 }
 
@@ -155,12 +156,11 @@ export default function VendedoresPage() {
     onError: (e: Error) => toast.error(e.message),
   })
 
-  function copiarLink(codigo: string) {
-    const link = `${baseUrl()}/?v=${codigo}`
-    navigator.clipboard.writeText(link)
-    setCopiado(codigo)
-    toast.success("Link copiado!")
-    setTimeout(() => setCopiado((c) => (c === codigo ? null : c)), 2000)
+  function copiar(key: string, texto: string, msg: string) {
+    navigator.clipboard.writeText(texto)
+    setCopiado(key)
+    toast.success(msg)
+    setTimeout(() => setCopiado((c) => (c === key ? null : c)), 2000)
   }
 
   function toggleExpandir(id: string) {
@@ -229,6 +229,7 @@ export default function VendedoresPage() {
             const pendentes = vendas.length - convertidas.length
             const aberto = expandido.has(v.id)
             const link = `${baseUrl()}/?v=${v.codigo}`
+            const portalLink = `${baseUrl()}/vendedor/${v.portal_token}`
 
             return (
               <div key={v.id} className={cn("admin-panel overflow-hidden", !v.ativo && "opacity-70")}>
@@ -249,21 +250,40 @@ export default function VendedoresPage() {
                         {v.chave_pix && <span>· PIX: {v.chave_pix}</span>}
                       </div>
 
-                      {/* Link exclusivo */}
-                      <div className="mt-3 flex items-center gap-2 max-w-full">
-                        <code className="truncate text-xs bg-slate-100 text-slate-700 rounded-lg px-2.5 py-1.5 border border-slate-200">
-                          {link}
-                        </code>
-                        <button
-                          onClick={() => copiarLink(v.codigo)}
-                          className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 hover:text-blue-900"
-                        >
-                          {copiado === v.codigo ? (
-                            <><Check className="h-3.5 w-3.5" /> Copiado</>
-                          ) : (
-                            <><Copy className="h-3.5 w-3.5" /> Copiar</>
-                          )}
-                        </button>
+                      {/* Links: venda (público) + portal (secreto) */}
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center gap-2 max-w-full">
+                          <span className="shrink-0 text-[11px] font-semibold text-slate-400 w-12">Venda</span>
+                          <code className="truncate text-xs bg-slate-100 text-slate-700 rounded-lg px-2.5 py-1.5 border border-slate-200">
+                            {link}
+                          </code>
+                          <button
+                            onClick={() => copiar(`venda:${v.id}`, link, "Link de venda copiado!")}
+                            className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 hover:text-blue-900"
+                          >
+                            {copiado === `venda:${v.id}` ? (
+                              <><Check className="h-3.5 w-3.5" /> Copiado</>
+                            ) : (
+                              <><Copy className="h-3.5 w-3.5" /> Copiar</>
+                            )}
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2 max-w-full">
+                          <span className="shrink-0 text-[11px] font-semibold text-slate-400 w-12">Portal</span>
+                          <code className="truncate text-xs bg-slate-100 text-slate-700 rounded-lg px-2.5 py-1.5 border border-slate-200">
+                            {portalLink}
+                          </code>
+                          <button
+                            onClick={() => copiar(`portal:${v.id}`, portalLink, "Link do portal copiado!")}
+                            className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 hover:text-blue-900"
+                          >
+                            {copiado === `portal:${v.id}` ? (
+                              <><Check className="h-3.5 w-3.5" /> Copiado</>
+                            ) : (
+                              <><Copy className="h-3.5 w-3.5" /> Copiar</>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
