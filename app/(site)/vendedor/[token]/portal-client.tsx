@@ -26,8 +26,15 @@ import {
   ChevronRight,
   Loader2,
   Wand2,
+  Users,
+  MessageCircle,
+  Brain,
+  GraduationCap,
+  Gauge,
+  ArrowRight,
 } from "lucide-react"
-import { ROTEIROS, type Roteiro } from "@/lib/roteiros"
+import { ROTEIROS, REENQUADRAMENTO, VETORES_VALOR, type Roteiro } from "@/lib/roteiros"
+import { TREINAMENTOS, type Treinamento, type Bloco } from "@/lib/treinamentos"
 import type { ComissaoEntry, StatusComissao } from "@/lib/comissoes"
 import {
   recomendar,
@@ -56,7 +63,7 @@ const STATUS_CLIENTE: Record<StatusComissao, { label: string; cls: string }> = {
   cancelado: { label: "Cancelado", cls: "bg-slate-100 text-slate-500 border-slate-200" },
 }
 
-type Tab = "vendas" | "captacoes" | "roteiro"
+type Tab = "vendas" | "captacoes" | "roteiro" | "treinamentos"
 
 export interface Captacao {
   id: string
@@ -159,6 +166,9 @@ export function PortalClient({
           <TabBtn ativo={tab === "roteiro"} onClick={() => setTab("roteiro")} icon={BookOpen}>
             Roteiro de vendas
           </TabBtn>
+          <TabBtn ativo={tab === "treinamentos"} onClick={() => setTab("treinamentos")} icon={GraduationCap}>
+            Treinamentos
+          </TabBtn>
         </div>
       </div>
 
@@ -173,8 +183,10 @@ export function PortalClient({
           />
         ) : tab === "captacoes" ? (
           <CaptacoesView token={token} ativo={ativo} iniciais={captacoesIniciais} />
-        ) : (
+        ) : tab === "roteiro" ? (
           <RoteiroView />
+        ) : (
+          <TreinamentosView />
         )}
       </main>
 
@@ -321,8 +333,11 @@ function Kpi({
   )
 }
 
+type ModoRoteiro = "whatsapp" | "presencial"
+
 function RoteiroView() {
   const [sel, setSel] = useState<Roteiro["id"]>("zweb")
+  const [modo, setModo] = useState<ModoRoteiro>("whatsapp")
   const [msgCopiada, setMsgCopiada] = useState<string | null>(null)
   const roteiro = ROTEIROS.find((r) => r.id === sel)!
 
@@ -364,7 +379,17 @@ function RoteiroView() {
         </div>
       </div>
 
-      {/* Regra de ouro */}
+      {/* Seletor de modo: WhatsApp x Presencial */}
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-1.5">
+        <ModoBtn ativo={modo === "whatsapp"} onClick={() => setModo("whatsapp")} icon={MessageCircle}>
+          Roteiro WhatsApp
+        </ModoBtn>
+        <ModoBtn ativo={modo === "presencial"} onClick={() => setModo("presencial")} icon={Users}>
+          Roteiro presencial
+        </ModoBtn>
+      </div>
+
+      {/* Regra de ouro (vale nos dois modos) */}
       <div className="rounded-2xl border-2 border-blue-100 bg-blue-50 p-5 flex items-start gap-3">
         <Sparkles className="h-5 w-5 shrink-0 text-blue-700 mt-0.5" />
         <div>
@@ -373,7 +398,65 @@ function RoteiroView() {
         </div>
       </div>
 
-      {/* Sequência de mensagens — o script na ordem certa */}
+      <Secao icon={Target} titulo="Para quem é">
+        <ul className="space-y-2">
+          {roteiro.paraQuem.map((p, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+              <Check className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
+              {p}
+            </li>
+          ))}
+        </ul>
+      </Secao>
+
+      <VetoresValor />
+
+      {modo === "whatsapp" ? (
+        <RoteiroWhatsApp roteiro={roteiro} copiarMsg={copiarMsg} msgCopiada={msgCopiada} />
+      ) : (
+        <RoteiroPresencial roteiro={roteiro} />
+      )}
+    </div>
+  )
+}
+
+function ModoBtn({
+  ativo,
+  onClick,
+  icon: Icon,
+  children,
+}: {
+  ativo: boolean
+  onClick: () => void
+  icon: React.ElementType
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-all",
+        ativo ? "bg-blue-700 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {children}
+    </button>
+  )
+}
+
+// ---------- Modo WhatsApp: sequência de mensagens pra colar ----------
+function RoteiroWhatsApp({
+  roteiro,
+  copiarMsg,
+  msgCopiada,
+}: {
+  roteiro: Roteiro
+  copiarMsg: (key: string, texto: string) => void
+  msgCopiada: string | null
+}) {
+  return (
+    <>
       <section className="rounded-2xl border-2 border-emerald-100 bg-white p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-1">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
@@ -410,18 +493,36 @@ function RoteiroView() {
         </ol>
       </section>
 
-      <Secao icon={Target} titulo="Para quem é">
-        <ul className="space-y-2">
-          {roteiro.paraQuem.map((p, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-              <Check className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
-              {p}
-            </li>
+      <Secao icon={ShieldQuestion} titulo="Quebra de objeções">
+        <div className="space-y-3">
+          {roteiro.objecoes.map((o, i) => (
+            <div key={i} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <p className="bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 border-b border-slate-200">
+                {o.objecao}
+              </p>
+              <p className="px-4 py-3 text-sm text-slate-600 leading-relaxed">{o.resposta}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </Secao>
 
-      <Secao icon={Quote} titulo="Ganchos de abertura">
+      <ReframesRapidos />
+
+      <Secao icon={BadgeCheck} titulo="Como fechar">
+        <Fechamento itens={roteiro.fechamento} />
+      </Secao>
+    </>
+  )
+}
+
+// ---------- Modo presencial: conversa cara a cara + Técnica 3A ----------
+function RoteiroPresencial({ roteiro }: { roteiro: Roteiro }) {
+  return (
+    <>
+      <Secao icon={Quote} titulo="Perguntas pra abrir a conversa">
+        <p className="-mt-2 mb-3 text-sm text-slate-500">
+          Comece perguntando, não apresentando. Deixe o cliente falar da dor dele primeiro.
+        </p>
         <div className="space-y-2.5">
           {roteiro.ganchos.map((g, i) => (
             <p key={i} className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-800 italic">
@@ -453,7 +554,13 @@ function RoteiroView() {
         </div>
       </Secao>
 
+      <Tecnica3A />
+
       <Secao icon={ShieldQuestion} titulo="Quebra de objeções">
+        <p className="-mt-2 mb-3 text-sm text-slate-500">
+          Ao vivo, aplique o 3A: <strong>reconheça</strong>, <strong>associe</strong> e devolva com uma{" "}
+          <strong>pergunta</strong> antes de responder.
+        </p>
         <div className="space-y-3">
           {roteiro.objecoes.map((o, i) => (
             <div key={i} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
@@ -467,19 +574,333 @@ function RoteiroView() {
       </Secao>
 
       <Secao icon={BadgeCheck} titulo="Como fechar">
-        <ol className="space-y-2.5">
-          {roteiro.fechamento.map((f, i) => (
-            <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white text-[11px] font-bold">
-                {i + 1}
-              </span>
-              {f}
-            </li>
-          ))}
-        </ol>
+        <Fechamento itens={roteiro.fechamento} />
       </Secao>
+    </>
+  )
+}
+
+function Fechamento({ itens }: { itens: string[] }) {
+  return (
+    <ol className="space-y-2.5">
+      {itens.map((f, i) => (
+        <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white text-[11px] font-bold">
+            {i + 1}
+          </span>
+          {f}
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+// Card completo da Técnica 3A de reenquadramento (modo presencial).
+function Tecnica3A() {
+  const t = REENQUADRAMENTO
+  return (
+    <section className="rounded-2xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-5 sm:p-6">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+          <Brain className="h-4 w-4" />
+        </div>
+        <h3 className="font-bold text-slate-950">{t.nome}</h3>
+      </div>
+      <p className="text-sm font-semibold text-indigo-700">{t.chamada}</p>
+      <p className="mt-2 text-sm text-slate-600 leading-relaxed">{t.resumo}</p>
+
+      {/* 3 passos */}
+      <div className="mt-4 space-y-2.5">
+        {t.passos.map((p, i) => (
+          <div key={i} className="rounded-xl border border-indigo-100 bg-white p-4">
+            <p className="text-sm font-bold text-indigo-800">{p.titulo}</p>
+            <p className="mt-1 text-sm text-slate-600 leading-relaxed">{p.texto}</p>
+            <p className="mt-2 rounded-lg bg-indigo-50 px-3 py-2 text-sm italic text-indigo-900">{p.exemplo}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* 5 regras */}
+      <p className="mt-5 mb-2 text-xs font-bold uppercase tracking-wide text-indigo-700">As 5 regras</p>
+      <ul className="space-y-2">
+        {t.regras.map((r, i) => (
+          <li key={i} className="flex items-start gap-2.5 text-sm">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-[11px] font-bold">
+              {i + 1}
+            </span>
+            <span className="text-slate-700">
+              <strong className="text-slate-900">{r.titulo}.</strong> {r.texto}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {/* Reframes prontos */}
+      <p className="mt-5 mb-2 text-xs font-bold uppercase tracking-wide text-indigo-700">Reenquadramentos prontos</p>
+      <ReframeList />
+
+      <p className="mt-5 rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-indigo-100">
+        {t.mantra}
+      </p>
+    </section>
+  )
+}
+
+// Versão compacta dos reframes (usada no modo WhatsApp como cheat-sheet).
+function ReframesRapidos() {
+  return (
+    <Secao icon={Brain} titulo="Reenquadramentos rápidos (3A)">
+      <p className="-mt-2 mb-3 text-sm text-slate-500">
+        Respostas prontas pras objeções mais comuns. A técnica completa está na aba{" "}
+        <strong>Roteiro presencial</strong>.
+      </p>
+      <ReframeList />
+    </Secao>
+  )
+}
+
+function ReframeList() {
+  return (
+    <div className="space-y-3">
+      {REENQUADRAMENTO.reframes.map((r, i) => (
+        <div key={i} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <p className="bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 border-b border-slate-200">
+            {r.objecao}
+          </p>
+          <p className="px-4 py-3 text-sm text-slate-600 leading-relaxed">{r.como}</p>
+        </div>
+      ))}
     </div>
   )
+}
+
+// Vetores de valor — argumento essencial (arquivo 3), nos dois modos do roteiro.
+function VetoresValor() {
+  return (
+    <Secao icon={Gauge} titulo="Vetores de valor (não brigue por preço)">
+      <p className="-mt-2 mb-3 text-sm text-slate-500">{VETORES_VALOR.intro}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {VETORES_VALOR.itens.map((v, i) => (
+          <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+            <p className="font-bold text-slate-950 text-sm">{v.titulo}</p>
+            <p className="mt-1 text-sm text-slate-600 leading-relaxed">{v.texto}</p>
+          </div>
+        ))}
+      </div>
+    </Secao>
+  )
+}
+
+// ============================================================
+// Treinamentos — apresentações visuais pra ensinar os vendedores
+// ============================================================
+
+const COR_TREINO = {
+  blue: { grad: "from-blue-600 to-blue-900", chip: "bg-blue-100 text-blue-700", ring: "border-blue-100", dot: "bg-blue-600", soft: "bg-blue-50" },
+  indigo: { grad: "from-indigo-600 to-indigo-900", chip: "bg-indigo-100 text-indigo-700", ring: "border-indigo-100", dot: "bg-indigo-600", soft: "bg-indigo-50" },
+  emerald: { grad: "from-emerald-600 to-emerald-900", chip: "bg-emerald-100 text-emerald-700", ring: "border-emerald-100", dot: "bg-emerald-600", soft: "bg-emerald-50" },
+} as const
+
+function PublicoBadge({ publico }: { publico: Treinamento["publico"] }) {
+  const vend = publico.tipo === "vendedor"
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold",
+        vend ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-500"
+      )}
+    >
+      {vend ? <Users className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
+      {vend ? "Ensine aos vendedores" : "Base de estudo"}
+    </span>
+  )
+}
+
+function TreinamentosView() {
+  const [abertoId, setAbertoId] = useState<string | null>(null)
+  const aberto = TREINAMENTOS.find((t) => t.id === abertoId) ?? null
+
+  if (aberto) return <TreinamentoDetalhe treino={aberto} onVoltar={() => setAbertoId(null)} />
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-black text-slate-950">Treinamentos de venda</h2>
+        <p className="text-sm text-slate-500">
+          Apresentações completas pra estudar e ensinar a equipe. A etiqueta indica o que usar com os vendedores.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {TREINAMENTOS.map((t) => {
+          const c = COR_TREINO[t.cor]
+          return (
+            <button
+              key={t.id}
+              onClick={() => setAbertoId(t.id)}
+              className="w-full text-left rounded-2xl border border-slate-200 bg-white p-5 hover:border-blue-300 hover:shadow-sm transition-all flex items-start gap-4"
+            >
+              <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white font-black bg-gradient-to-br", c.grad)}>
+                {t.numero}
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className={cn("inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide", c.chip)}>
+                  {t.etiqueta}
+                </span>
+                <p className="mt-1.5 font-black text-slate-950 leading-snug">{t.titulo}</p>
+                <p className="text-sm text-slate-500 mt-0.5">{t.subtitulo}</p>
+                <div className="mt-2.5">
+                  <PublicoBadge publico={t.publico} />
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 shrink-0 text-slate-300 mt-1" />
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function TreinamentoDetalhe({ treino, onVoltar }: { treino: Treinamento; onVoltar: () => void }) {
+  const c = COR_TREINO[treino.cor]
+  return (
+    <div className="space-y-6">
+      <VoltarBtn onClick={onVoltar} label="Todos os treinamentos" />
+
+      {/* Hero */}
+      <div className={cn("rounded-2xl p-6 sm:p-8 text-white bg-gradient-to-br", c.grad)}>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 font-black">{treino.numero}</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-white/80">{treino.etiqueta}</span>
+        </div>
+        <h2 className="mt-3 text-2xl font-black leading-tight">{treino.titulo}</h2>
+        <p className="mt-1 text-base font-medium text-white/85">{treino.subtitulo}</p>
+        <p className="mt-3 text-sm leading-relaxed text-white/80">{treino.resumo}</p>
+        <div className="mt-4">
+          <PublicoBadge publico={treino.publico} />
+        </div>
+        {treino.publico.nota && (
+          <p className="mt-2 text-xs text-white/70">{treino.publico.nota}</p>
+        )}
+      </div>
+
+      {/* Seções */}
+      {treino.secoes.map((s, i) => (
+        <section key={i} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+          <div className="flex items-center gap-2.5 mb-4">
+            <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-white text-sm font-black", c.dot)}>
+              {i + 1}
+            </span>
+            <h3 className="font-black text-slate-950 leading-snug">{s.titulo}</h3>
+          </div>
+          <div className="space-y-3">
+            {s.blocos.map((b, j) => (
+              <BlocoView key={j} bloco={b} cor={treino.cor} />
+            ))}
+          </div>
+        </section>
+      ))}
+
+      {/* Como usar no ZWeb */}
+      <section className={cn("rounded-2xl border-2 p-5 sm:p-6", c.ring, c.soft)}>
+        <div className="flex items-center gap-2 mb-4">
+          <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg text-white", c.dot)}>
+            <ArrowRight className="h-4 w-4" />
+          </div>
+          <h3 className="font-black text-slate-950">Como usar no ZWeb</h3>
+        </div>
+        <div className="space-y-3">
+          {treino.aplicacao.map((b, j) => (
+            <BlocoView key={j} bloco={b} cor={treino.cor} />
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function BlocoView({ bloco, cor }: { bloco: Bloco; cor: Treinamento["cor"] }) {
+  const c = COR_TREINO[cor]
+  switch (bloco.tipo) {
+    case "paragrafo":
+      return <p className="text-sm text-slate-700 leading-relaxed">{bloco.texto}</p>
+    case "destaque": {
+      const tom = bloco.tom ?? "info"
+      const cls = {
+        info: "border-blue-200 bg-blue-50 text-blue-950",
+        alerta: "border-amber-200 bg-amber-50 text-amber-950",
+        sucesso: "border-emerald-200 bg-emerald-50 text-emerald-950",
+      }[tom]
+      return <p className={cn("rounded-xl border px-4 py-3 text-sm font-medium leading-relaxed", cls)}>{bloco.texto}</p>
+    }
+    case "citacao":
+      return (
+        <blockquote className="relative rounded-xl bg-slate-950 px-5 py-4 text-sm font-medium italic text-slate-100 leading-relaxed">
+          <span className="absolute left-2 top-1 text-3xl leading-none text-white/20">“</span>
+          <span className="relative">{bloco.texto}</span>
+        </blockquote>
+      )
+    case "lista":
+      return (
+        <ul className="space-y-2">
+          {bloco.itens.map((it, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700 leading-relaxed">
+              <Check className={cn("h-4 w-4 mt-0.5 shrink-0", cor === "emerald" ? "text-emerald-600" : cor === "indigo" ? "text-indigo-600" : "text-blue-600")} />
+              {it}
+            </li>
+          ))}
+        </ul>
+      )
+    case "passos":
+      return (
+        <div className="space-y-2.5">
+          {bloco.itens.map((p, i) => (
+            <div key={i} className={cn("rounded-xl border bg-white p-4", c.ring)}>
+              <p className={cn("text-sm font-bold", cor === "emerald" ? "text-emerald-800" : cor === "indigo" ? "text-indigo-800" : "text-blue-800")}>
+                {p.titulo}
+              </p>
+              <p className="mt-1 text-sm text-slate-600 leading-relaxed">{p.texto}</p>
+              {p.exemplo && (
+                <p className={cn("mt-2 rounded-lg px-3 py-2 text-sm italic text-slate-800", c.soft)}>{p.exemplo}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    case "cards":
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {bloco.itens.map((it, i) => (
+            <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+              <p className="font-bold text-slate-950 text-sm">{it.titulo}</p>
+              <p className="mt-1 text-sm text-slate-600 leading-relaxed">{it.texto}</p>
+            </div>
+          ))}
+        </div>
+      )
+    case "tabela":
+      return (
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-4 py-2.5 font-bold text-slate-800 whitespace-nowrap">{bloco.colunas[0]}</th>
+                <th className="px-4 py-2.5 font-bold text-slate-800">{bloco.colunas[1]}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bloco.linhas.map((linha, i) => (
+                <tr key={i} className="border-b border-slate-100 last:border-0 align-top">
+                  <td className="px-4 py-2.5 font-semibold text-slate-800">{linha[0]}</td>
+                  <td className="px-4 py-2.5 text-slate-600 leading-relaxed">{linha[1]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+  }
 }
 
 function Secao({

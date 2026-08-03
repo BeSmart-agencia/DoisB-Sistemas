@@ -31,6 +31,118 @@ export interface Roteiro {
   regraDeOuro: string
 }
 
+// ------------------------------------------------------------
+// Técnicas de venda — conteúdo transversal, vale pros 3 produtos.
+// (1) Framework 3A de Reenquadramento — usar principalmente no presencial.
+// ------------------------------------------------------------
+
+export interface Reframe {
+  objecao: string
+  como: string // Reconhece → Associa → Pergunta, numa frase pronta
+}
+
+export interface Tecnica {
+  id: string
+  nome: string
+  chamada: string
+  resumo: string
+  passos: { titulo: string; texto: string; exemplo: string }[]
+  regras: { titulo: string; texto: string }[]
+  reframes: Reframe[]
+  mantra: string
+}
+
+export const REENQUADRAMENTO: Tecnica = {
+  id: "3a",
+  nome: "Técnica 3A — Reenquadramento",
+  chamada: "Quem faz as perguntas controla a conversa.",
+  resumo:
+    "Quando o cliente disser qualquer coisa que não seja 'sim', não responda na hora: Reconheça, Associe e Pergunte. O cliente acredita em quase nada do que VOCÊ diz — e em quase tudo que ELE mesmo conclui. Seu papel é fazer perguntas até ele chegar sozinho na compra.",
+  passos: [
+    {
+      titulo: "1 · Reconheça",
+      texto: "Repita de volta o que ele disse. Ele sente que foi ouvido e você ganha 2-3 segundos pra pensar.",
+      exemplo: "\"Então você quer entender melhor essa parte do preço…\"",
+    },
+    {
+      titulo: "2 · Associe",
+      texto: "Ligue a dúvida dele ao comportamento de quem tem os melhores resultados. Dê um rótulo positivo pra ele viver à altura (guarde o rótulo pro fechamento).",
+      exemplo: "\"É exatamente o tipo de pergunta que os lojistas que mais crescem fazem — mostra que você leva o negócio a sério.\"",
+    },
+    {
+      titulo: "3 · Pergunte",
+      texto: "Faça uma pergunta sobre a pergunta dele. Entenda o que realmente importa ANTES de responder — senão você entrega o poder e vira réu da sua própria resposta.",
+      exemplo: "\"O que exatamente você está comparando pra decidir?\"",
+    },
+  ],
+  regras: [
+    {
+      titulo: "Não responda — pergunte",
+      texto: "\"Tem alguma dúvida?\" é pedir pra pessoa criar objeção. Devolva com uma pergunta. Se não sabe responder, pergunte mais sobre a pergunta dele.",
+    },
+    {
+      titulo: "Ninguém discorda de uma pergunta",
+      texto: "Seja como fumaça: a cada fala, devolva \"deixa eu te perguntar uma coisa sobre isso…\". Você nunca ganha a venda ganhando a discussão.",
+    },
+    {
+      titulo: "Diga o que a objeção significa",
+      texto: "Reinterprete o 'não' como sinal de bom cliente: \"já tenho sistema\" vira \"ótimo, você já entende o valor e sobe a curva mais rápido\".",
+    },
+    {
+      titulo: "Use a 'terceira voz' pra verdades duras",
+      texto: "Não jogue a verdade na cara. Empreste a autoridade da Zucchetti ou cite outro cliente: \"teve um lojista hoje com essa mesma dúvida, posso te contar o que respondi?\".",
+    },
+    {
+      titulo: "Curiosidade de criança",
+      texto: "O objetivo é entender, não vencer. \"Hã, interessante você perguntar isso — posso te perguntar mais sobre isso?\" Mantenha o humano em primeiro lugar.",
+    },
+  ],
+  reframes: [
+    {
+      objecao: "\"Preciso pensar.\"",
+      como: "\"Total. Quais são as coisas que você está pesando? Qual a sua maior preocupação — o que faria disso um não? E o que precisaria acontecer pra ser um sim?\"",
+    },
+    {
+      objecao: "\"Agora não é um bom momento.\"",
+      como: "\"Entendo, tá corrido. Inteligente já pensar na implementação — nossos melhores cases pensavam assim. O que faria disso um bom momento?\"",
+    },
+    {
+      objecao: "\"Preciso falar com meu sócio / contador.\"",
+      como: "\"Super sensato. Só pra eu entender: quais partes você acha que ele ia querer entender melhor? Porque a gente já tem o material pronto pra passar pra ele.\"",
+    },
+    {
+      objecao: "\"Quanto custa?\" (cedo demais)",
+      como: "\"Depende do que você precisa hoje. Você emite nota? Trabalha com grade? Vende em marketplace? Deixa eu entender sua operação pra te indicar o plano certo — senão você paga por algo que não usa, ou falta algo que precisa.\"",
+    },
+    {
+      objecao: "\"Já tenho um sistema.\"",
+      como: "\"Ótimo — 9 em cada 10 que migram pra gente já tinham um. Significa que você já sabe o que quer e sobe a curva rápido. O que ele NÃO te entrega hoje que te incomoda?\"",
+    },
+  ],
+  mantra:
+    "Você não fecha vendas estando certo. Você fecha fazendo o cliente chegar sozinho na conclusão. O objetivo é ganhar dinheiro, não ter razão.",
+}
+
+// (2) Vetores de valor — em vez de brigar por preço, ganhe em um destes três
+// e deixe explícito na conversa. Base: docs/Vendas/ofertas-e-iscas-digitais.
+export const VETORES_VALOR: { intro: string; itens: { titulo: string; texto: string }[] } = {
+  intro: "Não brigue por preço. Ganhe em um destes três e diga isso na cara do cliente:",
+  itens: [
+    {
+      titulo: "⚡ Mais rápido",
+      texto: "Migração via XML, onboarding em poucos dias e suporte que responde no mesmo dia.",
+    },
+    {
+      titulo: "🛡️ Menos arriscado",
+      texto: "Sem fidelidade, cancela quando quiser e migração dos dados sem custo. \"Se não for melhor, é só sair.\"",
+    },
+    {
+      titulo: "✨ Mais fácil",
+      texto: "A DoisB importa os dados, configura a tributação e deixa o PDV pronto. Diga isso — quase ninguém percebe o bastidor.",
+    },
+  ],
+}
+
 export const ROTEIROS: Roteiro[] = [
   {
     id: "zweb",
