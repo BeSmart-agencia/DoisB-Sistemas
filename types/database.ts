@@ -81,6 +81,32 @@ export interface Database {
         }
         Relationships: []
       }
+      captacoes: {
+        Row: {
+          id: string; vendedor_id: string; tipo: "fisica" | "online"
+          nome_cliente: string; whatsapp: string | null; respostas: Json
+          plano_recomendado: string | null; motivo_recomendacao: Json | null
+          status: string; motivo_perda: string | null
+          created_at: string; atualizado_em: string
+        }
+        Insert: {
+          id?: string; vendedor_id: string; tipo: "fisica" | "online"
+          nome_cliente: string; whatsapp?: string | null; respostas?: Json
+          plano_recomendado?: string | null; motivo_recomendacao?: Json | null
+          status?: string; motivo_perda?: string | null
+          created_at?: string; atualizado_em?: string
+        }
+        Update: {
+          id?: string; vendedor_id?: string; tipo?: "fisica" | "online"
+          nome_cliente?: string; whatsapp?: string | null; respostas?: Json
+          plano_recomendado?: string | null; motivo_recomendacao?: Json | null
+          status?: string; motivo_perda?: string | null
+          created_at?: string; atualizado_em?: string
+        }
+        Relationships: [
+          { foreignKeyName: "captacoes_vendedor_id_fkey"; columns: ["vendedor_id"]; isOneToOne: false; referencedRelation: "vendedores"; referencedColumns: ["id"] }
+        ]
+      }
       chamados: {
         Row: {
           id: number; cliente_id: string | null; cnpj_informado: string; email_retorno: string

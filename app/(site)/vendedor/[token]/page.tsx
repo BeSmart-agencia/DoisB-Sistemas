@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { listarComissoes } from "@/lib/comissoes"
-import { PortalClient } from "./portal-client"
+import { PortalClient, type Captacao } from "./portal-client"
 
 export const metadata: Metadata = {
   title: "Portal do Vendedor — DoisB Sistemas",
@@ -33,17 +33,26 @@ export default async function PortalVendedorPage({
 
   if (!vendedor) notFound()
 
-  const comissoes = await listarComissoes(supabase, vendedor.id)
+  const [comissoes, { data: captacoes }] = await Promise.all([
+    listarComissoes(supabase, vendedor.id),
+    supabase
+      .from("captacoes")
+      .select("*")
+      .eq("vendedor_id", vendedor.id)
+      .order("created_at", { ascending: false }),
+  ])
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.doisbsistemas.com.br"
 
   return (
     <PortalClient
+      token={params.token}
       nome={vendedor.nome}
       ativo={vendedor.ativo}
       chavePix={vendedor.chave_pix}
       linkVenda={`${appUrl}/?v=${vendedor.codigo}`}
       comissoes={comissoes}
+      captacoesIniciais={(captacoes ?? []) as unknown as Captacao[]}
     />
   )
 }

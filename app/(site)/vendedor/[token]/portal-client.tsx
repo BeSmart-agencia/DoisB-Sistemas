@@ -18,9 +18,31 @@ import {
   Sparkles,
   CircleDollarSign,
   MessagesSquare,
+  ClipboardList,
+  UserPlus,
+  Store,
+  Globe,
+  ArrowLeft,
+  ChevronRight,
+  Loader2,
+  Wand2,
 } from "lucide-react"
 import { ROTEIROS, type Roteiro } from "@/lib/roteiros"
 import type { ComissaoEntry, StatusComissao } from "@/lib/comissoes"
+import {
+  recomendar,
+  RECOMENDACAO_INFO,
+  STATUS_CAPTACAO_INFO,
+  STATUS_MANUAIS,
+  REGIME_OPCOES,
+  USUARIOS_OPCOES,
+  CHECKBOXES_OPERACAO,
+  CHECKBOXES_SOB_MEDIDA,
+  type Respostas,
+  type StatusCaptacao,
+  type PlanoRecomendado,
+  type TipoCaptacao,
+} from "@/lib/captacao"
 import { cn } from "@/lib/utils"
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
@@ -34,20 +56,37 @@ const STATUS_CLIENTE: Record<StatusComissao, { label: string; cls: string }> = {
   cancelado: { label: "Cancelado", cls: "bg-slate-100 text-slate-500 border-slate-200" },
 }
 
-type Tab = "vendas" | "roteiro"
+type Tab = "vendas" | "captacoes" | "roteiro"
+
+export interface Captacao {
+  id: string
+  tipo: TipoCaptacao
+  nome_cliente: string
+  whatsapp: string | null
+  respostas: Respostas
+  plano_recomendado: PlanoRecomendado | null
+  motivo_recomendacao: string[] | null
+  status: StatusCaptacao
+  motivo_perda: string | null
+  created_at: string
+}
 
 export function PortalClient({
+  token,
   nome,
   ativo,
   chavePix,
   linkVenda,
   comissoes,
+  captacoesIniciais,
 }: {
+  token: string
   nome: string
   ativo: boolean
   chavePix: string | null
   linkVenda: string
   comissoes: ComissaoEntry[]
+  captacoesIniciais: Captacao[]
 }) {
   const [tab, setTab] = useState<Tab>("vendas")
   const [copiado, setCopiado] = useState(false)
@@ -114,6 +153,9 @@ export function PortalClient({
           <TabBtn ativo={tab === "vendas"} onClick={() => setTab("vendas")} icon={ShoppingBag}>
             Minhas vendas
           </TabBtn>
+          <TabBtn ativo={tab === "captacoes"} onClick={() => setTab("captacoes")} icon={ClipboardList}>
+            Captações
+          </TabBtn>
           <TabBtn ativo={tab === "roteiro"} onClick={() => setTab("roteiro")} icon={BookOpen}>
             Roteiro de vendas
           </TabBtn>
@@ -129,6 +171,8 @@ export function PortalClient({
             recebido={recebido}
             chavePix={chavePix}
           />
+        ) : tab === "captacoes" ? (
+          <CaptacoesView token={token} ativo={ativo} iniciais={captacoesIniciais} />
         ) : (
           <RoteiroView />
         )}
@@ -457,5 +501,519 @@ function Secao({
       </div>
       {children}
     </section>
+  )
+}
+
+// ============================================================
+// Captações — funil de leads do vendedor (só controle interno)
+// ============================================================
+
+function CaptacoesView({
+  token,
+  ativo,
+  iniciais,
+}: {
+  token: string
+  ativo: boolean
+  iniciais: Captacao[]
+}) {
+  const [lista, setLista] = useState<Captacao[]>(iniciais)
+  const [abertaId, setAbertaId] = useState<string | null>(null)
+  const [criando, setCriando] = useState(false)
+
+  const aberta = lista.find((c) => c.id === abertaId) ?? null
+
+  async function api(method: "POST" | "PATCH", body: unknown): Promise<Captacao> {
+    const res = await fetch(`/api/vendedor/${token}/captacoes`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data?.error ?? "Não foi possível salvar")
+    return data as Captacao
+  }
+
+  function upsert(c: Captacao) {
+    setLista((prev) => {
+      const i = prev.findIndex((x) => x.id === c.id)
+      if (i === -1) return [c, ...prev]
+      const copy = [...prev]
+      copy[i] = c
+      return copy
+    })
+  }
+
+  if (criando) {
+    return (
+      <NovaCaptacao
+        onCancelar={() => setCriando(false)}
+        onCriar={async (payload) => {
+          const c = await api("POST", payload)
+          upsert(c)
+          setCriando(false)
+          setAbertaId(c.id)
+        }}
+      />
+    )
+  }
+
+  if (aberta) {
+    return (
+      <CaptacaoDetalhe
+        captacao={aberta}
+        onVoltar={() => setAbertaId(null)}
+        onFinalizar={async (respostas) => {
+          upsert(await api("PATCH", { id: aberta.id, acao: "finalizar", respostas }))
+        }}
+        onStatus={async (status, motivo) => {
+          upsert(await api("PATCH", { id: aberta.id, acao: "status", status, motivo_perda: motivo }))
+        }}
+      />
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-black text-slate-950">Captações</h2>
+          <p className="text-sm text-slate-500">Registre cada contato e descubra o plano ideal.</p>
+        </div>
+        <button
+          onClick={() => setCriando(true)}
+          disabled={!ativo}
+          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
+        >
+          <UserPlus className="h-4 w-4" />
+          Nova captação
+        </button>
+      </div>
+
+      {lista.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <ClipboardList className="h-8 w-8 mx-auto text-slate-300" />
+          <p className="mt-3 font-semibold text-slate-700">Nenhuma captação ainda</p>
+          <p className="text-sm text-slate-500 mt-1">
+            Toque em <strong>Nova captação</strong> quando começar uma conversa com um cliente.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {lista.map((c) => {
+            const st = STATUS_CAPTACAO_INFO[c.status]
+            const rec = c.plano_recomendado ? RECOMENDACAO_INFO[c.plano_recomendado] : null
+            return (
+              <button
+                key={c.id}
+                onClick={() => setAbertaId(c.id)}
+                className="w-full text-left rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 flex items-center justify-between gap-4 hover:border-blue-300 transition-colors"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    {c.tipo === "fisica" ? (
+                      <Store className="h-4 w-4 text-slate-400" />
+                    ) : (
+                      <Globe className="h-4 w-4 text-slate-400" />
+                    )}
+                    <p className="font-bold text-slate-950 truncate">{c.nome_cliente}</p>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", st.cls)}>
+                      {st.label}
+                    </span>
+                    {rec && (
+                      <span className="text-[11px] font-medium text-slate-500">
+                        Indicação: <strong className="text-slate-700">{rec.label}</strong>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <p className="text-xs text-slate-400 leading-relaxed">
+        Esta aba é só para <strong>seu controle</strong> — não gera venda nem comissão. A comissão continua
+        entrando automaticamente quando o cliente assina pelo seu link.
+      </p>
+    </div>
+  )
+}
+
+function NovaCaptacao({
+  onCriar,
+  onCancelar,
+}: {
+  onCriar: (p: { tipo: TipoCaptacao; nome_cliente: string; whatsapp: string }) => Promise<void>
+  onCancelar: () => void
+}) {
+  const [tipo, setTipo] = useState<TipoCaptacao | null>(null)
+  const [nome, setNome] = useState("")
+  const [whatsapp, setWhatsapp] = useState("")
+  const [salvando, setSalvando] = useState(false)
+
+  async function iniciar() {
+    if (!tipo) return toast.error("Escolha visita física ou online")
+    if (nome.trim().length < 2) return toast.error("Informe o nome do cliente")
+    setSalvando(true)
+    try {
+      await onCriar({ tipo, nome_cliente: nome.trim(), whatsapp: whatsapp.trim() })
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao iniciar")
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <VoltarBtn onClick={onCancelar} label="Cancelar" />
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-5">
+        <div>
+          <h2 className="text-lg font-black text-slate-950">Nova captação</h2>
+          <p className="text-sm text-slate-500">Como é o contato?</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { v: "fisica" as const, icon: Store, label: "Visita física" },
+            { v: "online" as const, icon: Globe, label: "Online" },
+          ]).map(({ v, icon: Icon, label }) => (
+            <button
+              key={v}
+              onClick={() => setTipo(v)}
+              className={cn(
+                "flex flex-col items-center gap-2 rounded-xl border-2 px-4 py-5 transition-all",
+                tipo === v ? "border-blue-700 bg-blue-50 text-blue-800" : "border-slate-200 text-slate-600 hover:border-slate-300"
+              )}
+            >
+              <Icon className="h-6 w-6" />
+              <span className="text-sm font-bold">{label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-600">Nome do cliente</label>
+            <input
+              data-slot="input"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder="Ex: Loja do João"
+              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600">WhatsApp (opcional)</label>
+            <input
+              data-slot="input"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+              inputMode="tel"
+              placeholder="(51) 99999-9999"
+              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={iniciar}
+          disabled={salvando}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
+        >
+          {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4" />}
+          Iniciar captação
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function CaptacaoDetalhe({
+  captacao,
+  onVoltar,
+  onFinalizar,
+  onStatus,
+}: {
+  captacao: Captacao
+  onVoltar: () => void
+  onFinalizar: (respostas: Respostas) => Promise<void>
+  onStatus: (status: StatusCaptacao, motivo: string) => Promise<void>
+}) {
+  const [respostas, setRespostas] = useState<Respostas>(captacao.respostas ?? {})
+  const [salvando, setSalvando] = useState(false)
+  const [motivoPerda, setMotivoPerda] = useState(captacao.motivo_perda ?? "")
+
+  const st = STATUS_CAPTACAO_INFO[captacao.status]
+  const finalizada = captacao.status !== "iniciada"
+  const preview = recomendar(respostas)
+  const recInfo = RECOMENDACAO_INFO[preview.plano]
+
+  function set(chave: keyof Respostas, valor: unknown) {
+    setRespostas((r) => ({ ...r, [chave]: valor }))
+  }
+  function toggle(chave: keyof Respostas) {
+    setRespostas((r) => ({ ...r, [chave]: !r[chave] }))
+  }
+
+  async function finalizar() {
+    setSalvando(true)
+    try {
+      await onFinalizar(respostas)
+      toast.success("Captação finalizada!")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao finalizar")
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function mudarStatus(novo: StatusCaptacao) {
+    if (novo === "venda_negada" && motivoPerda.trim().length === 0) {
+      toast.error("Escreva o motivo antes de marcar como negada")
+      return
+    }
+    setSalvando(true)
+    try {
+      await onStatus(novo, motivoPerda.trim())
+      toast.success("Status atualizado")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao atualizar")
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <VoltarBtn onClick={onVoltar} label="Voltar" />
+
+      {/* Cabeçalho */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              {captacao.tipo === "fisica" ? <Store className="h-4 w-4 text-slate-400" /> : <Globe className="h-4 w-4 text-slate-400" />}
+              <h2 className="text-lg font-black text-slate-950 truncate">{captacao.nome_cliente}</h2>
+            </div>
+            {captacao.whatsapp && <p className="text-sm text-slate-500 mt-0.5">{captacao.whatsapp}</p>}
+          </div>
+          <span className={cn("inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", st.cls)}>
+            {st.label}
+          </span>
+        </div>
+      </div>
+
+      {/* Questionário */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-6">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+            <ClipboardList className="h-4 w-4" />
+          </div>
+          <h3 className="font-bold text-slate-950">Perguntas estratégicas</h3>
+        </div>
+        <p className="-mt-3 text-sm text-slate-500">Vá marcando conforme o cliente responde.</p>
+
+        <Pergunta titulo="Regime tributário">
+          <Segmented
+            valor={respostas.regime}
+            opcoes={REGIME_OPCOES}
+            onEscolher={(v) => set("regime", v)}
+          />
+        </Pergunta>
+
+        <Pergunta titulo="Quantas pessoas vão usar?">
+          <Segmented
+            valor={respostas.usuarios}
+            opcoes={USUARIOS_OPCOES}
+            onEscolher={(v) => set("usuarios", v)}
+          />
+        </Pergunta>
+
+        <Pergunta titulo="Marque tudo que se aplica">
+          <div className="space-y-2">
+            {CHECKBOXES_OPERACAO.map((c) => (
+              <CheckLinha key={c.chave} checked={!!respostas[c.chave]} onToggle={() => toggle(c.chave)}>
+                {c.label}
+              </CheckLinha>
+            ))}
+          </div>
+        </Pergunta>
+
+        <Pergunta titulo="É caso de sistema sob medida?">
+          <div className="space-y-2">
+            {CHECKBOXES_SOB_MEDIDA.map((c) => (
+              <CheckLinha key={c.chave} checked={!!respostas[c.chave]} onToggle={() => toggle(c.chave)}>
+                {c.label}
+              </CheckLinha>
+            ))}
+          </div>
+        </Pergunta>
+      </div>
+
+      {/* Recomendação (prévia ao vivo + resultado ao finalizar) */}
+      {preview.plano !== "indefinido" && (
+        <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex items-center gap-2 text-emerald-800">
+            <Wand2 className="h-4 w-4" />
+            <span className="text-xs font-bold uppercase tracking-wide">
+              {finalizada ? "Plano recomendado" : "Indicação prévia"}
+            </span>
+          </div>
+          <p className="mt-1 text-xl font-black text-emerald-950">{recInfo.label}</p>
+          {recInfo.sub && <p className="text-sm text-emerald-800">{recInfo.sub}</p>}
+          <ul className="mt-3 space-y-1.5">
+            {preview.motivos.map((m, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-emerald-900">
+                <Check className="h-4 w-4 mt-0.5 shrink-0" />
+                {m}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs font-medium text-emerald-800">{recInfo.acao}</p>
+        </div>
+      )}
+
+      {/* Ação: finalizar questionário */}
+      {!finalizada && (
+        <button
+          onClick={finalizar}
+          disabled={salvando}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-500 transition-colors disabled:opacity-50"
+        >
+          {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
+          Finalizar questionário
+        </button>
+      )}
+
+      {/* Controle de status (após finalizar) */}
+      {finalizada && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Flag className="h-4 w-4 text-slate-500" />
+            <h3 className="font-bold text-slate-950">Andamento (controle interno)</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {STATUS_MANUAIS.map((s) => {
+              const info = STATUS_CAPTACAO_INFO[s]
+              const ativoBtn = captacao.status === s
+              return (
+                <button
+                  key={s}
+                  onClick={() => mudarStatus(s)}
+                  disabled={salvando}
+                  className={cn(
+                    "rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all disabled:opacity-50",
+                    ativoBtn ? info.cls : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  )}
+                >
+                  {info.label}
+                </button>
+              )
+            })}
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600">
+              Motivo (se venda negada)
+            </label>
+            <input
+              data-slot="input"
+              value={motivoPerda}
+              onChange={(e) => setMotivoPerda(e.target.value)}
+              placeholder="Ex: achou caro, foi pra concorrência…"
+              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function VoltarBtn({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800"
+    >
+      <ArrowLeft className="h-4 w-4" />
+      {label}
+    </button>
+  )
+}
+
+function Pergunta({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-2 text-sm font-bold text-slate-800">{titulo}</p>
+      {children}
+    </div>
+  )
+}
+
+function Segmented<T extends string>({
+  valor,
+  opcoes,
+  onEscolher,
+}: {
+  valor: T | undefined
+  opcoes: { valor: T; label: string }[]
+  onEscolher: (v: T) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {opcoes.map((o) => (
+        <button
+          key={o.valor}
+          onClick={() => onEscolher(o.valor)}
+          className={cn(
+            "rounded-xl border px-3.5 py-2 text-sm font-semibold transition-all",
+            valor === o.valor
+              ? "border-blue-700 bg-blue-700 text-white"
+              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function CheckLinha({
+  checked,
+  onToggle,
+  children,
+}: {
+  checked: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        "w-full text-left flex items-start gap-3 rounded-xl border px-3.5 py-3 transition-all",
+        checked ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300"
+      )}
+    >
+      <span
+        className={cn(
+          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
+          checked ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-white"
+        )}
+      >
+        {checked && <Check className="h-3.5 w-3.5" />}
+      </span>
+      <span className={cn("text-sm", checked ? "text-blue-950 font-medium" : "text-slate-700")}>
+        {children}
+      </span>
+    </button>
   )
 }
