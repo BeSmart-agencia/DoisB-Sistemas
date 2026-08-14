@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/admin/require-admin"
-import { enviarEmailAcessoLiberado } from "@/lib/emails"
 
 export async function PATCH(_req: Request, { params }: { params: { id: string } }) {
   const { supabase, response } = await requireAdmin()
@@ -8,7 +7,7 @@ export async function PATCH(_req: Request, { params }: { params: { id: string } 
 
   const { data: cliente, error: fetchError } = await supabase!
     .from("clientes")
-    .select("email, nome_responsavel, acesso_liberado")
+    .select("acesso_liberado")
     .eq("id", params.id)
     .maybeSingle()
 
@@ -29,17 +28,8 @@ export async function PATCH(_req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ error: "Erro ao liberar acesso" }, { status: 500 })
   }
 
-  // Disparar e-mail com credenciais provisórias
-  // Adapte usuario/senha/url conforme seu sistema de licenças ZWeb
-  await enviarEmailAcessoLiberado(
-    cliente.email,
-    cliente.nome_responsavel,
-    {
-      usuario: cliente.email,
-      senha: "Alterar123!",
-      url: "https://app.zweb.com.br",
-    }
-  ).catch((err) => console.error("[liberar] Erro e-mail acesso:", err))
+  // A ativação no ZWeb é feita manualmente e o próprio ZWeb envia o e-mail
+  // de acesso ao cliente. Aqui só marcamos como liberado, sem disparar e-mail.
 
   return NextResponse.json({ ok: true })
 }
