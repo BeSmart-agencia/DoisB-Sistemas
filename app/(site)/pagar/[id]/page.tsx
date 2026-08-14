@@ -50,7 +50,7 @@ export default async function PagarPage({ params }: { params: { id: string } }) 
           <h1 className="text-xl font-bold text-slate-900 mb-3">QR Code indisponível</h1>
           <p className="text-slate-500 mb-6">O QR Code desta cobrança expirou ou não está disponível.</p>
           <a
-            href="https://wa.me/5551998518895"
+            href="https://wa.me/5551992726289"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center w-full py-3 rounded-xl font-semibold text-white text-sm"

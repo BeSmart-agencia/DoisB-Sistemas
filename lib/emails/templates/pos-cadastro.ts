@@ -31,7 +31,7 @@ export function templatePosCadastro(nome: string, plano: string): string {
             </table>
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr><td align="center">
-                <a href="https://wa.me/5551998518895?text=Olá!%20Acabei%20de%20assinar%20o%20ZWeb%20e%20quero%20acompanhar%20meu%20acesso."
+                <a href="https://wa.me/5551992726289?text=Olá!%20Acabei%20de%20assinar%20o%20ZWeb%20e%20quero%20acompanhar%20meu%20acesso."
                    style="display:inline-block;background:#1472B5;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:700;font-size:15px;">
                   Falar no WhatsApp
                 </a>

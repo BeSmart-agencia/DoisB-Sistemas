@@ -36,7 +36,7 @@ export default function AgendabSucessoPage() {
           <p className="mt-6 text-xs text-slate-400">
             Não recebeu em alguns minutos? Fale com a gente pelo{" "}
             <a
-              href="https://wa.me/5551998518895?text=Assinei%20o%20AgendaB%20e%20n%C3%A3o%20recebi%20o%20e-mail%20de%20acesso."
+              href="https://wa.me/5551992726289?text=Assinei%20o%20AgendaB%20e%20n%C3%A3o%20recebi%20o%20e-mail%20de%20acesso."
               className="font-semibold text-[#0169b2] hover:underline"
             >
               WhatsApp

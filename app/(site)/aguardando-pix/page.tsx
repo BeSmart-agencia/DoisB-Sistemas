@@ -68,7 +68,7 @@ function AguardandoPixContent() {
             até <strong>24 horas úteis</strong>.
           </p>
           <a
-            href="https://wa.me/5551998518895?text=Ol%C3%A1!%20Acabei%20de%20pagar%20o%20PIX%20e%20quero%20acompanhar%20meu%20acesso."
+            href="https://wa.me/5551992726289?text=Ol%C3%A1!%20Acabei%20de%20pagar%20o%20PIX%20e%20quero%20acompanhar%20meu%20acesso."
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-semibold text-white text-sm"

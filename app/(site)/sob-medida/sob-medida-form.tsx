@@ -163,7 +163,7 @@ export function SobMedidaForm() {
         <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center">
           <p className="text-sm font-semibold text-red-700">{erro}</p>
           <a
-            href="https://wa.me/5551998518895"
+            href="https://wa.me/5551992726289"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-1 inline-block text-sm font-bold text-red-700 underline underline-offset-2"

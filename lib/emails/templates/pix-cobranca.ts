@@ -59,7 +59,7 @@ export function templatePixCobranca(
 
             <p style="color:#94a3b8;font-size:12px;line-height:1.6;margin:0;">
               Dúvidas? Fale no WhatsApp:
-              <a href="https://wa.me/5551998518895" style="color:#1472B5;">(51) 99851-8895</a>
+              <a href="https://wa.me/5551992726289" style="color:#1472B5;">(51) 99272-6289</a>
             </p>
           </td>
         </tr>

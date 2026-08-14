@@ -7,9 +7,9 @@ import { Check, MessageCircle, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const WA_LINK =
-  "https://wa.me/5551998518895?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
+  "https://wa.me/5551992726289?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
 const WA_ORCAMENTO_LINK =
-  "https://wa.me/5551998518895?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20tenho%20empresa%20no%20regime%20geral%20%28lucro%20real%20ou%20presumido%29.%20Quero%20solicitar%20um%20or%C3%A7amento%20sob%20medida%20para%20o%20ZWeb."
+  "https://wa.me/5551992726289?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20tenho%20empresa%20no%20regime%20geral%20%28lucro%20real%20ou%20presumido%29.%20Quero%20solicitar%20um%20or%C3%A7amento%20sob%20medida%20para%20o%20ZWeb."
 
 type Billing = "monthly" | "yearly"
 

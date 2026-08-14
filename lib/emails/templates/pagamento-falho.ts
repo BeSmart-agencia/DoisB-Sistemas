@@ -33,7 +33,7 @@ export function templatePagamentoFalho(nome: string): string {
             </p>
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr><td align="center">
-                <a href="https://wa.me/5551998518895?text=Olá!%20Tive%20um%20problema%20no%20pagamento%20da%20minha%20assinatura%20ZWeb."
+                <a href="https://wa.me/5551992726289?text=Olá!%20Tive%20um%20problema%20no%20pagamento%20da%20minha%20assinatura%20ZWeb."
                    style="display:inline-block;background:#1472B5;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:700;font-size:15px;">
                   Falar no WhatsApp
                 </a>

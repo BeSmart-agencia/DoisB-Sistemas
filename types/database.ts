@@ -397,6 +397,42 @@ export interface Database {
         }
         Relationships: []
       }
+      metas_premissas: {
+        Row: {
+          id: number; zweb_vendedora: number; zweb_socios_m1: number; zweb_socios: number
+          sob_medida_mes: number; mix_essencial: number; mix_standard: number; mix_premium: number
+          dev_sm: number; mens_sm: number; pro_labore_pct: number; outros_custos: number
+          atualizado_em: string | null; atualizado_por: string | null
+        }
+        Insert: {
+          id?: number; zweb_vendedora?: number; zweb_socios_m1?: number; zweb_socios?: number
+          sob_medida_mes?: number; mix_essencial?: number; mix_standard?: number; mix_premium?: number
+          dev_sm?: number; mens_sm?: number; pro_labore_pct?: number; outros_custos?: number
+          atualizado_em?: string | null; atualizado_por?: string | null
+        }
+        Update: {
+          id?: number; zweb_vendedora?: number; zweb_socios_m1?: number; zweb_socios?: number
+          sob_medida_mes?: number; mix_essencial?: number; mix_standard?: number; mix_premium?: number
+          dev_sm?: number; mens_sm?: number; pro_labore_pct?: number; outros_custos?: number
+          atualizado_em?: string | null; atualizado_por?: string | null
+        }
+        Relationships: []
+      }
+      metas_realizado: {
+        Row: {
+          id: string; mes: string; metrica: string; valor: number
+          atualizado_em: string | null; atualizado_por: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; mes: string; metrica: string; valor?: number
+          atualizado_em?: string | null; atualizado_por?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; mes?: string; metrica?: string; valor?: number
+          atualizado_em?: string | null; atualizado_por?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           id: string; plataforma: string; external_id: string | null; nome: string

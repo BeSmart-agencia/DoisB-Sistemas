@@ -78,7 +78,7 @@ export default function SucessoPage() {
               Ver tutoriais
             </a>
             <a
-              href="https://wa.me/5551998518895?text=Olá!%20Acabei%20de%20assinar%20o%20ZWeb%20e%20quero%20acompanhar%20meu%20acesso."
+              href="https://wa.me/5551992726289?text=Olá!%20Acabei%20de%20assinar%20o%20ZWeb%20e%20quero%20acompanhar%20meu%20acesso."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-xl transition-colors text-sm"

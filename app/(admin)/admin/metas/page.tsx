@@ -1,46 +1,15 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { Target, Wallet, Rocket } from "lucide-react"
-import { MetasChecklist, type MetaRow } from "./_components/metas-checklist"
+import { Target, Wallet } from "lucide-react"
+import { MetasPlanner, type Premissas, type RealizadoRow } from "./_components/metas-planner"
 
 export const metadata = { title: "Metas Ano 1 | DoisB Admin" }
 export const dynamic = "force-dynamic"
 
 const FOLHA = [
-  { nome: "Laisa", valor: "R$ 7.000", pct: 100, tipo: "Sócia" },
-  { nome: "Abel", valor: "R$ 7.000", pct: 100, tipo: "Sócio" },
-  { nome: "Douglas", valor: "R$ 2.500", pct: 36, tipo: "Equipe" },
-  { nome: "Ailla", valor: "R$ 2.000", pct: 29, tipo: "Equipe" },
-]
-
-const MOTORES = [
-  {
-    rotulo: "Motor 1 · Indústria",
-    valor: "R$ 16 mil",
-    hipotese: true,
-    desc: "6 clientes ativos a ~R$ 2.650/mês. Sistema Zucchetti para indústrias — produto, preço e margem a confirmar com a Zucchetti.",
-    quem: "Abel · venda presencial, ticket alto",
-  },
-  {
-    rotulo: "Motor 2 · ZWeb",
-    valor: "R$ 10 mil",
-    hipotese: false,
-    desc: "60 clientes ativos com margem média de ~R$ 165/cliente. Volume, base e indicações — o motor que constrói presença. Reforço: vendedora externa com meta de 5 ZWeb/mês (comissão = 1ª mensalidade).",
-    quem: "Laisa + vendedora externa · anúncios em escala",
-  },
-  {
-    rotulo: "Motor 3 · Sob medida",
-    valor: "R$ 4 mil",
-    hipotese: false,
-    desc: "1 projeto/mês (projeto menor) + mensalidade de R$ 450 que acumula a cada projeto entregue — a anuidade silenciosa.",
-    quem: "Laisa · desenvolvimento",
-  },
-]
-
-const TRIMESTRES = [
-  { quando: "T1 · out/26", industria: "1º cliente fechado", zweb: "16 clientes", marco: "validação dos modelos", cor: "amber" },
-  { quando: "T2 · jan/27", industria: "3 clientes", zweb: "30 clientes", marco: "—", cor: "slate" },
-  { quando: "T3 · abr/27", industria: "5 clientes", zweb: "45 clientes", marco: "receita > R$ 20 mil → DoisB absorve 1 salário", cor: "amber" },
-  { quando: "T4 · jul/27", industria: "6 clientes", zweb: "60 clientes", marco: "folha completa · agência encerrada", cor: "emerald" },
+  { nome: "Laisa", valor: "R$ 7.000", pct: 100 },
+  { nome: "Abel", valor: "R$ 7.000", pct: 100 },
+  { nome: "Douglas", valor: "R$ 2.500", pct: 36 },
+  { nome: "Ailla", valor: "R$ 2.000", pct: 29 },
 ]
 
 const REGRAS = [
@@ -50,29 +19,52 @@ const REGRAS = [
   { chave: "R4", texto: "Nenhum real de mídia sem aprovação humana — e o Estrategista cobra estas metas todo relatório de segunda-feira." },
 ]
 
-const MARCO_COR: Record<string, string> = {
-  amber: "text-amber-700 font-semibold",
-  emerald: "text-emerald-700 font-semibold",
-  slate: "text-slate-600",
+const PREMISSAS_PADRAO: Premissas = {
+  zweb_vendedora: 5, zweb_socios_m1: 2, zweb_socios: 10, sob_medida_mes: 1,
+  mix_essencial: 70, mix_standard: 20, mix_premium: 10,
+  dev_sm: 2000, mens_sm: 350, pro_labore_pct: 70, outros_custos: 80,
 }
 
 export default async function MetasPage() {
   const db = createAdminClient()
-  const { data: metas } = await db
-    .from("metas_checklist")
-    .select("id, mes, responsavel, categoria, tarefa, ordem, concluido, concluido_em, concluido_por")
-    .order("mes", { ascending: true })
-    .order("ordem", { ascending: true })
+
+  const [premRes, realRes] = await Promise.all([
+    db.from("metas_premissas").select("*").eq("id", 1).maybeSingle(),
+    db.from("metas_realizado").select("mes, metrica, valor"),
+  ])
+
+  const p = premRes.data
+  const premissas: Premissas = p
+    ? {
+        zweb_vendedora: p.zweb_vendedora, zweb_socios_m1: p.zweb_socios_m1, zweb_socios: p.zweb_socios,
+        sob_medida_mes: p.sob_medida_mes, mix_essencial: p.mix_essencial, mix_standard: p.mix_standard,
+        mix_premium: p.mix_premium, dev_sm: Number(p.dev_sm), mens_sm: Number(p.mens_sm),
+        pro_labore_pct: p.pro_labore_pct, outros_custos: Number(p.outros_custos),
+      }
+    : PREMISSAS_PADRAO
+
+  const realizado: RealizadoRow[] = (realRes.data ?? []).map((r) => ({
+    mes: r.mes, metrica: r.metrica, valor: Number(r.valor),
+  }))
+
+  const tabelaFalta = !!premRes.error || !!realRes.error
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-950">Metas — Ano 1</h1>
         <p className="text-sm text-slate-700 mt-1">
-          Jul/2026 → Jul/2027. O plano para a DoisB pagar todos os salários — equipe e sócios — em 12 meses,
-          com três motores de receita e regras claras de prioridade.
+          Ago/2026 → Jul/2027. Defina as metas, veja a projeção recalcular na hora e marque mês a mês o que já foi
+          cumprido — o plano para a DoisB pagar todos os salários em 12 meses.
         </p>
       </div>
+
+      {tabelaFalta && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          Rode a migration <code className="rounded bg-white/70 px-1.5 py-0.5 text-xs">supabase/migrations/metas_planner.sql</code>{" "}
+          no Supabase para salvar as metas e o progresso. Enquanto isso, a tela funciona com valores padrão (sem salvar).
+        </div>
+      )}
 
       {/* Meta-mãe */}
       <div className="p-6 rounded-2xl shadow-lg text-white bg-gradient-to-br from-blue-900 to-slate-950">
@@ -98,13 +90,13 @@ export default async function MetasPage() {
           <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">A folha que a DoisB vai sustentar</h2>
         </div>
         <div className="space-y-3">
-          {FOLHA.map((p) => (
-            <div key={p.nome} className="flex items-center gap-3">
-              <span className="w-20 shrink-0 text-sm font-semibold text-slate-800">{p.nome}</span>
+          {FOLHA.map((f) => (
+            <div key={f.nome} className="flex items-center gap-3">
+              <span className="w-20 shrink-0 text-sm font-semibold text-slate-800">{f.nome}</span>
               <div className="flex-1 h-6 rounded-lg bg-slate-100 overflow-hidden">
-                <div className="h-full rounded-lg bg-gradient-to-r from-blue-600 to-sky-400" style={{ width: `${p.pct}%` }} />
+                <div className="h-full rounded-lg bg-gradient-to-r from-blue-600 to-sky-400" style={{ width: `${f.pct}%` }} />
               </div>
-              <span className="w-24 text-right text-sm font-bold text-blue-800">{p.valor}</span>
+              <span className="w-24 text-right text-sm font-bold text-blue-800">{f.valor}</span>
             </div>
           ))}
         </div>
@@ -117,58 +109,8 @@ export default async function MetasPage() {
         </div>
       </div>
 
-      {/* 3 motores */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Rocket className="h-4 w-4 text-blue-900" />
-          <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">De onde vem o dinheiro · três motores</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {MOTORES.map((m) => (
-            <div key={m.rotulo} className={`admin-panel p-5 relative ${m.hipotese ? "ring-1 ring-amber-200" : ""}`}>
-              {m.hipotese && (
-                <span className="absolute top-4 right-4 rounded border border-amber-300 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-600">
-                  Hipótese
-                </span>
-              )}
-              <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{m.rotulo}</p>
-              <p className="text-2xl font-black text-slate-950 mt-1.5">{m.valor}</p>
-              <p className="text-xs text-slate-700 mt-2 leading-relaxed">{m.desc}</p>
-              <p className="text-xs text-slate-700 mt-3 pt-3 border-t border-slate-100">{m.quem}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Trimestres */}
-      <div className="admin-panel p-6">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900 mb-4">O caminho · trimestre a trimestre</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[560px]">
-            <thead>
-              <tr className="border-b border-slate-100 text-left">
-                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-blue-900">Quando</th>
-                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-blue-900">Indústria (Abel)</th>
-                <th className="pb-2.5 pr-4 text-xs font-bold uppercase tracking-wide text-blue-900">ZWeb (Laisa)</th>
-                <th className="pb-2.5 text-xs font-bold uppercase tracking-wide text-blue-900">Marco de folha</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {TRIMESTRES.map((t) => (
-                <tr key={t.quando}>
-                  <td className="py-3 pr-4 font-bold text-slate-900 whitespace-nowrap">{t.quando}</td>
-                  <td className="py-3 pr-4 text-slate-800">{t.industria}</td>
-                  <td className="py-3 pr-4 text-slate-800">{t.zweb}</td>
-                  <td className={`py-3 ${MARCO_COR[t.cor]}`}>{t.marco}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-xs text-slate-700 mt-4">
-          Sob medida em ritmo constante o ano todo: 1 projeto por mês, base de manutenção crescendo junto.
-        </p>
-      </div>
+      {/* Simulador + acompanhamento */}
+      <MetasPlanner premissasIniciais={premissas} realizadoInicial={realizado} />
 
       {/* Regras */}
       <div className="admin-panel p-6">
@@ -181,15 +123,6 @@ export default async function MetasPage() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Checklist mês a mês */}
-      <div className="pt-2">
-        <h2 className="text-xl font-bold text-slate-950 mb-1">Checklist mês a mês</h2>
-        <p className="text-sm text-slate-700 mb-4">
-          Laisa e Abel marcam cada meta conforme concluem. O sistema registra quem marcou.
-        </p>
-        <MetasChecklist metas={(metas ?? []) as MetaRow[]} />
       </div>
     </div>
   )

@@ -56,7 +56,7 @@ export default function PagarPixClient({ intentId, plano, vencimento, qrImage, q
             PIX recebido. Seu acesso ao ZWeb será mantido por mais 30 dias.
           </p>
           <a
-            href="https://wa.me/5551998518895"
+            href="https://wa.me/5551992726289"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center w-full py-3.5 rounded-xl font-semibold text-white text-sm"
@@ -127,7 +127,7 @@ export default function PagarPixClient({ intentId, plano, vencimento, qrImage, q
         <div className="mt-6 pt-5 border-t border-slate-100 text-center">
           <p className="text-xs text-slate-400 mb-2">Problema com o pagamento?</p>
           <a
-            href="https://wa.me/5551998518895"
+            href="https://wa.me/5551992726289"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-semibold"
