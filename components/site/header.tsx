@@ -49,21 +49,6 @@ export function Header() {
               priority
             />
           </a>
-
-          <div className={cn("h-7 w-px hidden sm:block", scrolled ? "bg-slate-200" : "bg-white/20")} />
-
-          <div className="hidden sm:flex items-center gap-2">
-            <span className={cn("text-xs font-medium whitespace-nowrap", scrolled ? "text-slate-400" : "text-white/50")}>
-              revenda oficial
-            </span>
-            <Image
-              src="/logos/zweb-color.png"
-              alt="ZWeb"
-              width={80}
-              height={27}
-              className="h-9 w-auto object-contain"
-            />
-          </div>
         </div>
 
         {/* Nav desktop */}
@@ -115,16 +100,6 @@ export function Header() {
                 height={74}
                 className="h-12 w-auto object-contain"
               />
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">revenda oficial</span>
-                <Image
-                  src="/logos/zweb-color.png"
-                  alt="ZWeb"
-                  width={70}
-                  height={23}
-                  className="h-5 w-auto object-contain"
-                />
-              </div>
             </div>
 
             <nav className="flex flex-col gap-1 px-4 py-4">
