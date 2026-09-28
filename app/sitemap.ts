@@ -5,8 +5,12 @@ const BASE = 'https://doisbsistemas.com.br'
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: BASE, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
+    { url: `${BASE}/produtos`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.95 },
+    { url: `${BASE}/doisb-web`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.95 },
     { url: `${BASE}/zweb`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE}/gweb`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${BASE}/sob-medida`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE}/sobre`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE}/tutoriais`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE}/suporte`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE}/chat-suporte`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },

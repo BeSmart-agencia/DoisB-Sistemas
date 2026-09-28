@@ -10,14 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-const PLANOS = {
-  essencial: { nome: "Essencial", preco: "R$ 129,90", desc: "Tudo o que você precisa pra começar" },
-  standard: { nome: "Standard", preco: "R$ 199,90", desc: "A escolha de 8 em cada 10 lojistas" },
-  premium: { nome: "Premium", preco: "R$ 249,90", desc: "Solução completa pra escalar" },
-} as const
-
-type PlanoKey = keyof typeof PLANOS
+import { getProduto, getPlano, precoMensalNoAnual, BRL, type ProdutoId, type IntervaloCobranca } from "@/lib/planos"
 
 function validarCNPJ(cnpj: string): boolean {
   const n = cnpj.replace(/\D/g, "")
@@ -76,8 +69,27 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 type FormaPagamento = "cartao" | "boleto" | "pix"
 
-export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }) {
-  const info = PLANOS[plano] ?? PLANOS.standard
+export function CadastroForm({
+  produto,
+  plano,
+  intervalo,
+  erro,
+}: {
+  produto: ProdutoId
+  plano: string
+  intervalo: IntervaloCobranca
+  erro?: string
+}) {
+  const produtoCat = getProduto(produto)
+  const planoCat = getPlano(produto, plano) ?? produtoCat?.planos.find((p) => p.destaque) ?? produtoCat?.planos[0]
+  const ehAnual = intervalo === "anual" && !!planoCat?.precoAnual
+  const precoMostrado = ehAnual ? precoMensalNoAnual(planoCat!)! : (planoCat?.precoMensal ?? 0)
+  const destaque = !!planoCat?.destaque
+  const info = {
+    nome: `${produtoCat?.nome ?? "DoisB Web"} ${planoCat?.nome ?? ""}`.trim(),
+    preco: BRL.format(precoMostrado),
+    desc: planoCat?.descricao ?? "",
+  }
   const [loading, setLoading] = useState(false)
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("cartao")
   const [buscandoCep, setBuscandoCep] = useState(false)
@@ -133,7 +145,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
         const res = await fetch("/api/checkout/pix", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, plano, vendedor_codigo }),
+          body: JSON.stringify({ ...data, produto, plano, intervalo, vendedor_codigo }),
         })
         const json = await res.json()
         if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }
@@ -147,7 +159,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, plano, forma_pagamento: formaPagamento, vendedor_codigo }),
+          body: JSON.stringify({ ...data, produto, plano, intervalo, forma_pagamento: formaPagamento, vendedor_codigo }),
         })
         const json = await res.json()
         if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }
@@ -179,7 +191,7 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
             <ShieldCheck className="h-3.5 w-3.5" />
             Cadastro seguro
           </span>
-          <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950">Comece sua operação com o ZWeb</h1>
+          <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950">Comece sua operação com o {produtoCat?.nome ?? "DoisB Web"}</h1>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
             Preencha os dados da empresa para seguir ao pagamento e iniciar a liberação do ambiente.
           </p>
@@ -188,28 +200,35 @@ export function CadastroForm({ plano, erro }: { plano: PlanoKey; erro?: string }
         {/* Plano selecionado */}
         <div className={cn(
           "rounded-2xl p-6 mb-8 border shadow-xl shadow-slate-900/5",
-          plano === "standard" ? "bg-slate-950 border-blue-900 text-white" : "bg-white/90 border-slate-200"
+          destaque ? "bg-slate-950 border-blue-900 text-white" : "bg-white/90 border-slate-200"
         )}>
           <div className="flex items-start justify-between">
             <div>
-              <p className={cn("text-sm font-medium mb-1", plano === "standard" ? "text-blue-200" : "text-slate-500")}>
+              <p className={cn("text-sm font-medium mb-1", destaque ? "text-blue-200" : "text-slate-500")}>
                 Plano selecionado
               </p>
-              <h2 className={cn("text-2xl font-bold", plano === "standard" ? "text-white" : "text-slate-900")}>
+              <h2 className={cn("text-2xl font-bold", destaque ? "text-white" : "text-slate-900")}>
                 {info.nome}
               </h2>
-              <p className={cn("text-sm mt-1", plano === "standard" ? "text-blue-200" : "text-slate-500")}>
+              <p className={cn("text-sm mt-1", destaque ? "text-blue-200" : "text-slate-500")}>
                 {info.desc}
               </p>
             </div>
             <div className="text-right">
-              <p className={cn("text-3xl font-extrabold", plano === "standard" ? "text-white" : "text-blue-800")}>
+              <p className={cn("text-3xl font-extrabold", destaque ? "text-white" : "text-blue-800")}>
                 {info.preco}
               </p>
-              <p className={cn("text-sm", plano === "standard" ? "text-blue-200" : "text-slate-400")}>/mês</p>
+              <p className={cn("text-sm", destaque ? "text-blue-200" : "text-slate-400")}>
+                {ehAnual ? "/mês no plano anual" : "/mês"}
+              </p>
+              {planoCat?.trialDias ? (
+                <p className={cn("text-xs mt-1 font-medium", destaque ? "text-emerald-300" : "text-emerald-600")}>
+                  {planoCat.trialDias} dias grátis
+                </p>
+              ) : null}
             </div>
           </div>
-          <a href="/#planos" className={cn("inline-block mt-4 text-xs font-medium underline underline-offset-2", plano === "standard" ? "text-blue-200 hover:text-white" : "text-blue-700 hover:text-blue-900")}>
+          <a href={`${produtoCat?.href ?? "/produtos"}#planos`} className={cn("inline-block mt-4 text-xs font-medium underline underline-offset-2", destaque ? "text-blue-200 hover:text-white" : "text-blue-700 hover:text-blue-900")}>
             Trocar de plano
           </a>
         </div>

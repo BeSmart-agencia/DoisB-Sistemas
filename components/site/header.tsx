@@ -8,12 +8,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 
 const navLinks = [
-  { label: "ZWeb", href: "/zweb" },
-  { label: "Sob medida", href: "/sob-medida" },
-  { label: "Planos", href: "/zweb#planos" },
+  { label: "Home", href: "/" },
+  { label: "Sobre nós", href: "/sobre" },
+  { label: "Produtos", href: "/produtos" },
+  { label: "Chat IA", href: "/chat-suporte" },
   { label: "Tutoriais", href: "/tutoriais" },
   { label: "Suporte", href: "/suporte" },
-  { label: "Chat IA", href: "/chat-suporte" },
 ]
 
 export function Header() {
@@ -85,7 +85,7 @@ export function Header() {
         {/* CTA desktop */}
         <div className="hidden md:block shrink-0">
           <a
-            href="/cadastro"
+            href="/produtos"
             className={cn(
               buttonVariants({ size: "default" }),
               "bg-blue-800 hover:bg-blue-900 text-white rounded-full px-6 shadow-sm hover:-translate-y-0.5 transition-transform"
@@ -139,7 +139,7 @@ export function Header() {
                 </a>
               ))}
               <a
-                href="/cadastro"
+                href="/produtos"
                 className={cn(
                   buttonVariants({ size: "default" }),
                   "mt-6 bg-blue-800 hover:bg-blue-900 text-white rounded-full w-full justify-center"

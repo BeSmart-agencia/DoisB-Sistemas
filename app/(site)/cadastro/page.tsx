@@ -1,23 +1,32 @@
 import type { Metadata } from "next"
 import { CadastroForm } from "./cadastro-form"
+import { getProduto, type ProdutoId, type IntervaloCobranca } from "@/lib/planos"
 
 export const metadata: Metadata = {
   title: "Cadastro — DoisB Sistemas",
-  description: "Assine o ZWeb e comece a vender, controlar e crescer.",
+  description: "Assine e comece a vender, controlar e crescer.",
   robots: { index: false, follow: false },
 }
 
-const planosValidos = ["essencial", "standard", "premium"] as const
-type PlanoKey = (typeof planosValidos)[number]
+const produtosValidos: ProdutoId[] = ["doisb-web", "zweb", "gweb"]
 
 export default function CadastroPage({
   searchParams,
 }: {
-  searchParams: { plano?: string; erro?: string }
+  searchParams: { produto?: string; plano?: string; intervalo?: string; erro?: string }
 }) {
-  const plano: PlanoKey = planosValidos.includes(searchParams.plano as PlanoKey)
-    ? (searchParams.plano as PlanoKey)
-    : "standard"
+  const produto: ProdutoId = produtosValidos.includes(searchParams.produto as ProdutoId)
+    ? (searchParams.produto as ProdutoId)
+    : "zweb"
 
-  return <CadastroForm plano={plano} erro={searchParams.erro} />
+  const produtoCat = getProduto(produto)
+  const planosValidos = produtoCat?.planos.map((p) => p.key) ?? []
+  const planoDefault = produtoCat?.planos.find((p) => p.destaque)?.key ?? produtoCat?.planos[0]?.key ?? "standard"
+  const plano = planosValidos.includes(searchParams.plano ?? "")
+    ? (searchParams.plano as string)
+    : planoDefault
+
+  const intervalo: IntervaloCobranca = searchParams.intervalo === "anual" ? "anual" : "mensal"
+
+  return <CadastroForm produto={produto} plano={plano} intervalo={intervalo} erro={searchParams.erro} />
 }

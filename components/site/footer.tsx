@@ -4,9 +4,12 @@ const WA_LINK =
   "https://wa.me/5551992726289?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
 
 const NAV = [
+  { label: "DoisB Web", href: "/doisb-web" },
   { label: "ZWeb", href: "/zweb" },
+  { label: "GWeb", href: "/gweb" },
   { label: "Sistemas sob medida", href: "/sob-medida" },
-  { label: "Planos ZWeb", href: "/zweb#planos" },
+  { label: "Todos os produtos", href: "/produtos" },
+  { label: "Sobre nós", href: "/sobre" },
   { label: "Tutoriais", href: "/tutoriais" },
   { label: "Suporte", href: "/suporte" },
   { label: "Chat IA", href: "/chat-suporte" },

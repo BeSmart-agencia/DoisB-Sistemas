@@ -3,6 +3,7 @@ import { z } from "zod"
 import { stripe } from "@/lib/stripe/client"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { resolverVendedorId } from "@/lib/vendedores"
+import { resolverPriceId, getPlano, type ProdutoId } from "@/lib/planos"
 
 const PRICE_IDS: Record<string, string> = {
   essencial: process.env.STRIPE_PRICE_ESSENCIAL!,
@@ -47,7 +48,9 @@ const schema = z.object({
   email: z.string().email(),
   telefone: z.string().min(10),
   nome_responsavel: z.string().min(2),
-  plano: z.enum(["essencial", "standard", "premium"]),
+  produto: z.enum(["zweb", "doisb-web", "gweb"]).default("zweb"),
+  plano: z.string().min(1),
+  intervalo: z.enum(["mensal", "anual"]).default("mensal"),
   forma_pagamento: z.enum(["cartao", "boleto"]).default("cartao"),
   vendedor_codigo: z.string().optional(),
   nome_fantasia: z.string().optional(),
@@ -75,11 +78,69 @@ export async function POST(request: Request) {
     )
   }
 
-  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano, forma_pagamento,
+  const { nome_empresa, cnpj, email, telefone, nome_responsavel, produto, plano, intervalo, forma_pagamento,
     vendedor_codigo, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
+
+  // ---------------------------------------------------------------------------
+  // Produtos próprios (DoisB Web) e revenda GWeb: assinatura direta no Stripe.
+  // O provisionamento pós-pagamento (ativação/liberação de acesso) é tratado
+  // em fase própria — aqui só criamos a assinatura com metadata para reconciliar.
+  // O fluxo do ZWeb (comissão, promoções, registro em `clientes`) segue abaixo,
+  // inalterado.
+  // ---------------------------------------------------------------------------
+  if (produto !== "zweb") {
+    const priceId = resolverPriceId(produto as ProdutoId, plano, intervalo)
+    if (!priceId) {
+      return NextResponse.json({ error: "Plano indisponível para este produto." }, { status: 400 })
+    }
+    const planoCat = getPlano(produto as ProdutoId, plano)
+    const temTrial = !!planoCat?.trialDias
+    // Trial exige método de pagamento com cobrança recorrente automática (cartão);
+    // boleto não é compatível com período de teste.
+    const usarBoleto = forma_pagamento === "boleto" && !temTrial
+
+    let customer
+    try {
+      customer = await stripe.customers.create({
+        email,
+        name: nome_empresa,
+        phone: telefone,
+        metadata: { produto, plano, intervalo, cnpj: cnpjLimpo, nome_responsavel },
+      })
+    } catch (err) {
+      console.error("[checkout] Erro ao criar customer (produto próprio):", err)
+      return NextResponse.json({ error: "Erro ao processar pagamento. Tente novamente." }, { status: 500 })
+    }
+
+    try {
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer: customer.id,
+        line_items: [{ price: priceId, quantity: 1 }],
+        ...(usarBoleto && { payment_method_types: ["boleto"] }),
+        success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/cadastro?produto=${produto}&plano=${plano}&intervalo=${intervalo}&erro=cancelado`,
+        locale: "pt-BR",
+        allow_promotion_codes: true,
+        subscription_data: {
+          ...(temTrial ? { trial_period_days: planoCat!.trialDias } : {}),
+          metadata: { produto, plano, intervalo, cnpj: cnpjLimpo, nome_empresa, nome_responsavel },
+        },
+      })
+      return NextResponse.json({ url: session.url })
+    } catch (err) {
+      console.error("[checkout] Erro ao criar session (produto próprio):", err)
+      return NextResponse.json({ error: "Erro ao criar sessão de pagamento. Tente novamente." }, { status: 500 })
+    }
+  }
+
+  // A partir daqui: fluxo exclusivo do ZWeb.
+  if (!PRICE_IDS[plano]) {
+    return NextResponse.json({ error: "Plano inválido." }, { status: 422 })
+  }
 
   // Atribuição a vendedor externo (link exclusivo). Null se não houver.
   const vendedorId = await resolverVendedorId(supabase, vendedor_codigo)
@@ -112,7 +173,9 @@ export async function POST(request: Request) {
       email,
       telefone,
       nome_responsavel,
-      plano,
+      // Neste ponto o fluxo é exclusivo do ZWeb e `plano` já passou pelo guard
+      // de PRICE_IDS, portanto é essencial | standard | premium.
+      plano: plano as "essencial" | "standard" | "premium",
       status_pagamento: "aguardando",
       acesso_liberado: false,
       forma_pagamento,
