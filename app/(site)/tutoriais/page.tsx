@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 }
 
 const PRODUTOS_TAB = [
+  { id: "doisb-web", nome: "DoisB Web", descricao: "o ERP completo da DoisB" },
   { id: "zweb", nome: "ZWeb", descricao: "o sistema de gestão da Zucchetti" },
   { id: "gweb", nome: "GWeb", descricao: "o sistema para mini-mercados" },
 ] as const
@@ -42,7 +43,7 @@ export default async function TutoriaisPage({
 
   const produto: ProdutoTut = PRODUTOS_TAB.some((p) => p.id === searchParams.produto)
     ? (searchParams.produto as ProdutoTut)
-    : "zweb"
+    : "doisb-web"
   const produtoInfo = PRODUTOS_TAB.find((p) => p.id === produto)!
 
   const { data: tutoriais } = await supabase
