@@ -22,6 +22,7 @@ type PrioridadeChamado = "baixa" | "media" | "alta" | "urgente"
 interface Chamado {
   id: number
   assunto: string
+  produto: string | null
   status: StatusChamado
   prioridade: PrioridadeChamado
   email_retorno: string
@@ -190,7 +191,14 @@ export default function SuporteAdminPage() {
                 >
                   <TableCell className="text-slate-500 text-sm font-mono">#{c.id}</TableCell>
                   <TableCell>
-                    <p className="font-medium text-slate-900 text-sm">{c.assunto}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-900 text-sm">{c.assunto}</p>
+                      {c.produto && (
+                        <Badge variant="outline" className="text-[10px] border-blue-200 bg-blue-50 text-blue-700 shrink-0">
+                          {c.produto}
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-400 mt-0.5">
                       {c.cliente?.nome_empresa ?? c.cnpj_informado}
                     </p>

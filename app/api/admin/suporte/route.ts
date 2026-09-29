@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   let query = supabase!
     .from("chamados")
     .select(
-      `id, assunto, status, prioridade, email_retorno, cnpj_informado, created_at, atualizado_em, resolvido_em,
+      `id, assunto, produto, status, prioridade, email_retorno, cnpj_informado, created_at, atualizado_em, resolvido_em,
        cliente:clientes(nome_empresa, plano),
        atendente:admins(nome)`,
       { count: "exact" }

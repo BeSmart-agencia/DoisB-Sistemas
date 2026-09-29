@@ -35,7 +35,10 @@ function maskCNPJ(v: string) {
     .replace(/(\d{4})(\d)/, "$1-$2")
 }
 
+const SISTEMAS = ["DoisB Web", "ZWeb", "GWeb", "Sistema Sob Medida", "AgendaB", "Outro / Não sei"]
+
 const schema = z.object({
+  produto: z.string().min(1, "Selecione o sistema"),
   cnpj: z.string().min(14, "CNPJ inválido").refine(validarCNPJ, "CNPJ inválido"),
   assunto: z.string().min(3, "Informe o assunto").max(200),
   descricao: z.string().min(10, "Descreva o problema com mais detalhes").max(4000),
@@ -54,6 +57,7 @@ export default function SuportePage() {
   })
 
   const cnpjValue = watch("cnpj")
+  const produtoSel = watch("produto")
 
   useEffect(() => {
     const cnpjLimpo = (cnpjValue ?? "").replace(/\D/g, "")
@@ -140,6 +144,30 @@ export default function SuportePage() {
             </div>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+            <input type="hidden" {...register("produto")} />
+            <Field label="Para qual sistema é o chamado? *" error={errors.produto?.message}>
+              <div className="flex flex-wrap gap-2">
+                {SISTEMAS.map((s) => {
+                  const ativo = produtoSel === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setValue("produto", s, { shouldValidate: true })}
+                      className={
+                        "rounded-full border px-4 py-2 text-sm font-medium transition-all " +
+                        (ativo
+                          ? "border-blue-700 bg-blue-50 text-blue-800 shadow-sm"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300")
+                      }
+                    >
+                      {s}
+                    </button>
+                  )
+                })}
+              </div>
+            </Field>
+
             <Field label="CNPJ da empresa *" error={errors.cnpj?.message}>
               <div className="relative">
                 <Input

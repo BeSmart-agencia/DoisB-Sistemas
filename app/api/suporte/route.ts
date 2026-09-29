@@ -23,6 +23,7 @@ function validarCNPJ(cnpj: string): boolean {
 
 const schema = z.object({
   cnpj: z.string().min(14).refine(validarCNPJ, "CNPJ inválido"),
+  produto: z.string().min(1).max(60).optional(),
   assunto: z.string().min(3).max(200),
   descricao: z.string().min(10).max(4000),
   email: z.string().email(),
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dados inválidos", detalhes: parsed.error.flatten() }, { status: 422 })
   }
 
-  const { cnpj, assunto, descricao, email } = parsed.data
+  const { cnpj, produto, assunto, descricao, email } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const db = createAdminClient()
 
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
       cliente_id: cliente?.id ?? null,
       cnpj_informado: cnpjLimpo,
       email_retorno: email,
+      produto: produto ?? null,
       assunto,
       descricao,
       status: "a_atender",
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
       cnpj: cnpjLimpo,
       email,
       nomeEmpresa,
+      produto: produto ?? undefined,
     }),
   ])
 

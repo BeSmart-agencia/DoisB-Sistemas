@@ -28,6 +28,7 @@ interface Mensagem { id: string; autor: AutorMensagem; autor_nome: string; conte
 interface Admin { id: string; nome: string }
 interface ChamadoDetalhe {
   id: number; assunto: string; descricao: string; email_retorno: string
+  produto: string | null
   cnpj_informado: string; status: StatusChamado; prioridade: PrioridadeChamado
   atendente_id: string | null; created_at: string
   cliente: { id: string; nome_empresa: string; cnpj: string; telefone: string; email: string; plano: string; status_pagamento: string } | null
@@ -174,6 +175,11 @@ export default function ChamadoDetalhePage() {
                 <Badge variant="outline" className={`text-xs ${PRIO_CLASS[chamado.prioridade]}`}>
                   {PRIO_LABEL[chamado.prioridade]}
                 </Badge>
+                {chamado.produto && (
+                  <Badge variant="outline" className="text-xs border-blue-200 bg-blue-50 text-blue-700">
+                    {chamado.produto}
+                  </Badge>
+                )}
               </>
             )}
           </div>

@@ -110,16 +110,19 @@ export interface Database {
       chamados: {
         Row: {
           id: number; cliente_id: string | null; cnpj_informado: string; email_retorno: string
+          produto: string | null
           assunto: string; descricao: string; status: StatusChamado; prioridade: PrioridadeChamado
           atendente_id: string | null; created_at: string; atualizado_em: string; resolvido_em: string | null
         }
         Insert: {
           id?: number; cliente_id?: string | null; cnpj_informado: string; email_retorno: string
+          produto?: string | null
           assunto: string; descricao: string; status?: StatusChamado; prioridade?: PrioridadeChamado
           atendente_id?: string | null; created_at?: string; atualizado_em?: string; resolvido_em?: string | null
         }
         Update: {
           id?: number; cliente_id?: string | null; cnpj_informado?: string; email_retorno?: string
+          produto?: string | null
           assunto?: string; descricao?: string; status?: StatusChamado; prioridade?: PrioridadeChamado
           atendente_id?: string | null; created_at?: string; atualizado_em?: string; resolvido_em?: string | null
         }

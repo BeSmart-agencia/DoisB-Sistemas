@@ -5,6 +5,7 @@ export interface DadosNovoChamado {
   cnpj: string
   email: string
   nomeEmpresa?: string
+  produto?: string
 }
 
 export function templateInternaNewChamado(dados: DadosNovoChamado): string {
@@ -29,6 +30,7 @@ export function templateInternaNewChamado(dados: DadosNovoChamado): string {
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:24px;">
             ${[
               ["Nº Chamado", `#${dados.numeroChamado}`],
+              ["Sistema", dados.produto ?? "Não informado"],
               ["Empresa", dados.nomeEmpresa ?? "Não identificada"],
               ["CNPJ", dados.cnpj],
               ["E-mail", dados.email],
