@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select"
 
 type StatusPagamento = "aguardando" | "ativo" | "atrasado" | "cancelado"
-type Plano = "essencial" | "standard" | "premium"
+type Plano = "essencial" | "standard" | "premium" | "unico"
 
 interface Cliente {
   id: string
@@ -72,6 +72,7 @@ const PLANO_LABEL: Record<Plano, string> = {
   essencial: "Essencial",
   standard: "Standard",
   premium: "Premium",
+  unico: "GWeb",
 }
 
 function formatCNPJ(cnpj: string) {

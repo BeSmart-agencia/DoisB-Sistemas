@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type StatusPagamento = "aguardando" | "ativo" | "atrasado" | "cancelado"
-export type Plano = "essencial" | "standard" | "premium"
+export type Plano = "essencial" | "standard" | "premium" | "unico"
 export type StatusChamado = "a_atender" | "em_andamento" | "aguardando_cliente" | "resolvido" | "cancelado"
 export type PrioridadeChamado = "baixa" | "media" | "alta" | "urgente"
 export type AutorMensagem = "cliente" | "equipe"
@@ -25,7 +25,7 @@ export interface Database {
       clientes: {
         Row: {
           id: string; nome_empresa: string; cnpj: string; email: string; telefone: string
-          nome_responsavel: string; plano: Plano; status_pagamento: StatusPagamento
+          nome_responsavel: string; produto: string; plano: Plano; status_pagamento: StatusPagamento
           acesso_liberado: boolean; stripe_customer_id: string | null
           stripe_subscription_id: string | null; data_assinatura: string | null
           observacoes: string | null; created_at: string
@@ -37,7 +37,7 @@ export interface Database {
         }
         Insert: {
           id?: string; nome_empresa: string; cnpj: string; email: string; telefone: string
-          nome_responsavel: string; plano: Plano; status_pagamento?: StatusPagamento
+          nome_responsavel: string; produto?: string; plano: Plano; status_pagamento?: StatusPagamento
           acesso_liberado?: boolean; stripe_customer_id?: string | null
           stripe_subscription_id?: string | null; data_assinatura?: string | null
           observacoes?: string | null; created_at?: string
@@ -49,7 +49,7 @@ export interface Database {
         }
         Update: {
           id?: string; nome_empresa?: string; cnpj?: string; email?: string; telefone?: string
-          nome_responsavel?: string; plano?: Plano; status_pagamento?: StatusPagamento
+          nome_responsavel?: string; produto?: string; plano?: Plano; status_pagamento?: StatusPagamento
           acesso_liberado?: boolean; stripe_customer_id?: string | null
           stripe_subscription_id?: string | null; data_assinatura?: string | null
           observacoes?: string | null; created_at?: string

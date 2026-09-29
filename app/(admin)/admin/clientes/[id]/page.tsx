@@ -51,7 +51,7 @@ import {
 import { cn } from "@/lib/utils"
 
 type StatusPagamento = "aguardando" | "ativo" | "atrasado" | "cancelado"
-type Plano = "essencial" | "standard" | "premium"
+type Plano = "essencial" | "standard" | "premium" | "unico"
 
 const CRT_LABEL: Record<string, string> = {
   "1": "Simples Nacional",
@@ -135,12 +135,14 @@ const PLANO_CONFIG: Record<Plano, { label: string; preco: string; badge: string 
   essencial: { label: "Essencial", preco: "R$ 129,90/mês", badge: "bg-slate-100 text-slate-700 border-slate-200" },
   standard: { label: "Standard", preco: "R$ 199,90/mês", badge: "bg-blue-50 text-blue-700 border-blue-200" },
   premium: { label: "Premium", preco: "R$ 249,90/mês", badge: "bg-violet-50 text-violet-700 border-violet-200" },
+  unico: { label: "GWeb", preco: "R$ 159,90/mês", badge: "bg-orange-50 text-orange-700 border-orange-200" },
 }
 
 const PLANO_LABEL: Record<Plano, string> = {
   essencial: "Essencial — R$ 129,90/mês",
   standard: "Standard — R$ 199,90/mês",
   premium: "Premium — R$ 249,90/mês",
+  unico: "GWeb — R$ 159,90/mês",
 }
 
 function formatDate(iso: string | null) {
@@ -173,6 +175,7 @@ export default function ClienteDetalhePage() {
 
   const [observacoes, setObservacoes] = useState<string | null>(null)
   const [cancelarOpen, setCancelarOpen] = useState(false)
+  const [ativarOpen, setAtivarOpen] = useState(false)
 
   const { data, isLoading } = useQuery<{ cliente: ClienteDetalhe; faturas: Fatura[] }>({
     queryKey: ["admin", "cliente", id],
@@ -191,6 +194,26 @@ export default function ClienteDetalhePage() {
     onSuccess: (res) => {
       if (res.error) { toast.error(res.error); return }
       toast.success("Acesso liberado!")
+      qc.invalidateQueries({ queryKey: ["admin", "cliente", id] })
+      qc.invalidateQueries({ queryKey: ["admin", "clientes"] })
+    },
+  })
+
+  const ativarManualMutation = useMutation({
+    mutationFn: (duracao: "anual" | "mensal") =>
+      fetch(`/api/admin/clientes/${id}/ativar-manual`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ duracao }),
+      }).then((r) => r.json()),
+    onSuccess: (res) => {
+      if (res.error) { toast.error(res.error); return }
+      toast.success(
+        res.duracao === "anual"
+          ? "Cliente ativado por 1 ano!"
+          : "Cliente ativado (mensal)!"
+      )
+      setAtivarOpen(false)
       qc.invalidateQueries({ queryKey: ["admin", "cliente", id] })
       qc.invalidateQueries({ queryKey: ["admin", "clientes"] })
     },
@@ -509,6 +532,27 @@ export default function ClienteDetalhePage() {
                         <p className="text-xs text-emerald-100 mt-0.5">Clique para ativar o sistema</p>
                       </div>
                     </button>
+                  ) : cliente.status_pagamento !== "cancelado" ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+                        <p className="text-xs text-amber-700 font-medium leading-relaxed">
+                          Aguardando pagamento para liberar o acesso
+                        </p>
+                      </div>
+                      <button
+                        className="w-full flex items-center gap-3 border border-emerald-200 rounded-xl p-4 hover:bg-emerald-50 hover:border-emerald-300 transition-all"
+                        onClick={() => setAtivarOpen(true)}
+                      >
+                        <div className="h-9 w-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                          <CheckCircle className="h-5 w-5 text-emerald-600" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-semibold text-slate-800">Ativar manualmente</p>
+                          <p className="text-xs text-slate-400 mt-0.5">Pagamento recebido por fora (PIX/boleto)</p>
+                        </div>
+                      </button>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
                       <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
@@ -609,6 +653,50 @@ export default function ClienteDetalhePage() {
                       </Dialog>
                     </>
                   )}
+
+                  {/* Dialog ativação manual */}
+                  <Dialog open={ativarOpen} onOpenChange={setAtivarOpen}>
+                    <DialogContent className="max-w-md rounded-2xl">
+                      <DialogHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                            <CheckCircle className="h-5 w-5 text-emerald-600" />
+                          </div>
+                          <DialogTitle className="text-base">Ativar manualmente</DialogTitle>
+                        </div>
+                        <DialogDescription className="text-sm leading-relaxed">
+                          Use quando o pagamento de{" "}
+                          <strong className="text-slate-800">{cliente.nome_empresa}</strong> foi
+                          recebido por fora do sistema (PIX anual, boleto avulso). A conta fica{" "}
+                          <strong className="text-slate-800">ativa</strong>, o acesso é liberado e o
+                          próximo vencimento do PIX é agendado conforme a duração escolhida.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="mt-2 rounded-xl bg-amber-50 border border-amber-200 p-3">
+                        <p className="text-xs text-amber-700 leading-relaxed">
+                          Lembre-se: a comissão da vendedora é calculada como 1 mensalidade. Numa
+                          venda anual à vista, ajuste o valor da comissão manualmente.
+                        </p>
+                      </div>
+                      <DialogFooter className="gap-2 mt-2 sm:flex-col">
+                        <Button
+                          className="w-full bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => ativarManualMutation.mutate("anual")}
+                          disabled={ativarManualMutation.isPending}
+                        >
+                          Ativar por 1 ano
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => ativarManualMutation.mutate("mensal")}
+                          disabled={ativarManualMutation.isPending}
+                        >
+                          Ativar mensal (30 dias)
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 

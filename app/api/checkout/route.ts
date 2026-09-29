@@ -5,12 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { resolverVendedorId } from "@/lib/vendedores"
 import { resolverPriceId, getPlano, type ProdutoId } from "@/lib/planos"
 
-const PRICE_IDS: Record<string, string> = {
-  essencial: process.env.STRIPE_PRICE_ESSENCIAL!,
-  standard: process.env.STRIPE_PRICE_STANDARD!,
-  premium: process.env.STRIPE_PRICE_PREMIUM!,
-}
-
 const PROMO_GDOOR = {
   inicio: new Date("2026-06-02T03:00:00Z"), // 00h BRT
   fim: new Date("2026-06-25T20:00:00Z"),    // 17h BRT
@@ -85,13 +79,14 @@ export async function POST(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
   // ---------------------------------------------------------------------------
-  // Produtos próprios (DoisB Web) e revenda GWeb: assinatura direta no Stripe.
-  // O provisionamento pós-pagamento (ativação/liberação de acesso) é tratado
-  // em fase própria — aqui só criamos a assinatura com metadata para reconciliar.
-  // O fluxo do ZWeb (comissão, promoções, registro em `clientes`) segue abaixo,
-  // inalterado.
+  // DoisB Web (white-label Nuts): assinatura direta no Stripe. O provisionamento
+  // pós-pagamento (ativação/liberação de acesso) tem fluxo próprio — aqui só
+  // criamos a assinatura com metadata para reconciliar depois.
+  //
+  // ZWeb e GWeb seguem o MESMO fluxo abaixo: registro em `clientes`, e-mails
+  // (cliente + interno de ativação) e liberação manual pela equipe.
   // ---------------------------------------------------------------------------
-  if (produto !== "zweb") {
+  if (produto === "doisb-web") {
     const priceId = resolverPriceId(produto as ProdutoId, plano, intervalo)
     if (!priceId) {
       return NextResponse.json({ error: "Plano indisponível para este produto." }, { status: 400 })
@@ -137,19 +132,21 @@ export async function POST(request: Request) {
     }
   }
 
-  // A partir daqui: fluxo exclusivo do ZWeb.
-  if (!PRICE_IDS[plano]) {
+  // A partir daqui: fluxo compartilhado ZWeb + GWeb (registro em `clientes`).
+  const priceIdCliente = resolverPriceId(produto as ProdutoId, plano, intervalo)
+  if (!priceIdCliente) {
     return NextResponse.json({ error: "Plano inválido." }, { status: 422 })
   }
 
   // Atribuição a vendedor externo (link exclusivo). Null se não houver.
   const vendedorId = await resolverVendedorId(supabase, vendedor_codigo)
 
-  // Verificar se CNPJ já existe com assinatura ativa
+  // Verificar se já existe conta ativa para este CNPJ NESTE produto
   const { data: existente } = await supabase
     .from("clientes")
     .select("id, status_pagamento")
     .eq("cnpj", cnpjLimpo)
+    .eq("produto", produto)
     .maybeSingle()
 
   if (existente && ["ativo", "atrasado"].includes(existente.status_pagamento as string)) {
@@ -173,9 +170,10 @@ export async function POST(request: Request) {
       email,
       telefone,
       nome_responsavel,
-      // Neste ponto o fluxo é exclusivo do ZWeb e `plano` já passou pelo guard
-      // de PRICE_IDS, portanto é essencial | standard | premium.
-      plano: plano as "essencial" | "standard" | "premium",
+      produto,
+      // `plano` já passou por resolverPriceId: essencial|standard|premium (ZWeb)
+      // ou unico (GWeb).
+      plano: plano as "essencial" | "standard" | "premium" | "unico",
       status_pagamento: "aguardando",
       acesso_liberado: false,
       forma_pagamento,
@@ -211,6 +209,7 @@ export async function POST(request: Request) {
         supabase_cliente_id: cliente.id,
         cnpj: cnpjLimpo,
         nome_responsavel,
+        produto,
         plano,
       },
     })
@@ -227,16 +226,17 @@ export async function POST(request: Request) {
     .eq("id", cliente.id)
 
   // Criar Stripe Checkout Session
-  const aplicarPromo = forma_pagamento === "cartao" && promoAtiva()
+  // Promoção GDOOR é exclusiva do ZWeb.
+  const aplicarPromo = produto === "zweb" && forma_pagamento === "cartao" && promoAtiva()
   let session
   try {
     session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: stripeCustomer.id,
-      line_items: [{ price: PRICE_IDS[plano], quantity: 1 }],
+      line_items: [{ price: priceIdCliente, quantity: 1 }],
       ...(forma_pagamento === "boleto" && { payment_method_types: ["boleto"] }),
       success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/cadastro?plano=${plano}&erro=cancelado`,
+      cancel_url: `${appUrl}/cadastro?produto=${produto}&plano=${plano}&erro=cancelado`,
       locale: "pt-BR",
       ...(aplicarPromo
         ? { discounts: [{ coupon: PROMO_GDOOR.cupons[plano] }] }
@@ -244,6 +244,7 @@ export async function POST(request: Request) {
       subscription_data: {
         metadata: {
           supabase_cliente_id: cliente.id,
+          produto,
           plano,
         },
       },

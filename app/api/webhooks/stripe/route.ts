@@ -10,6 +10,7 @@ import {
   enviarEmailConviteAgendab,
   enviarEmailInternoVendaAgendab,
 } from "@/lib/emails"
+import { enviarPurchaseMeta } from "@/lib/meta/capi"
 
 export const dynamic = "force-dynamic"
 
@@ -204,7 +205,7 @@ export async function POST(request: Request) {
 
         // E-mails em paralelo — falha de e-mail não deve quebrar o webhook
         const emailResults = await Promise.allSettled([
-          enviarEmailPosCadastro(cliente.email as string, cliente.nome_responsavel as string, cliente.plano as string),
+          enviarEmailPosCadastro(cliente.email as string, cliente.nome_responsavel as string, cliente.plano as string, cliente.produto as string),
           enviarEmailInternoNovaVenda({
             nome_empresa: cliente.nome_empresa as string,
             cnpj: cliente.cnpj as string,
@@ -212,6 +213,7 @@ export async function POST(request: Request) {
             telefone: cliente.telefone as string,
             nome_responsavel: cliente.nome_responsavel as string,
             plano: cliente.plano as string,
+            produto: cliente.produto as string,
             stripe_customer_id: customerId,
           }),
           enviarEmailInternoAtivacaoPendente({
@@ -220,7 +222,15 @@ export async function POST(request: Request) {
             email: cliente.email as string,
             telefone: cliente.telefone as string,
             plano: cliente.plano as string,
+            produto: cliente.produto as string,
             forma_pagamento: "Cartão",
+          }),
+          // Meta CAPI: conversão de venda (pagamento confirmado)
+          enviarPurchaseMeta({
+            clienteId: cliente.id as string,
+            email: cliente.email as string,
+            telefone: cliente.telefone as string,
+            plano: cliente.plano as string,
           }),
         ])
         emailResults.forEach((r, i) => {
@@ -352,14 +362,22 @@ export async function POST(request: Request) {
 
         if (cliente) {
           await Promise.allSettled([
-            enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano),
+            enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano, cliente.produto),
             enviarEmailInternoAtivacaoPendente({
               nome_empresa: cliente.nome_empresa,
               nome_responsavel: cliente.nome_responsavel,
               email: cliente.email,
               telefone: cliente.telefone,
               plano: cliente.plano,
+              produto: cliente.produto,
               forma_pagamento: "Boleto",
+            }),
+            // Meta CAPI: conversão de venda (boleto compensado)
+            enviarPurchaseMeta({
+              clienteId: cliente.id,
+              email: cliente.email,
+              telefone: cliente.telefone,
+              plano: cliente.plano,
             }),
           ])
         }
@@ -418,14 +436,22 @@ export async function POST(request: Request) {
 
           if (cliente) {
             await Promise.allSettled([
-              enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano),
+              enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano, cliente.produto),
               enviarEmailInternoAtivacaoPendente({
                 nome_empresa: cliente.nome_empresa,
                 nome_responsavel: cliente.nome_responsavel,
                 email: cliente.email,
                 telefone: cliente.telefone,
                 plano: cliente.plano,
+                produto: cliente.produto,
                 forma_pagamento: "PIX",
+              }),
+              // Meta CAPI: conversão de venda (PIX confirmado)
+              enviarPurchaseMeta({
+                clienteId: cliente.id,
+                email: cliente.email,
+                telefone: cliente.telefone,
+                plano: cliente.plano,
               }),
             ])
           }

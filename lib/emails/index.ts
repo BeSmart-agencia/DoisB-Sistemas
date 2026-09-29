@@ -15,17 +15,18 @@ import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pe
 import { templateInternaLeadMarketing, type DadosLeadMarketing } from "./templates/interna-lead-marketing"
 import { templateInternaResumoSemanal, type DadosResumoSemanal } from "./templates/interna-resumo-semanal"
 import { templateAgendabConvite } from "./templates/agendab-convite"
+import { PRODUTO_NOME } from "@/lib/planos"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = "DoisB Sistemas <noreply@doisbsistemas.com.br>"
 const INTERNO = ["barthlaisa@gmail.com", "laisabarth@doisbsistemas.com.br", "abelbarth@doisbsistemas.com.br"]
 
-export async function enviarEmailPosCadastro(email: string, nome: string, plano: string) {
+export async function enviarEmailPosCadastro(email: string, nome: string, plano: string, produto: string = "zweb") {
   await resend.emails.send({
     from: FROM,
     to: email,
     subject: "Bem-vindo à DoisB Sistemas — pagamento confirmado!",
-    html: templatePosCadastro(nome, plano),
+    html: templatePosCadastro(nome, plano, produto),
   })
 }
 
@@ -100,10 +101,11 @@ export async function enviarEmailChamadoResolvido(email: string, nome: string, p
 }
 
 export async function enviarEmailInternoNovaVenda(dados: DadosNovaVenda) {
+  const nomeProduto = PRODUTO_NOME[dados.produto ?? "zweb"] ?? "ZWeb"
   await resend.emails.send({
     from: FROM,
     to: INTERNO,
-    subject: `🎉 Nova venda — ${dados.nome_empresa} (${dados.plano})`,
+    subject: `🎉 Nova venda ${nomeProduto} — ${dados.nome_empresa}`,
     html: templateInternaNovaVenda(dados),
   })
 }
@@ -118,10 +120,11 @@ export async function enviarEmailInternoNovoChamado(dados: DadosNovoChamado) {
 }
 
 export async function enviarEmailInternoAtivacaoPendente(dados: DadosAtivacaoPendente) {
+  const nomeProduto = PRODUTO_NOME[dados.produto ?? "zweb"] ?? "ZWeb"
   await resend.emails.send({
     from: FROM,
     to: INTERNO,
-    subject: `⚡ Ativar no ZWeb — ${dados.nome_empresa} (${dados.plano})`,
+    subject: `⚡ Ativar no ${nomeProduto} — ${dados.nome_empresa} (${dados.plano})`,
     html: templateInternaAtivacaoPendente(dados),
   })
 }

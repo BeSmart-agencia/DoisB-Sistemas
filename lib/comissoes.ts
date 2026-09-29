@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/database"
-import { PLANO_PRECO, PLANO_LABEL } from "@/lib/planos"
+import { PLANO_PRECO, PLANO_LABEL, PRODUTO_NOME } from "@/lib/planos"
 
 export type StatusComissao = "aguardando" | "ativo" | "atrasado" | "cancelado"
 
@@ -41,7 +41,7 @@ export async function listarComissoes(
 ): Promise<ComissaoEntry[]> {
   let zwebQuery = supabase
     .from("clientes")
-    .select("id, nome_empresa, cidade, estado, plano, status_pagamento, data_assinatura, created_at, comissao_paga, vendedor_id")
+    .select("id, nome_empresa, cidade, estado, produto, plano, status_pagamento, data_assinatura, created_at, comissao_paga, vendedor_id")
   zwebQuery = vendedorId
     ? zwebQuery.eq("vendedor_id", vendedorId)
     : zwebQuery.not("vendedor_id", "is", null)
@@ -61,7 +61,7 @@ export async function listarComissoes(
     vendedor_id: c.vendedor_id as string,
     cliente: c.nome_empresa,
     local: [c.cidade, c.estado].filter(Boolean).join("/") || null,
-    produto: `ZWeb ${PLANO_LABEL[c.plano] ?? c.plano}`,
+    produto: `${PRODUTO_NOME[c.produto] ?? "ZWeb"} ${PLANO_LABEL[c.plano] ?? c.plano}`,
     valor: PLANO_PRECO[c.plano] ?? 0,
     status: (c.status_pagamento as StatusComissao) ?? "aguardando",
     convertido: !!c.data_assinatura,

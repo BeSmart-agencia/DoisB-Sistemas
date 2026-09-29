@@ -1,3 +1,5 @@
+import { PLANO_LABEL, PLANO_PRECO, PRODUTO_NOME, BRL } from "@/lib/planos"
+
 export interface DadosNovaVenda {
   nome_empresa: string
   cnpj: string
@@ -6,15 +8,13 @@ export interface DadosNovaVenda {
   nome_responsavel: string
   plano: string
   stripe_customer_id?: string
+  produto?: string
 }
 
 export function templateInternaNovaVenda(dados: DadosNovaVenda): string {
-  const planoNome = dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1)
-  const precos: Record<string, string> = {
-    essencial: 'R$ 129,90/mês',
-    standard: 'R$ 199,90/mês',
-    premium: 'R$ 249,90/mês',
-  }
+  const nomeProduto = PRODUTO_NOME[dados.produto ?? "zweb"] ?? "ZWeb"
+  const planoNome = PLANO_LABEL[dados.plano] ?? (dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1))
+  const precoStr = PLANO_PRECO[dados.plano] ? `${BRL.format(PLANO_PRECO[dados.plano])}/mês` : '-'
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
@@ -32,11 +32,12 @@ export function templateInternaNovaVenda(dados: DadosNovaVenda): string {
           <td style="padding:32px 40px;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;margin-bottom:24px;">
               <tr><td style="padding:16px 20px;text-align:center;">
-                <p style="margin:0;color:#166534;font-size:18px;font-weight:700;">Plano ${planoNome} — ${precos[dados.plano] ?? '-'}</p>
+                <p style="margin:0;color:#166534;font-size:18px;font-weight:700;">${nomeProduto} · ${planoNome} — ${precoStr}</p>
               </td></tr>
             </table>
             <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
               ${[
+                ['Produto', nomeProduto],
                 ['Empresa', dados.nome_empresa],
                 ['CNPJ', dados.cnpj],
                 ['Responsável', dados.nome_responsavel],
@@ -51,7 +52,7 @@ export function templateInternaNovaVenda(dados: DadosNovaVenda): string {
               </tr>`).join('')}
             </table>
             <p style="margin:24px 0 0;color:#64748b;font-size:13px;text-align:center;">
-              Lembre-se de liberar o acesso em até 24h úteis após esta notificação.
+              Lembre-se de liberar o acesso em até 1 dia útil após esta notificação.
             </p>
           </td>
         </tr>

@@ -8,12 +8,21 @@ export const PLANO_PRECO: Record<string, number> = {
   essencial: 129.9,
   standard: 199.9,
   premium: 249.9,
+  unico: 159.9, // GWeb — plano único
 }
 
 export const PLANO_LABEL: Record<string, string> = {
   essencial: "Essencial",
   standard: "Standard",
   premium: "Premium",
+  unico: "Plano único",
+}
+
+/** Nome de exibição do produto a partir do id salvo em `clientes.produto`. */
+export const PRODUTO_NOME: Record<string, string> = {
+  "zweb": "ZWeb",
+  "gweb": "GWeb",
+  "doisb-web": "DoisB Web",
 }
 
 // =============================================================================

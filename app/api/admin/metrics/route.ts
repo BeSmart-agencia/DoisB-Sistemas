@@ -6,6 +6,7 @@ const PRECO_PLANO: Record<Plano, number> = {
   essencial: 129.9,
   standard: 199.9,
   premium: 249.9,
+  unico: 159.9,
 }
 
 export async function GET() {

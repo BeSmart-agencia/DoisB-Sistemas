@@ -1,3 +1,5 @@
+import { PLANO_LABEL, PLANO_PRECO, PRODUTO_NOME, BRL } from "@/lib/planos"
+
 export interface DadosAtivacaoPendente {
   nome_empresa: string
   nome_responsavel: string
@@ -5,17 +7,16 @@ export interface DadosAtivacaoPendente {
   telefone: string
   plano: string
   forma_pagamento: string
+  produto?: string
 }
 
 export function templateInternaAtivacaoPendente(dados: DadosAtivacaoPendente): string {
-  const planoNome = dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1)
-  const precos: Record<string, string> = {
-    essencial: 'R$ 129,90/mês',
-    standard: 'R$ 199,90/mês',
-    premium: 'R$ 249,90/mês',
-  }
+  const produto = dados.produto ?? "zweb"
+  const nomeProduto = PRODUTO_NOME[produto] ?? "ZWeb"
+  const planoNome = PLANO_LABEL[dados.plano] ?? (dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1))
+  const precoStr = PLANO_PRECO[dados.plano] ? `${BRL.format(PLANO_PRECO[dados.plano])}/mês` : "-"
   const checklist = [
-    'Acessar o painel ZWeb',
+    `Acessar o painel do ${nomeProduto}`,
     'Localizar ou criar o cliente com os dados abaixo',
     'Ativar o sistema para o cliente',
     `Enviar as credenciais de acesso por e-mail (${dados.email})`,
@@ -31,14 +32,14 @@ export function templateInternaAtivacaoPendente(dados: DadosAtivacaoPendente): s
         <tr>
           <td style="background:#0169b2;padding:28px 40px;">
             <p style="margin:0;color:#bfdbfe;font-size:12px;text-transform:uppercase;letter-spacing:1px;">DoisB Sistemas — Ação necessária</p>
-            <h1 style="margin:8px 0 0;color:#ffffff;font-size:20px;font-weight:700;">⚡ Novo cliente — ativar no ZWeb</h1>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:20px;font-weight:700;">⚡ Novo cliente — ativar no ${nomeProduto}</h1>
           </td>
         </tr>
         <tr>
           <td style="padding:32px 40px;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;margin-bottom:24px;">
               <tr><td style="padding:16px 20px;text-align:center;">
-                <p style="margin:0;color:#1e40af;font-size:18px;font-weight:700;">Plano ${planoNome} — ${precos[dados.plano] ?? '-'}</p>
+                <p style="margin:0;color:#1e40af;font-size:18px;font-weight:700;">${nomeProduto} · ${planoNome} — ${precoStr}</p>
                 <p style="margin:4px 0 0;color:#3b82f6;font-size:13px;">Pagamento via ${dados.forma_pagamento} confirmado</p>
               </td></tr>
             </table>
@@ -46,11 +47,12 @@ export function templateInternaAtivacaoPendente(dados: DadosAtivacaoPendente): s
             <h2 style="margin:0 0 12px;color:#0f172a;font-size:15px;font-weight:700;">Dados do cliente</h2>
             <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:24px;">
               ${[
+                ['Produto', nomeProduto],
                 ['Empresa', dados.nome_empresa],
                 ['Responsável', dados.nome_responsavel],
                 ['E-mail', dados.email],
                 ['Telefone', dados.telefone],
-                ['Plano', `${planoNome} (${precos[dados.plano] ?? '-'})`],
+                ['Plano', `${planoNome} (${precoStr})`],
                 ['Forma de pagamento', dados.forma_pagamento],
               ].map(([label, value], i) => `
               <tr style="background:${i % 2 === 0 ? '#ffffff' : '#f8fafc'};">
