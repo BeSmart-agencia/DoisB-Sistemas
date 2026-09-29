@@ -9,6 +9,7 @@ import {
   enviarEmailInternoAtivacaoPendente,
   enviarEmailConviteAgendab,
   enviarEmailInternoVendaAgendab,
+  enviarEmailDoisbWebAtivacao,
 } from "@/lib/emails"
 import { enviarPurchaseMeta } from "@/lib/meta/capi"
 
@@ -193,19 +194,29 @@ export async function POST(request: Request) {
           break
         }
 
+        // DoisB Web: ativação é self-service (o cliente cria o acesso pelo link),
+        // então não há liberação manual pela equipe.
+        const ehDoisbWeb = cliente.produto === "doisb-web"
+
         await supabase
           .from("clientes")
           .update({
             status_pagamento: "ativo",
-            acesso_liberado: false, // equipe libera manualmente
+            acesso_liberado: ehDoisbWeb, // DoisB Web = true (self-service); ZWeb/GWeb = false (manual)
             stripe_subscription_id: subscriptionId,
             data_assinatura: new Date().toISOString(),
           })
           .eq("id", cliente.id)
 
+        // E-mail do cliente: DoisB Web recebe o link de ativação (self-service);
+        // ZWeb/GWeb recebem o aviso de "ativo em até 1 dia útil".
+        const emailCliente = ehDoisbWeb
+          ? enviarEmailDoisbWebAtivacao(cliente.email as string, cliente.nome_responsavel as string, cliente.plano as string)
+          : enviarEmailPosCadastro(cliente.email as string, cliente.nome_responsavel as string, cliente.plano as string, cliente.produto as string)
+
         // E-mails em paralelo — falha de e-mail não deve quebrar o webhook
-        const emailResults = await Promise.allSettled([
-          enviarEmailPosCadastro(cliente.email as string, cliente.nome_responsavel as string, cliente.plano as string, cliente.produto as string),
+        const emailJobs = [
+          emailCliente,
           enviarEmailInternoNovaVenda({
             nome_empresa: cliente.nome_empresa as string,
             cnpj: cliente.cnpj as string,
@@ -216,23 +227,30 @@ export async function POST(request: Request) {
             produto: cliente.produto as string,
             stripe_customer_id: customerId,
           }),
-          enviarEmailInternoAtivacaoPendente({
-            nome_empresa: cliente.nome_empresa as string,
-            nome_responsavel: cliente.nome_responsavel as string,
-            email: cliente.email as string,
-            telefone: cliente.telefone as string,
-            plano: cliente.plano as string,
-            produto: cliente.produto as string,
-            forma_pagamento: "Cartão",
-          }),
           // Meta CAPI: conversão de venda (pagamento confirmado)
           enviarPurchaseMeta({
             clienteId: cliente.id as string,
             email: cliente.email as string,
             telefone: cliente.telefone as string,
             plano: cliente.plano as string,
+            produto: cliente.produto as string,
           }),
-        ])
+        ]
+        // ZWeb/GWeb: notificar a equipe para ativar manualmente.
+        if (!ehDoisbWeb) {
+          emailJobs.push(
+            enviarEmailInternoAtivacaoPendente({
+              nome_empresa: cliente.nome_empresa as string,
+              nome_responsavel: cliente.nome_responsavel as string,
+              email: cliente.email as string,
+              telefone: cliente.telefone as string,
+              plano: cliente.plano as string,
+              produto: cliente.produto as string,
+              forma_pagamento: "Cartão",
+            })
+          )
+        }
+        const emailResults = await Promise.allSettled(emailJobs)
         emailResults.forEach((r, i) => {
           if (r.status === "rejected") console.error(`[webhook] email[${i}] falhou:`, r.reason)
           else console.log(`[webhook] email[${i}] ok`)
@@ -378,6 +396,7 @@ export async function POST(request: Request) {
               email: cliente.email,
               telefone: cliente.telefone,
               plano: cliente.plano,
+              produto: cliente.produto,
             }),
           ])
         }
@@ -452,6 +471,7 @@ export async function POST(request: Request) {
                 email: cliente.email,
                 telefone: cliente.telefone,
                 plano: cliente.plano,
+                produto: cliente.produto,
               }),
             ])
           }

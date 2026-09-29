@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/database"
-import { PLANO_PRECO, PLANO_LABEL, PRODUTO_NOME } from "@/lib/planos"
+import { PLANO_LABEL, PRODUTO_NOME, precoMensalDe } from "@/lib/planos"
 
 export type StatusComissao = "aguardando" | "ativo" | "atrasado" | "cancelado"
 
@@ -62,7 +62,7 @@ export async function listarComissoes(
     cliente: c.nome_empresa,
     local: [c.cidade, c.estado].filter(Boolean).join("/") || null,
     produto: `${PRODUTO_NOME[c.produto] ?? "ZWeb"} ${PLANO_LABEL[c.plano] ?? c.plano}`,
-    valor: PLANO_PRECO[c.plano] ?? 0,
+    valor: precoMensalDe(c.produto, c.plano),
     status: (c.status_pagamento as StatusComissao) ?? "aguardando",
     convertido: !!c.data_assinatura,
     data: c.created_at,

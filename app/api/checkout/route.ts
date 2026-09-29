@@ -79,64 +79,18 @@ export async function POST(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
   // ---------------------------------------------------------------------------
-  // DoisB Web (white-label Nuts): assinatura direta no Stripe. O provisionamento
-  // pós-pagamento (ativação/liberação de acesso) tem fluxo próprio — aqui só
-  // criamos a assinatura com metadata para reconciliar depois.
-  //
-  // ZWeb e GWeb seguem o MESMO fluxo abaixo: registro em `clientes`, e-mails
-  // (cliente + interno de ativação) e liberação manual pela equipe.
+  // Fluxo compartilhado ZWeb + GWeb + DoisB Web: registro em `clientes`.
+  // O que confirma o pagamento no webhook difere por produto:
+  //   - ZWeb / GWeb: e-mail "ativo em até 1 dia útil" + liberação manual pela equipe.
+  //   - DoisB Web: e-mail com o link de ativação (cliente se cadastra/ativa sozinho).
+  // DoisB Web tem trial (5 dias) e opção anual (−10%).
   // ---------------------------------------------------------------------------
-  if (produto === "doisb-web") {
-    const priceId = resolverPriceId(produto as ProdutoId, plano, intervalo)
-    if (!priceId) {
-      return NextResponse.json({ error: "Plano indisponível para este produto." }, { status: 400 })
-    }
-    const planoCat = getPlano(produto as ProdutoId, plano)
-    const temTrial = !!planoCat?.trialDias
-    // Trial exige método de pagamento com cobrança recorrente automática (cartão);
-    // boleto não é compatível com período de teste.
-    const usarBoleto = forma_pagamento === "boleto" && !temTrial
-
-    let customer
-    try {
-      customer = await stripe.customers.create({
-        email,
-        name: nome_empresa,
-        phone: telefone,
-        metadata: { produto, plano, intervalo, cnpj: cnpjLimpo, nome_responsavel },
-      })
-    } catch (err) {
-      console.error("[checkout] Erro ao criar customer (produto próprio):", err)
-      return NextResponse.json({ error: "Erro ao processar pagamento. Tente novamente." }, { status: 500 })
-    }
-
-    try {
-      const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        customer: customer.id,
-        line_items: [{ price: priceId, quantity: 1 }],
-        ...(usarBoleto && { payment_method_types: ["boleto"] }),
-        success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${appUrl}/cadastro?produto=${produto}&plano=${plano}&intervalo=${intervalo}&erro=cancelado`,
-        locale: "pt-BR",
-        allow_promotion_codes: true,
-        subscription_data: {
-          ...(temTrial ? { trial_period_days: planoCat!.trialDias } : {}),
-          metadata: { produto, plano, intervalo, cnpj: cnpjLimpo, nome_empresa, nome_responsavel },
-        },
-      })
-      return NextResponse.json({ url: session.url })
-    } catch (err) {
-      console.error("[checkout] Erro ao criar session (produto próprio):", err)
-      return NextResponse.json({ error: "Erro ao criar sessão de pagamento. Tente novamente." }, { status: 500 })
-    }
-  }
-
-  // A partir daqui: fluxo compartilhado ZWeb + GWeb (registro em `clientes`).
   const priceIdCliente = resolverPriceId(produto as ProdutoId, plano, intervalo)
   if (!priceIdCliente) {
     return NextResponse.json({ error: "Plano inválido." }, { status: 422 })
   }
+  const planoCat = getPlano(produto as ProdutoId, plano)
+  const temTrial = !!planoCat?.trialDias
 
   // Atribuição a vendedor externo (link exclusivo). Null se não houver.
   const vendedorId = await resolverVendedorId(supabase, vendedor_codigo)
@@ -234,18 +188,22 @@ export async function POST(request: Request) {
       mode: "subscription",
       customer: stripeCustomer.id,
       line_items: [{ price: priceIdCliente, quantity: 1 }],
-      ...(forma_pagamento === "boleto" && { payment_method_types: ["boleto"] }),
+      // Boleto não é compatível com período de teste (trial exige cobrança
+      // recorrente automática — cartão).
+      ...(forma_pagamento === "boleto" && !temTrial && { payment_method_types: ["boleto"] }),
       success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/cadastro?produto=${produto}&plano=${plano}&erro=cancelado`,
+      cancel_url: `${appUrl}/cadastro?produto=${produto}&plano=${plano}&intervalo=${intervalo}&erro=cancelado`,
       locale: "pt-BR",
       ...(aplicarPromo
         ? { discounts: [{ coupon: PROMO_GDOOR.cupons[plano] }] }
         : { allow_promotion_codes: true }),
       subscription_data: {
+        ...(temTrial ? { trial_period_days: planoCat!.trialDias } : {}),
         metadata: {
           supabase_cliente_id: cliente.id,
           produto,
           plano,
+          intervalo,
         },
       },
     })

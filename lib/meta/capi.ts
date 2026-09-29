@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import { PLANO_PRECO } from "@/lib/planos"
+import { precoMensalDe } from "@/lib/planos"
 
 // Meta Conversions API (server-side). Dispara o evento `Purchase` direto do
 // servidor quando o pagamento é CONFIRMADO (webhook do Stripe), em vez de
@@ -43,7 +43,9 @@ export interface PurchaseInput {
   email: string
   telefone?: string | null
   plano: string
-  /** Valor da conversão; se omitido, usa o preço de tabela do plano. */
+  /** Produto (zweb, gweb, doisb-web) — define o preço de tabela. */
+  produto?: string
+  /** Valor da conversão; se omitido, usa o preço de tabela do produto+plano. */
   valor?: number
   /** URL de origem (ex.: página de sucesso). Opcional. */
   eventSourceUrl?: string
@@ -62,7 +64,7 @@ export async function enviarPurchaseMeta(input: PurchaseInput): Promise<boolean>
     return false
   }
 
-  const valor = input.valor ?? PLANO_PRECO[input.plano] ?? 0
+  const valor = input.valor ?? precoMensalDe(input.produto ?? "zweb", input.plano)
 
   const userData: Record<string, unknown> = {
     em: [sha256(normalizeEmail(input.email))],

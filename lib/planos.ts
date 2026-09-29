@@ -224,4 +224,14 @@ export function precoMensalNoAnual(plano: PlanoCatalogo): number | undefined {
   return plano.precoAnual ? plano.precoAnual / 12 : undefined
 }
 
+/**
+ * Preço mensal de tabela por produto+plano — usado em comissão e Meta CAPI.
+ * O mesmo `plano` (ex.: "essencial") tem preço diferente por produto
+ * (ZWeb 129,90 vs DoisB Web 149,90), por isso não basta olhar só o plano.
+ */
+export function precoMensalDe(produtoId: string, planoKey: string): number {
+  const plano = getPlano(produtoId as ProdutoId, planoKey)
+  return plano?.precoMensal ?? PLANO_PRECO[planoKey] ?? 0
+}
+
 export const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })

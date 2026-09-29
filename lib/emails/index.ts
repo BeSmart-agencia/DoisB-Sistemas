@@ -15,6 +15,7 @@ import { templateInternaAtivacaoPendente } from "./templates/interna-ativacao-pe
 import { templateInternaLeadMarketing, type DadosLeadMarketing } from "./templates/interna-lead-marketing"
 import { templateInternaResumoSemanal, type DadosResumoSemanal } from "./templates/interna-resumo-semanal"
 import { templateAgendabConvite } from "./templates/agendab-convite"
+import { templateDoisbWebAtivacao } from "./templates/doisb-web-ativacao"
 import { PRODUTO_NOME } from "@/lib/planos"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -40,6 +41,15 @@ export async function enviarEmailAcessoLiberado(
     to: email,
     subject: "Seu acesso ao ZWeb está liberado!",
     html: templateAcessoLiberado(nome, credenciais),
+  })
+}
+
+export async function enviarEmailDoisbWebAtivacao(email: string, nome: string, plano: string) {
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Seu DoisB Web está pronto — ative agora!",
+    html: templateDoisbWebAtivacao(nome, plano),
   })
 }
 
