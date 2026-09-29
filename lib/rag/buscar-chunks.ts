@@ -12,6 +12,7 @@ export interface Chunk {
 
 export async function buscarChunksRelevantes(
   pergunta: string,
+  produto: string | null = null,
   limite = 5
 ): Promise<Chunk[]> {
   const embeddingRes = await openai.embeddings.create({
@@ -27,6 +28,7 @@ export async function buscarChunksRelevantes(
     query_embedding: queryEmbedding,
     match_threshold: 0.3,
     match_count: limite,
+    filtro_produto: produto,
   })
 
   if (error) {

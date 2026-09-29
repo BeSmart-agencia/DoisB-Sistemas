@@ -24,14 +24,23 @@ function getSessaoId(): string {
   return id
 }
 
-const MSG_INICIAL: Mensagem = {
-  id: "boas-vindas",
-  role: "assistant",
-  content: `Olá! Sou o assistente da **DoisB Sistemas** 👋
+const PRODUTOS_CHAT = [
+  { id: "zweb", nome: "ZWeb" },
+  { id: "gweb", nome: "GWeb" },
+  { id: "doisb-web", nome: "DoisB Web" },
+] as const
+type ProdutoChat = (typeof PRODUTOS_CHAT)[number]["id"]
 
-Posso responder suas dúvidas sobre o **ZWeb** com base nos manuais oficiais do sistema.
+function saudacao(nome: string): Mensagem {
+  return {
+    id: "boas-vindas",
+    role: "assistant",
+    content: `Olá! Sou o assistente da **DoisB Sistemas** 👋
+
+Posso responder suas dúvidas sobre o **${nome}** com base nos manuais do sistema.
 
 Sobre o que você precisa de ajuda hoje?`,
+  }
 }
 
 const SUGESTOES = [
@@ -43,7 +52,9 @@ const SUGESTOES = [
 ]
 
 export default function ChatSuportePage() {
-  const [mensagens, setMensagens] = useState<Mensagem[]>([MSG_INICIAL])
+  const [produto, setProduto] = useState<ProdutoChat>("zweb")
+  const produtoNome = PRODUTOS_CHAT.find((p) => p.id === produto)!.nome
+  const [mensagens, setMensagens] = useState<Mensagem[]>([saudacao("ZWeb")])
   const [input, setInput] = useState("")
   const [enviando, setEnviando] = useState(false)
   const [sessaoId, setSessaoId] = useState("")
@@ -67,16 +78,22 @@ export default function ChatSuportePage() {
     e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`
   }
 
-  const limparConversa = useCallback(() => {
+  const limparConversa = useCallback((nome?: string) => {
     abortRef.current?.abort()
     const novoId = crypto.randomUUID()
     localStorage.setItem("doisb_chat_sessao_id", novoId)
     setSessaoId(novoId)
-    setMensagens([MSG_INICIAL])
+    setMensagens([saudacao(nome ?? produtoNome)])
     setInput("")
     setEnviando(false)
     setTimeout(() => inputRef.current?.focus(), 50)
-  }, [])
+  }, [produtoNome])
+
+  function trocarProduto(novo: ProdutoChat) {
+    if (novo === produto) return
+    setProduto(novo)
+    limparConversa(PRODUTOS_CHAT.find((p) => p.id === novo)!.nome)
+  }
 
   const enviar = useCallback(async (texto?: string) => {
     const msg = (texto ?? input).trim()
@@ -102,7 +119,7 @@ export default function ChatSuportePage() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensagens: historico, sessao_id: sessaoId }),
+        body: JSON.stringify({ mensagens: historico, sessao_id: sessaoId, produto }),
         signal: abortRef.current.signal,
       })
 
@@ -143,7 +160,7 @@ export default function ChatSuportePage() {
       setEnviando(false)
       setTimeout(() => inputRef.current?.focus(), 50)
     }
-  }, [input, enviando, sessaoId, mensagens])
+  }, [input, enviando, sessaoId, mensagens, produto])
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -203,12 +220,26 @@ export default function ChatSuportePage() {
             <div>
               <p className="text-sm font-bold text-white leading-none">Assistente DoisB</p>
               <p className="text-xs font-medium mt-0.5" style={{ color: "rgba(52,211,153,0.9)" }}>
-                Online · ZWeb
+                Online · {produtoNome}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Seletor de produto */}
+            <label className="flex items-center gap-1.5">
+              <span className="hidden sm:inline text-[11px]" style={{ color: "rgba(148,163,184,0.6)" }}>Sistema:</span>
+              <select
+                value={produto}
+                onChange={(e) => trocarProduto(e.target.value as ProdutoChat)}
+                className="text-xs font-semibold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "white" }}
+              >
+                {PRODUTOS_CHAT.map((p) => (
+                  <option key={p.id} value={p.id} style={{ color: "#0f172a" }}>{p.nome}</option>
+                ))}
+              </select>
+            </label>
             <Link
               href="/suporte"
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
@@ -218,7 +249,7 @@ export default function ChatSuportePage() {
               Suporte humano
             </Link>
             <button
-              onClick={limparConversa}
+              onClick={() => limparConversa()}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
               style={{ color: "rgba(148,163,184,0.6)" }}
             >
@@ -334,7 +365,7 @@ export default function ChatSuportePage() {
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Pergunte sobre qualquer funcionalidade do ZWeb..."
+              placeholder={`Pergunte sobre qualquer funcionalidade do ${produtoNome}...`}
               className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
               style={{
                 color: "rgba(226,232,240,0.9)",

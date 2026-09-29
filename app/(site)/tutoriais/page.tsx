@@ -12,8 +12,14 @@ import TutoriaisSearch from "./_components/tutoriais-search"
 
 export const metadata: Metadata = {
   title: "Central de Ajuda — DoisB Sistemas",
-  description: "Tutoriais e guias para o sistema ZWeb. Encontre respostas rápidas para suas dúvidas.",
+  description: "Tutoriais e guias para os sistemas da DoisB (ZWeb, GWeb e mais). Encontre respostas rápidas para suas dúvidas.",
 }
+
+const PRODUTOS_TAB = [
+  { id: "zweb", nome: "ZWeb", descricao: "o sistema de gestão da Zucchetti" },
+  { id: "gweb", nome: "GWeb", descricao: "o sistema para mini-mercados" },
+] as const
+type ProdutoTut = (typeof PRODUTOS_TAB)[number]["id"]
 
 const CATEGORIAS = [
   { key: "primeiros_passos", label: "Primeiros passos",        icon: Rocket,       cor: "text-green-600",   corBg: "bg-green-50 border-green-200" },
@@ -27,13 +33,23 @@ const CATEGORIAS = [
   { key: "configuracoes",    label: "Configurações avançadas", icon: Settings,     cor: "text-slate-600",   corBg: "bg-slate-100 border-slate-200" },
 ] as const
 
-export default async function TutoriaisPage() {
+export default async function TutoriaisPage({
+  searchParams,
+}: {
+  searchParams: { produto?: string }
+}) {
   const supabase = await createClient()
+
+  const produto: ProdutoTut = PRODUTOS_TAB.some((p) => p.id === searchParams.produto)
+    ? (searchParams.produto as ProdutoTut)
+    : "zweb"
+  const produtoInfo = PRODUTOS_TAB.find((p) => p.id === produto)!
 
   const { data: tutoriais } = await supabase
     .from("tutoriais")
     .select("id, titulo, slug, categoria, resumo")
     .eq("status", "publicado")
+    .eq("produto", produto)
     .order("ordem", { ascending: true })
     .order("titulo", { ascending: true })
 
@@ -57,8 +73,23 @@ export default async function TutoriaisPage() {
           </div>
           <h1 className="text-4xl font-black tracking-tight mb-4">Central de Ajuda DoisB Sistemas</h1>
           <p className="text-blue-100 text-lg max-w-2xl mx-auto">
-            Guias passo a passo para aproveitar ao máximo o ZWeb — o sistema de gestão da Zucchetti.
+            Guias passo a passo para aproveitar ao máximo o {produtoInfo.nome} — {produtoInfo.descricao}.
           </p>
+
+          {/* Abas de produto */}
+          <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-white/10 p-1 ring-1 ring-white/15">
+            {PRODUTOS_TAB.map((p) => (
+              <Link
+                key={p.id}
+                href={`/tutoriais?produto=${p.id}`}
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                  p.id === produto ? "bg-white text-slate-900" : "text-blue-100 hover:text-white"
+                }`}
+              >
+                {p.nome}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -108,6 +139,13 @@ export default async function TutoriaisPage() {
             )
           })}
         </Accordion>
+
+        {total === 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-10 text-center">
+            <p className="text-slate-600 font-medium">Ainda não há tutoriais publicados para o {produtoInfo.nome}.</p>
+            <p className="text-slate-400 text-sm mt-1">Em breve. Enquanto isso, fale com o suporte.</p>
+          </div>
+        )}
 
         {/* Dúvidas */}
         <div className="admin-panel-strong p-6 text-center">

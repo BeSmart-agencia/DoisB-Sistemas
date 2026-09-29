@@ -11,7 +11,14 @@ const schema = z.object({
     .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() }))
     .min(1),
   sessao_id: z.string().uuid(),
+  produto: z.enum(['zweb', 'gweb', 'doisb-web']).default('zweb'),
 })
+
+const PRODUTO_CHAT: Record<string, { nome: string; contexto: string }> = {
+  zweb: { nome: 'ZWeb', contexto: 'o ZWeb, sistema de gestão para o varejo (Zucchetti)' },
+  gweb: { nome: 'GWeb', contexto: 'o GWeb, sistema de gestão para mini-mercados (NF-e/NFC-e, PDV offline e etiquetas)' },
+  'doisb-web': { nome: 'DoisB Web', contexto: 'o DoisB Web, o ERP completo da DoisB (vendas, fiscal, estoque, financeiro, food e CRM)' },
+}
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -23,7 +30,8 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(body)
   if (!parsed.success) return new Response('Dados inválidos', { status: 422 })
 
-  const { mensagens, sessao_id } = parsed.data
+  const { mensagens, sessao_id, produto } = parsed.data
+  const prod = PRODUTO_CHAT[produto] ?? PRODUTO_CHAT.zweb
   const ultima = mensagens[mensagens.length - 1]
 
   if (ultima.role !== 'user') {
@@ -32,8 +40,8 @@ export async function POST(req: NextRequest) {
 
   const pergunta = ultima.content
 
-  // ── 1. Busca vetorial ────────────────────────────────────────────────────
-  const chunks = await buscarChunksRelevantes(pergunta, 5)
+  // ── 1. Busca vetorial (filtrada pelo produto selecionado) ─────────────────
+  const chunks = await buscarChunksRelevantes(pergunta, produto, 5)
   const semResposta = chunks.length === 0
 
   // ── 2. Contexto para o prompt ────────────────────────────────────────────
@@ -42,17 +50,19 @@ export async function POST(req: NextRequest) {
       ? chunks.map((c, i) => `[Fonte ${i + 1}]\n${c.conteudo}`).join('\n\n---\n\n')
       : 'Nenhum trecho relevante encontrado na base de conhecimento.'
 
-  const systemPrompt = `Você é o assistente da DoisB Sistemas, revenda autorizada do ZWeb (sistema de gestão da Zucchetti).
+  const systemPrompt = `Você é o assistente da DoisB Sistemas. Esta conversa é sobre ${prod.contexto}.
 
-Responda com base no CONTEXTO abaixo, extraído dos manuais oficiais do ZWeb. O contexto pode conter ruídos como URLs, datas e números de página — ignore-os e extraia apenas o conteúdo relevante.
+Responda com base no CONTEXTO abaixo, extraído dos manuais do ${prod.nome}. O contexto pode conter ruídos como URLs, datas e números de página — ignore-os e extraia apenas o conteúdo relevante.
 
 Regras:
+- Responda SOMENTE sobre o ${prod.nome}. Se perguntarem sobre outro sistema, oriente a trocar o produto no seletor do chat.
 - Se o contexto contiver a informação (mesmo que parcial), responda com base nela
 - Só diga que não encontrou se o contexto for completamente irrelevante para a pergunta
 - Se precisar de mais detalhes, sugira abrir chamado em /suporte
 - Tom: profissional, didático, amigável. Português brasileiro
 - Use bullets quando ajudar
 - Cite o nome das funcionalidades como aparecem no sistema
+- Nunca cite fornecedores externos (ex.: Gdoor); o sistema é o ${prod.nome} da DoisB
 
 CONTEXTO:
 ${contexto}`

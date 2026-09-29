@@ -321,7 +321,7 @@ export async function executeTool(agentId: AgentId, name: string, input: ToolInp
     case 'search_zweb_kb': {
       const consulta = String(input.consulta ?? '')
       const limite = Math.min(Number(input.limite) || 5, 10)
-      const chunks = await buscarChunksRelevantes(consulta, limite)
+      const chunks = await buscarChunksRelevantes(consulta, 'zweb', limite)
       if (!chunks.length) {
         return 'Nenhum trecho relevante encontrado na base de conhecimento. NÃO afirme essa funcionalidade — diga que precisa confirmar.'
       }

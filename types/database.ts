@@ -150,17 +150,17 @@ export interface Database {
       }
       tutoriais: {
         Row: {
-          id: string; titulo: string; slug: string; categoria: string
+          id: string; titulo: string; slug: string; categoria: string; produto: string
           resumo: string | null; conteudo_html: string | null
           status: string; ordem: number; created_at: string; atualizado_em: string
         }
         Insert: {
-          id?: string; titulo: string; slug: string; categoria: string
+          id?: string; titulo: string; slug: string; categoria: string; produto?: string
           resumo?: string | null; conteudo_html?: string | null
           status?: string; ordem?: number; created_at?: string; atualizado_em?: string
         }
         Update: {
-          id?: string; titulo?: string; slug?: string; categoria?: string
+          id?: string; titulo?: string; slug?: string; categoria?: string; produto?: string
           resumo?: string | null; conteudo_html?: string | null
           status?: string; ordem?: number; created_at?: string; atualizado_em?: string
         }
@@ -168,15 +168,15 @@ export interface Database {
       }
       documentos: {
         Row: {
-          id: string; nome_arquivo: string; categoria: string | null
+          id: string; nome_arquivo: string; categoria: string | null; produto: string
           conteudo_texto: string; tutorial_id: string | null; created_at: string
         }
         Insert: {
-          id?: string; nome_arquivo: string; categoria?: string | null
+          id?: string; nome_arquivo: string; categoria?: string | null; produto?: string
           conteudo_texto: string; tutorial_id?: string | null; created_at?: string
         }
         Update: {
-          id?: string; nome_arquivo?: string; categoria?: string | null
+          id?: string; nome_arquivo?: string; categoria?: string | null; produto?: string
           conteudo_texto?: string; tutorial_id?: string | null; created_at?: string
         }
         Relationships: [
