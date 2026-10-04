@@ -389,9 +389,9 @@ export function CadastroForm({
                 <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-blue-700 cursor-pointer" {...register("termos")} />
                 <span className="text-sm text-slate-600 leading-relaxed">
                   Li e aceito os{" "}
-                  <a href="/termos" target="_blank" className="text-blue-700 font-medium hover:underline">Termos de Uso</a>{" "}
+                  <a href="/termos-de-uso" target="_blank" className="text-blue-700 font-medium hover:underline">Termos de Uso</a>{" "}
                   e a{" "}
-                  <a href="/privacidade" target="_blank" className="text-blue-700 font-medium hover:underline">Política de Privacidade</a>.
+                  <a href="/politica-de-privacidade" target="_blank" className="text-blue-700 font-medium hover:underline">Política de Privacidade</a>.
                 </span>
               </label>
               {errors.termos && <p className="mt-1.5 text-sm text-red-600 ml-7">{errors.termos.message}</p>}

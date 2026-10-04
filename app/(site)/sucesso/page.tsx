@@ -38,7 +38,7 @@ export default function SucessoPage() {
             Pagamento confirmado!
           </h1>
           <p className="text-slate-500 text-lg mb-10">
-            Obrigado por assinar o ZWeb. Estamos preparando tudo pra você.
+            Obrigado por assinar! Estamos preparando tudo pra você.
           </p>
 
           {/* Cards informativos */}
@@ -48,9 +48,9 @@ export default function SucessoPage() {
                 <Clock className="h-5 w-5 text-blue-700" />
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">Acesso em até 24 horas úteis</p>
+                <p className="font-semibold text-slate-900 text-sm">Fique de olho no seu e-mail</p>
                 <p className="text-slate-500 text-sm mt-0.5 leading-relaxed">
-                  Nossa equipe irá configurar o seu sistema e enviar as credenciais de acesso por e-mail.
+                  Enviamos as instruções de acesso ao seu sistema para o e-mail do cadastro. Confira também a caixa de spam.
                 </p>
               </div>
             </div>
@@ -60,7 +60,7 @@ export default function SucessoPage() {
                 <BookOpen className="h-5 w-5 text-purple-700" />
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">Enquanto isso, conheça o ZWeb</p>
+                <p className="font-semibold text-slate-900 text-sm">Enquanto isso, explore os tutoriais</p>
                 <p className="text-slate-500 text-sm mt-0.5 leading-relaxed">
                   Explore nossos tutoriais e vídeos para se preparar para o primeiro acesso.
                 </p>
@@ -78,7 +78,7 @@ export default function SucessoPage() {
               Ver tutoriais
             </a>
             <a
-              href="https://wa.me/5551992726289?text=Olá!%20Acabei%20de%20assinar%20o%20ZWeb%20e%20quero%20acompanhar%20meu%20acesso."
+              href="https://wa.me/5551992726289?text=Olá!%20Acabei%20de%20assinar%20e%20quero%20acompanhar%20meu%20acesso."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-xl transition-colors text-sm"

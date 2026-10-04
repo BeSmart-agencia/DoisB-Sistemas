@@ -40,6 +40,7 @@ interface Cliente {
   nome_empresa: string
   cnpj: string
   email: string
+  produto: string
   plano: Plano
   status_pagamento: StatusPagamento
   acesso_liberado: boolean
@@ -73,6 +74,15 @@ const PLANO_LABEL: Record<Plano, string> = {
   standard: "Standard",
   premium: "Premium",
   unico: "GWeb",
+}
+
+const PRODUTO_LABEL: Record<string, string> = {
+  "zweb": "ZWeb", "gweb": "GWeb", "doisb-web": "DoisB Web",
+}
+const PRODUTO_CLASS: Record<string, string> = {
+  "zweb": "bg-blue-50 text-blue-700 border-blue-200",
+  "gweb": "bg-orange-50 text-orange-700 border-orange-200",
+  "doisb-web": "bg-emerald-50 text-emerald-700 border-emerald-200",
 }
 
 function formatCNPJ(cnpj: string) {
@@ -234,7 +244,12 @@ export default function ClientesPage() {
                 <TableRow key={c.id} className="hover:bg-slate-50/50">
                   <TableCell>
                     <div>
-                      <p className="font-medium text-slate-900 text-sm">{c.nome_empresa}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-slate-900 text-sm">{c.nome_empresa}</p>
+                        <Badge variant="outline" className={`text-[10px] shrink-0 ${PRODUTO_CLASS[c.produto] ?? "bg-slate-50 text-slate-600 border-slate-200"}`}>
+                          {PRODUTO_LABEL[c.produto] ?? c.produto}
+                        </Badge>
+                      </div>
                       <p className="text-xs text-slate-400">{c.email}</p>
                     </div>
                   </TableCell>

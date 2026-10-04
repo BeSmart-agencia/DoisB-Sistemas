@@ -10,16 +10,18 @@ export async function GET(request: Request) {
   const search = searchParams.get("search") ?? ""
   const categoria = searchParams.get("categoria") ?? ""
   const status = searchParams.get("status") ?? ""
+  const produto = searchParams.get("produto") ?? ""
 
   let query = supabase!
     .from("tutoriais")
-    .select("id, titulo, slug, categoria, resumo, status, ordem, atualizado_em", { count: "exact" })
+    .select("id, titulo, slug, categoria, produto, resumo, status, ordem, atualizado_em", { count: "exact" })
     .order("ordem", { ascending: true })
     .order("titulo", { ascending: true })
 
   if (search) query = query.ilike("titulo", `%${search}%`)
   if (categoria) query = query.eq("categoria", categoria)
   if (status) query = query.eq("status", status)
+  if (produto) query = query.eq("produto", produto)
 
   const { data, count, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
   if (response) return response
 
   const body = await request.json()
-  const { titulo, categoria, resumo, conteudo_html, status, ordem } = body
+  const { titulo, categoria, produto, resumo, conteudo_html, status, ordem } = body
 
   if (!titulo || !categoria) {
     return NextResponse.json({ error: "Título e categoria obrigatórios" }, { status: 400 })
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase!
     .from("tutoriais")
-    .insert({ titulo, slug, categoria, resumo, conteudo_html: htmlComIds, status: status ?? "rascunho", ordem: ordem ?? 0 })
+    .insert({ titulo, slug, categoria, produto: produto ?? "zweb", resumo, conteudo_html: htmlComIds, status: status ?? "rascunho", ordem: ordem ?? 0 })
     .select("id, slug")
     .single()
 

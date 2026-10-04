@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/admin/require-admin"
-import type { Plano } from "@/types/database"
-
-const PRECO_PLANO: Record<Plano, number> = {
-  essencial: 129.9,
-  standard: 199.9,
-  premium: 249.9,
-  unico: 159.9,
-}
+import { precoMensalDe } from "@/lib/planos"
 
 export async function GET() {
   const { supabase, response } = await requireAdmin()
@@ -19,13 +12,13 @@ export async function GET() {
     .select("*", { count: "exact", head: true })
     .eq("status_pagamento", "ativo")
 
-  // MRR calculado por plano
+  // MRR calculado por produto + plano (preço correto de cada sistema)
   const { data: planos } = await supabase!
     .from("clientes")
-    .select("plano")
+    .select("produto, plano")
     .eq("status_pagamento", "ativo")
 
-  const mrr = (planos ?? []).reduce((sum, c) => sum + (PRECO_PLANO[c.plano as Plano] ?? 0), 0)
+  const mrr = (planos ?? []).reduce((sum, c) => sum + precoMensalDe(c.produto, c.plano), 0)
 
   // Vendas do mês (novos clientes com pagamento confirmado)
   const inicioMes = new Date()

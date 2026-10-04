@@ -49,6 +49,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { precoMensalDe, BRL, PRODUTO_NOME } from "@/lib/planos"
 
 type StatusPagamento = "aguardando" | "ativo" | "atrasado" | "cancelado"
 type Plano = "essencial" | "standard" | "premium" | "unico"
@@ -81,6 +82,7 @@ interface ClienteDetalhe {
   bairro: string | null
   cidade: string | null
   estado: string | null
+  produto: string
   plano: Plano
   status_pagamento: StatusPagamento
   acesso_liberado: boolean
@@ -355,9 +357,9 @@ export default function ClienteDetalhePage() {
                 accent: "border-l-blue-400",
               },
               {
-                label: "Plano atual",
-                value: PLANO_CONFIG[cliente.plano].label,
-                sub: PLANO_CONFIG[cliente.plano].preco,
+                label: "Produto e plano",
+                value: `${PRODUTO_NOME[cliente.produto] ?? "ZWeb"} · ${PLANO_CONFIG[cliente.plano]?.label ?? cliente.plano}`,
+                sub: `${BRL.format(precoMensalDe(cliente.produto, cliente.plano))}/mês`,
                 icon: CreditCard,
                 iconBg: "bg-violet-100",
                 iconColor: "text-violet-600",

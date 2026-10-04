@@ -64,7 +64,7 @@ function AguardandoPixContent() {
           <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto mb-5" />
           <h1 className="text-2xl font-bold text-slate-900 mb-3">Pagamento confirmado!</h1>
           <p className="text-slate-500 leading-relaxed mb-6">
-            Recebemos seu PIX. Nossa equipe vai configurar seu acesso ao ZWeb e entrar em contato em
+            Recebemos seu PIX. Nossa equipe vai configurar seu acesso ao sistema e entrar em contato em
             até <strong>24 horas úteis</strong>.
           </p>
           <a

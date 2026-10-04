@@ -33,10 +33,18 @@ interface Tutorial {
   titulo: string
   slug: string
   categoria: Categoria
+  produto: string
   status: Status
   resumo: string | null
   ordem: number
   atualizado_em: string
+}
+
+const PRODUTO_LABEL: Record<string, string> = { "zweb": "ZWeb", "gweb": "GWeb", "doisb-web": "DoisB Web" }
+const PRODUTO_COLOR: Record<string, string> = {
+  "zweb": "bg-blue-50 text-blue-700 border-blue-200",
+  "gweb": "bg-orange-50 text-orange-700 border-orange-200",
+  "doisb-web": "bg-emerald-50 text-emerald-700 border-emerald-200",
 }
 
 const CAT_LABEL: Record<Categoria, string> = {
@@ -68,15 +76,17 @@ export default function AdminTutoriaisPage() {
   const [search, setSearch] = useState("")
   const [categoria, setCategoria] = useState("")
   const [status, setStatus] = useState("")
+  const [produto, setProduto] = useState("")
   const [deletandoId, setDeletandoId] = useState<string | null>(null)
 
   const params = new URLSearchParams()
   if (search) params.set("search", search)
   if (categoria) params.set("categoria", categoria)
   if (status) params.set("status", status)
+  if (produto) params.set("produto", produto)
 
   const { data, isLoading } = useQuery<{ tutoriais: Tutorial[]; total: number }>({
-    queryKey: ["admin-tutoriais", search, categoria, status],
+    queryKey: ["admin-tutoriais", search, categoria, status, produto],
     queryFn: () => fetch(`/api/admin/tutoriais?${params}`).then((r) => r.json()),
   })
 
@@ -137,6 +147,18 @@ export default function AdminTutoriaisPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <Select value={produto || "todos"} onValueChange={(v) => setProduto(v === "todos" ? "" : (v ?? ""))}>
+          <SelectTrigger className="w-40">
+            <Filter className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
+            <SelectValue placeholder="Produto" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os produtos</SelectItem>
+            {Object.entries(PRODUTO_LABEL).map(([k, v]) => (
+              <SelectItem key={k} value={k}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={categoria || "todos"} onValueChange={(v) => setCategoria(v === "todos" ? "" : (v ?? ""))}>
           <SelectTrigger className="w-48">
             <Filter className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
@@ -194,7 +216,12 @@ export default function AdminTutoriaisPage() {
                 <TableRow key={t.id} className="hover:bg-slate-50/50">
                   <TableCell className="text-center text-xs text-slate-400">{t.ordem}</TableCell>
                   <TableCell>
-                    <div className="font-medium text-slate-900 text-sm leading-snug">{t.titulo}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium text-slate-900 text-sm leading-snug">{t.titulo}</div>
+                      <Badge variant="outline" className={cn("text-[10px] shrink-0", PRODUTO_COLOR[t.produto] ?? "bg-slate-50 text-slate-600 border-slate-200")}>
+                        {PRODUTO_LABEL[t.produto] ?? t.produto}
+                      </Badge>
+                    </div>
                     {t.resumo && (
                       <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">{t.resumo}</div>
                     )}
