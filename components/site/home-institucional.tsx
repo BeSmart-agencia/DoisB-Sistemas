@@ -7,7 +7,7 @@ import {
   ArrowRight, Check, Crown, Heart, MapPin, Wrench,
   Store, ShoppingBasket, Workflow, Boxes,
 } from "lucide-react"
-import { PRODUTOS, BRL, type CorProduto, type ProdutoCatalogo } from "@/lib/planos"
+import { PRODUTOS_VISIVEIS, BRL, type CorProduto, type ProdutoCatalogo } from "@/lib/planos"
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 32 },
@@ -37,7 +37,7 @@ function precoDe(p: ProdutoCatalogo): string {
 }
 
 export function HomeInstitucional() {
-  const outros = PRODUTOS.filter((p) => p.id !== "doisb-web")
+  const outros = PRODUTOS_VISIVEIS.filter((p) => p.id !== "doisb-web")
 
   return (
     <>

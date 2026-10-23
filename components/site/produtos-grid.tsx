@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { ArrowRight, Check, Crown, Store, Workflow, ShoppingBasket, Boxes } from "lucide-react"
-import { PRODUTOS, BRL, type CorProduto, type ProdutoCatalogo } from "@/lib/planos"
+import { PRODUTOS_VISIVEIS, BRL, type CorProduto, type ProdutoCatalogo } from "@/lib/planos"
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 28 },
@@ -145,7 +145,7 @@ export function ProdutosGrid() {
         </motion.div>
 
         <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {PRODUTOS.map((p, i) => (
+          {PRODUTOS_VISIVEIS.map((p, i) => (
             <ProdutoCard key={p.id} p={p} i={i} />
           ))}
         </div>

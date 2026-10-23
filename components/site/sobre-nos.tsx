@@ -115,7 +115,6 @@ export function SobreNos() {
             {[
               { t: "DoisB Web", d: "Nosso ERP completo, desenvolvido e mantido pela DoisB." },
               { t: "ZWeb · Zucchetti", d: "Revenda oficial do grupo italiano com 700 mil clientes no mundo." },
-              { t: "GWeb · Gdoor", d: "Plataforma consolidada de gestão para o varejo brasileiro." },
             ].map((p) => (
               <div key={p.t} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-left">
                 <p className="font-black text-slate-950">{p.t}</p>

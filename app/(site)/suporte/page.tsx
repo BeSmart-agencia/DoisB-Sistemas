@@ -35,7 +35,7 @@ function maskCNPJ(v: string) {
     .replace(/(\d{4})(\d)/, "$1-$2")
 }
 
-const SISTEMAS = ["DoisB Web", "ZWeb", "GWeb", "Sistema Sob Medida", "AgendaB", "Outro / Não sei"]
+const SISTEMAS = ["DoisB Web", "ZWeb", "Sistema Sob Medida", "AgendaB", "Outro / Não sei"]
 
 const schema = z.object({
   produto: z.string().min(1, "Selecione o sistema"),

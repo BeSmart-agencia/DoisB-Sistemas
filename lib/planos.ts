@@ -62,6 +62,8 @@ export interface ProdutoCatalogo {
   destaque?: boolean
   /** possui checkout direto (assinar) */
   assinavel: boolean
+  /** oculto das vitrines do site (não vendido no momento, mas sem excluir) */
+  oculto?: boolean
   /** rótulo curto do público-alvo */
   publico: string
   planos: PlanoCatalogo[]
@@ -162,6 +164,9 @@ const gweb: ProdutoCatalogo = {
   cor: "laranja",
   href: "/gweb",
   assinavel: true,
+  // Omitido das vitrines por enquanto (não estamos vendendo). Nada foi excluído:
+  // a landing /gweb, o checkout e os dados de clientes GWeb continuam existindo.
+  oculto: true,
   publico: "Para mini-mercados e mercearias",
   planos: [
     {
@@ -195,6 +200,9 @@ const sobMedida: ProdutoCatalogo = {
 }
 
 export const PRODUTOS: ProdutoCatalogo[] = [doisbWeb, zweb, gweb, sobMedida]
+
+/** Produtos exibidos nas vitrines do site (exclui os marcados como `oculto`). */
+export const PRODUTOS_VISIVEIS: ProdutoCatalogo[] = PRODUTOS.filter((p) => !p.oculto)
 
 export function getProduto(id: ProdutoId): ProdutoCatalogo | undefined {
   return PRODUTOS.find((p) => p.id === id)

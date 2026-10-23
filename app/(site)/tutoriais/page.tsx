@@ -12,13 +12,12 @@ import TutoriaisSearch from "./_components/tutoriais-search"
 
 export const metadata: Metadata = {
   title: "Central de Ajuda — DoisB Sistemas",
-  description: "Tutoriais e guias para os sistemas da DoisB (ZWeb, GWeb e mais). Encontre respostas rápidas para suas dúvidas.",
+  description: "Tutoriais e guias para os sistemas da DoisB (DoisB Web, ZWeb e mais). Encontre respostas rápidas para suas dúvidas.",
 }
 
 const PRODUTOS_TAB = [
   { id: "doisb-web", nome: "DoisB Web", descricao: "o ERP completo da DoisB" },
   { id: "zweb", nome: "ZWeb", descricao: "o sistema de gestão da Zucchetti" },
-  { id: "gweb", nome: "GWeb", descricao: "o sistema para mini-mercados" },
 ] as const
 type ProdutoTut = (typeof PRODUTOS_TAB)[number]["id"]
 

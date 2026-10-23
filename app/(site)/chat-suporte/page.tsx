@@ -26,7 +26,6 @@ function getSessaoId(): string {
 
 const PRODUTOS_CHAT = [
   { id: "zweb", nome: "ZWeb" },
-  { id: "gweb", nome: "GWeb" },
   { id: "doisb-web", nome: "DoisB Web" },
 ] as const
 type ProdutoChat = (typeof PRODUTOS_CHAT)[number]["id"]

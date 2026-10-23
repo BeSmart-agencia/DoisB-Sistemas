@@ -19,7 +19,9 @@ export const metadata: Metadata = {
     siteName: "DoisB Sistemas",
     url: "/gweb",
   },
-  robots: { index: true, follow: true },
+  // Produto não divulgado no momento: fora das buscas e das vitrines do site.
+  // A página continua existindo (não foi excluída), só não é indexada/linkada.
+  robots: { index: false, follow: false },
 }
 
 export default function GwebPage() {

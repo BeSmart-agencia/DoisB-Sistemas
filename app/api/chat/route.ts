@@ -11,7 +11,7 @@ const schema = z.object({
     .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() }))
     .min(1),
   sessao_id: z.string().uuid(),
-  produto: z.enum(['zweb', 'gweb', 'doisb-web']).default('zweb'),
+  produto: z.enum(['zweb', 'doisb-web']).default('zweb'),
 })
 
 const PRODUTO_CHAT: Record<string, { nome: string; contexto: string }> = {

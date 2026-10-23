@@ -6,7 +6,6 @@ const WA_LINK =
 const NAV = [
   { label: "DoisB Web", href: "/doisb-web" },
   { label: "ZWeb", href: "/zweb" },
-  { label: "GWeb", href: "/gweb" },
   { label: "Sistemas sob medida", href: "/sob-medida" },
   { label: "Todos os produtos", href: "/produtos" },
   { label: "Sobre nós", href: "/sobre" },
