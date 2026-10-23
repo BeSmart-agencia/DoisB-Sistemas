@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react"
 import { DollarSign, TrendingUp, PiggyBank, Wallet, Info } from "lucide-react"
 
+// Economia do ZWeb (tem os 3 tiers). Preços atualizados; custo (Zucchetti) mantido.
 const PLANOS = {
-  essencial: { preco: 129.9, custo: 31.79 },
-  standard: { preco: 199.9, custo: 45.49 },
-  premium: { preco: 249.9, custo: 69.7 },
+  essencial: { preco: 199.9, custo: 31.79 },
+  standard: { preco: 249.9, custo: 45.49 },
+  premium: { preco: 299.9, custo: 69.7 },
 }
 
 const MESES_INICIO = { ano: 2026, mes: 6 } // julho/2026 (0-index: 6)

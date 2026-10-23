@@ -148,7 +148,7 @@ export const ROTEIROS: Roteiro[] = [
     id: "zweb",
     produto: "ZWeb",
     tagline: "Venda. Controle. Cresça.",
-    preco: "R$ 129,90 a R$ 249,90/mês · sem fidelidade",
+    preco: "R$ 199,90 a R$ 299,90/mês · sem fidelidade",
     comoGanho:
       "Comissão automática pelo seu link: quando o lojista assina pelo seu link, você recebe 100% da 1ª mensalidade do plano escolhido.",
     paraQuem: [

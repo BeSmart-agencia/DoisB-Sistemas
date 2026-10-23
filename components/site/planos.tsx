@@ -17,8 +17,8 @@ const PLANOS = [
   {
     nome: "Essencial",
     tag: "Pra quem está começando",
-    precoMensal: 129.9,
-    precoAnual: 109.9,
+    precoMensal: 199.9,
+    precoAnual: 169.9,
     desc: "Tudo que sua empresa precisa pra ter cadastro, emitir nota e organizar a rotina.",
     features: [
       "1 usuário",
@@ -36,8 +36,8 @@ const PLANOS = [
   {
     nome: "Standard",
     tag: "O queridinho do varejo",
-    precoMensal: 199.9,
-    precoAnual: 169.9,
+    precoMensal: 249.9,
+    precoAnual: 212.4,
     desc: "A escolha de 8 em cada 10 lojistas. PDV profissional + financeiro completo.",
     features: [
       "3 usuários",
@@ -56,8 +56,8 @@ const PLANOS = [
   {
     nome: "Premium",
     tag: "Pra quem leva o varejo a sério",
-    precoMensal: 249.9,
-    precoAnual: 212.4,
+    precoMensal: 299.9,
+    precoAnual: 254.9,
     desc: "Solução completa pra quem quer escalar. Sem limites, com todos os módulos.",
     features: [
       "Usuários ilimitados",

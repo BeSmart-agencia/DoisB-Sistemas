@@ -1,4 +1,4 @@
-import { PLANO_LABEL, PLANO_PRECO, PRODUTO_NOME, BRL } from "@/lib/planos"
+import { PLANO_LABEL, PRODUTO_NOME, BRL, precoMensalDe } from "@/lib/planos"
 
 export interface DadosNovaVenda {
   nome_empresa: string
@@ -12,9 +12,11 @@ export interface DadosNovaVenda {
 }
 
 export function templateInternaNovaVenda(dados: DadosNovaVenda): string {
-  const nomeProduto = PRODUTO_NOME[dados.produto ?? "zweb"] ?? "ZWeb"
+  const produto = dados.produto ?? "zweb"
+  const nomeProduto = PRODUTO_NOME[produto] ?? "ZWeb"
   const planoNome = PLANO_LABEL[dados.plano] ?? (dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1))
-  const precoStr = PLANO_PRECO[dados.plano] ? `${BRL.format(PLANO_PRECO[dados.plano])}/mês` : '-'
+  const preco = precoMensalDe(produto, dados.plano)
+  const precoStr = preco ? `${BRL.format(preco)}/mês` : '-'
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>

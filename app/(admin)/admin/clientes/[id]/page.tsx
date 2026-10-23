@@ -133,18 +133,12 @@ const STATUS_CONFIG: Record<StatusPagamento, { label: string; card: string; dot:
   },
 }
 
-const PLANO_CONFIG: Record<Plano, { label: string; preco: string; badge: string }> = {
-  essencial: { label: "Essencial", preco: "R$ 129,90/mês", badge: "bg-slate-100 text-slate-700 border-slate-200" },
-  standard: { label: "Standard", preco: "R$ 199,90/mês", badge: "bg-blue-50 text-blue-700 border-blue-200" },
-  premium: { label: "Premium", preco: "R$ 249,90/mês", badge: "bg-violet-50 text-violet-700 border-violet-200" },
-  unico: { label: "GWeb", preco: "R$ 159,90/mês", badge: "bg-orange-50 text-orange-700 border-orange-200" },
-}
-
-const PLANO_LABEL: Record<Plano, string> = {
-  essencial: "Essencial — R$ 129,90/mês",
-  standard: "Standard — R$ 199,90/mês",
-  premium: "Premium — R$ 249,90/mês",
-  unico: "GWeb — R$ 159,90/mês",
+// Preço vem de `precoMensalDe(produto, plano)` — varia por produto (DoisB ≠ ZWeb).
+const PLANO_CONFIG: Record<Plano, { label: string; badge: string }> = {
+  essencial: { label: "Essencial", badge: "bg-slate-100 text-slate-700 border-slate-200" },
+  standard: { label: "Standard", badge: "bg-blue-50 text-blue-700 border-blue-200" },
+  premium: { label: "Premium", badge: "bg-violet-50 text-violet-700 border-violet-200" },
+  unico: { label: "GWeb", badge: "bg-orange-50 text-orange-700 border-orange-200" },
 }
 
 function formatDate(iso: string | null) {
@@ -429,7 +423,7 @@ export default function ClienteDetalhePage() {
                           : "—"
                       },
                       { icon: MapPin, label: "CEP", value: cliente.cep ? formatCEP(cliente.cep) : "—", mono: true },
-                      { icon: CreditCard, label: "Plano", value: PLANO_LABEL[cliente.plano] },
+                      { icon: CreditCard, label: "Plano", value: `${PLANO_CONFIG[cliente.plano]?.label ?? cliente.plano} — ${BRL.format(precoMensalDe(cliente.produto, cliente.plano))}/mês` },
                       { icon: Wallet, label: "Pagamento", value: cliente.forma_pagamento === "pix" ? "PIX mensal" : "Cartão (assinatura)" },
                       ...(cliente.forma_pagamento === "pix" && cliente.pix_vencimento
                         ? [{ icon: Calendar, label: "Venc. PIX", value: formatDate(cliente.pix_vencimento) }]

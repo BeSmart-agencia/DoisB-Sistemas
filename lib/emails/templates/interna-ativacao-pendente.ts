@@ -1,4 +1,4 @@
-import { PLANO_LABEL, PLANO_PRECO, PRODUTO_NOME, BRL } from "@/lib/planos"
+import { PLANO_LABEL, PRODUTO_NOME, BRL, precoMensalDe } from "@/lib/planos"
 
 export interface DadosAtivacaoPendente {
   nome_empresa: string
@@ -14,7 +14,8 @@ export function templateInternaAtivacaoPendente(dados: DadosAtivacaoPendente): s
   const produto = dados.produto ?? "zweb"
   const nomeProduto = PRODUTO_NOME[produto] ?? "ZWeb"
   const planoNome = PLANO_LABEL[dados.plano] ?? (dados.plano.charAt(0).toUpperCase() + dados.plano.slice(1))
-  const precoStr = PLANO_PRECO[dados.plano] ? `${BRL.format(PLANO_PRECO[dados.plano])}/mês` : "-"
+  const preco = precoMensalDe(produto, dados.plano)
+  const precoStr = preco ? `${BRL.format(preco)}/mês` : "-"
   const checklist = [
     `Acessar o painel do ${nomeProduto}`,
     'Localizar ou criar o cliente com os dados abaixo',

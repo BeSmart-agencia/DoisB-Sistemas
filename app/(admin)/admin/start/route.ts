@@ -295,9 +295,9 @@ const HTML = `<!DOCTYPE html>
       <p style="opacity:0.78;font-size:16px;margin-bottom:2vh;font-family:var(--font-mono);">// ticket médio estimado: R$ 195/mês</p>
     </div>
     <div class="planos-grid stagger">
-      <div class="plano-card"><div class="plano-name">[ Plano 01 ]</div><div class="plano-titulo">Essencial</div><div class="plano-preco">R$129,90</div><div class="plano-preco-suffix">/mês</div><div class="plano-desc">Pra quem está começando. Cadastros + Nota Fiscal + Orçamento. 1 usuário.</div></div>
-      <div class="plano-card destaque"><span class="plano-badge">★ MAIS POPULAR</span><div class="plano-name">[ Plano 02 ]</div><div class="plano-titulo">Standard</div><div class="plano-preco">R$199,90</div><div class="plano-preco-suffix">/mês</div><div class="plano-desc">A escolha da maioria. PDV completo + Controle financeiro + Boletos + MDF-e. 3 usuários.</div></div>
-      <div class="plano-card"><div class="plano-name">[ Plano 03 ]</div><div class="plano-titulo">Premium</div><div class="plano-preco">R$249,90</div><div class="plano-preco-suffix">/mês</div><div class="plano-desc">Pra escalar. Tudo + OS + Retaguarda offline + SPED + Grades. Usuários ilimitados.</div></div>
+      <div class="plano-card"><div class="plano-name">[ Plano 01 ]</div><div class="plano-titulo">Essencial</div><div class="plano-preco">R$199,90</div><div class="plano-preco-suffix">/mês</div><div class="plano-desc">Pra quem está começando. Cadastros + Nota Fiscal + Orçamento. 1 usuário.</div></div>
+      <div class="plano-card destaque"><span class="plano-badge">★ MAIS POPULAR</span><div class="plano-name">[ Plano 02 ]</div><div class="plano-titulo">Standard</div><div class="plano-preco">R$249,90</div><div class="plano-preco-suffix">/mês</div><div class="plano-desc">A escolha da maioria. PDV completo + Controle financeiro + Boletos + MDF-e. 3 usuários.</div></div>
+      <div class="plano-card"><div class="plano-name">[ Plano 03 ]</div><div class="plano-titulo">Premium</div><div class="plano-preco">R$299,90</div><div class="plano-preco-suffix">/mês</div><div class="plano-desc">Pra escalar. Tudo + OS + Retaguarda offline + SPED + Grades. Usuários ilimitados.</div></div>
     </div>
   </section>
 

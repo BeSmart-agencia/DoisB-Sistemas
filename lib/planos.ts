@@ -5,9 +5,9 @@
 // LEGADO (ZWeb) — mantido: usado no cálculo de comissão do vendedor
 // (comissão = 100% da primeira mensalidade), captação e Meta CAPI.
 export const PLANO_PRECO: Record<string, number> = {
-  essencial: 129.9,
-  standard: 199.9,
-  premium: 249.9,
+  essencial: 199.9,
+  standard: 249.9,
+  premium: 299.9,
   unico: 159.9, // GWeb — plano único
 }
 
@@ -113,8 +113,8 @@ const doisbWeb: ProdutoCatalogo = {
     {
       key: "essencial",
       nome: "Essencial",
-      precoMensal: 149.9,
-      precoAnual: 1618.92,
+      precoMensal: 129.9,
+      precoAnual: 1402.92, // 129,90 × 12 − 10%
       descricao: "O ERP fiscal completo para vender, controlar e crescer.",
       features: DOISB_ESSENCIAL_FEATURES,
       trialDias: 5,
@@ -124,8 +124,8 @@ const doisbWeb: ProdutoCatalogo = {
     {
       key: "standard",
       nome: "Standard",
-      precoMensal: 249.9,
-      precoAnual: 2698.92,
+      precoMensal: 189.9,
+      precoAnual: 2050.92, // 189,90 × 12 − 10%
       descricao: "Tudo, com os adicionais inclusos: serviços, CRM, food e mais.",
       features: DOISB_STANDARD_FEATURES,
       destaque: true,
@@ -148,9 +148,9 @@ const zweb: ProdutoCatalogo = {
   assinavel: true,
   publico: "Para varejo completo, com e-commerce",
   planos: [
-    { key: "essencial", nome: "Essencial", precoMensal: 129.9, descricao: "Para começar a vender com nota.", features: [], priceEnvMensal: "STRIPE_PRICE_ESSENCIAL" },
-    { key: "standard", nome: "Standard", precoMensal: 199.9, descricao: "A escolha da maioria dos lojistas.", features: [], destaque: true, priceEnvMensal: "STRIPE_PRICE_STANDARD" },
-    { key: "premium", nome: "Premium", precoMensal: 249.9, descricao: "Solução completa para escalar.", features: [], priceEnvMensal: "STRIPE_PRICE_PREMIUM" },
+    { key: "essencial", nome: "Essencial", precoMensal: 199.9, descricao: "Para começar a vender com nota.", features: [], priceEnvMensal: "STRIPE_PRICE_ESSENCIAL" },
+    { key: "standard", nome: "Standard", precoMensal: 249.9, descricao: "A escolha da maioria dos lojistas.", features: [], destaque: true, priceEnvMensal: "STRIPE_PRICE_STANDARD" },
+    { key: "premium", nome: "Premium", precoMensal: 299.9, descricao: "Solução completa para escalar.", features: [], priceEnvMensal: "STRIPE_PRICE_PREMIUM" },
   ],
 }
 
@@ -235,7 +235,7 @@ export function precoMensalNoAnual(plano: PlanoCatalogo): number | undefined {
 /**
  * Preço mensal de tabela por produto+plano — usado em comissão e Meta CAPI.
  * O mesmo `plano` (ex.: "essencial") tem preço diferente por produto
- * (ZWeb 129,90 vs DoisB Web 149,90), por isso não basta olhar só o plano.
+ * (ZWeb 199,90 vs DoisB Web 129,90), por isso não basta olhar só o plano.
  */
 export function precoMensalDe(produtoId: string, planoKey: string): number {
   const plano = getPlano(produtoId as ProdutoId, planoKey)

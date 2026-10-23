@@ -6,7 +6,7 @@ import { DoisbWebLanding } from "@/components/site/doisb-web-landing"
 export const metadata: Metadata = {
   title: "DoisB Web — ERP completo | DoisB Sistemas",
   description:
-    "O DoisB Web é o ERP completo da DoisB: vendas, NF-e/NFC-e, estoque, financeiro, serviços, food service, CRM, catálogo digital e multiempresa. 5 dias grátis, a partir de R$ 149,90/mês.",
+    "O DoisB Web é o ERP completo da DoisB: vendas, NF-e/NFC-e, estoque, financeiro, serviços, food service, CRM, catálogo digital e multiempresa. 5 dias grátis, a partir de R$ 129,90/mês.",
   keywords:
     "DoisB Web, ERP completo, sistema de gestão, NF-e, NFC-e, PDV offline, food service, CRM, multiempresa, cardápio digital, catálogo digital, sistema para restaurante, sistema para varejo",
   alternates: { canonical: "/doisb-web" },
