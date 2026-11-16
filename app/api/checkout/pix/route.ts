@@ -65,10 +65,13 @@ export async function POST(request: Request) {
   // Atribuição a vendedor externo (link exclusivo). Null se não houver.
   const vendedorId = await resolverVendedorId(supabase, vendedor_codigo)
 
+  // CNPJ é único por produto; o fluxo PIX é só do ZWeb (insert usa o default
+  // 'zweb'), então a checagem de duplicidade também olha só o ZWeb.
   const { data: existente } = await supabase
     .from("clientes")
     .select("id, status_pagamento")
     .eq("cnpj", cnpjLimpo)
+    .eq("produto", "zweb")
     .maybeSingle()
 
   if (existente && ["ativo", "atrasado"].includes(existente.status_pagamento as string)) {

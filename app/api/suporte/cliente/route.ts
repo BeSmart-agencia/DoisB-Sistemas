@@ -10,11 +10,13 @@ export async function GET(request: Request) {
   }
 
   const supabase = createAdminClient()
-  const { data } = await supabase
+  // Um CNPJ pode ter um cliente por produto — para o autofill qualquer um serve.
+  const { data: rows } = await supabase
     .from("clientes")
     .select("email, nome_empresa, nome_responsavel")
     .eq("cnpj", cnpj)
-    .maybeSingle()
+    .limit(1)
+  const data = rows?.[0]
 
   if (!data) return NextResponse.json({ found: false })
 

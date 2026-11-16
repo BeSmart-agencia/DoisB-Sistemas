@@ -6,6 +6,7 @@ import {
   enviarEmailConfirmacaoChamado,
   enviarEmailInternoNovoChamado,
 } from "@/lib/emails"
+import { PRODUTO_NOME } from "@/lib/planos"
 
 function validarCNPJ(cnpj: string): boolean {
   const n = cnpj.replace(/\D/g, "")
@@ -42,12 +43,17 @@ export async function POST(request: Request) {
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const db = createAdminClient()
 
-  // Buscar cliente vinculado ao CNPJ
-  const { data: cliente } = await db
+  // Buscar cliente vinculado ao CNPJ. Um CNPJ pode ter um cliente por produto;
+  // o form envia o nome de exibição ("DoisB Web") e `clientes.produto` guarda
+  // o slug ("doisb-web") — quando der para mapear, filtra pelo produto certo.
+  const slugProduto = Object.entries(PRODUTO_NOME).find(([, nome]) => nome === produto)?.[0]
+  let buscaCliente = db
     .from("clientes")
     .select("id, nome_empresa, nome_responsavel")
     .eq("cnpj", cnpjLimpo)
-    .maybeSingle()
+  if (slugProduto) buscaCliente = buscaCliente.eq("produto", slugProduto)
+  const { data: clientes } = await buscaCliente.limit(1)
+  const cliente = clientes?.[0] ?? null
 
   // Criar chamado — usa supabase anon client para respeitar a policy de INSERT público
   const anonClient = await createClient()
