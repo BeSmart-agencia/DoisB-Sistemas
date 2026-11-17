@@ -4,12 +4,7 @@ import { stripe } from "@/lib/stripe/client"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { resolverVendedorId } from "@/lib/vendedores"
 import { enviarEmailInternoNovaVenda } from "@/lib/emails"
-
-const PRECOS: Record<string, number> = {
-  essencial: 12990,
-  standard: 19990,
-  premium: 24990,
-}
+import { getProduto, getPlano, precoMensalDe, type ProdutoId } from "@/lib/planos"
 
 function validarCNPJ(cnpj: string): boolean {
   const n = cnpj.replace(/\D/g, "")
@@ -33,7 +28,8 @@ const schema = z.object({
   email: z.string().email(),
   telefone: z.string().min(10),
   nome_responsavel: z.string().min(2),
-  plano: z.enum(["essencial", "standard", "premium"]),
+  produto: z.enum(["zweb", "doisb-web", "gweb"]).default("zweb"),
+  plano: z.string().min(1),
   vendedor_codigo: z.string().optional(),
   nome_fantasia: z.string().optional(),
   ie: z.string().optional(),
@@ -57,21 +53,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dados inválidos", detalhes: parsed.error.flatten() }, { status: 422 })
   }
 
-  const { nome_empresa, cnpj, email, telefone, nome_responsavel, plano,
+  const { nome_empresa, cnpj, email, telefone, nome_responsavel, produto, plano,
     vendedor_codigo, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
 
+  // Valida produto/plano e calcula o valor a partir da tabela central (o PIX
+  // cobra sempre o valor mensal — não há cobrança anual via QR Code).
+  const planoCat = getPlano(produto as ProdutoId, plano)
+  if (!getProduto(produto as ProdutoId)?.assinavel || !planoCat) {
+    return NextResponse.json({ error: "Plano inválido." }, { status: 422 })
+  }
+  const valorCentavos = Math.round(precoMensalDe(produto, plano) * 100)
+
   // Atribuição a vendedor externo (link exclusivo). Null se não houver.
   const vendedorId = await resolverVendedorId(supabase, vendedor_codigo)
 
-  // CNPJ é único por produto; o fluxo PIX é só do ZWeb (insert usa o default
-  // 'zweb'), então a checagem de duplicidade também olha só o ZWeb.
+  // CNPJ é único por produto — a checagem de duplicidade olha o mesmo produto.
   const { data: existente } = await supabase
     .from("clientes")
     .select("id, status_pagamento")
     .eq("cnpj", cnpjLimpo)
-    .eq("produto", "zweb")
+    .eq("produto", produto)
     .maybeSingle()
 
   if (existente && ["ativo", "atrasado"].includes(existente.status_pagamento as string)) {
@@ -93,7 +96,9 @@ export async function POST(request: Request) {
       email,
       telefone,
       nome_responsavel,
-      plano,
+      produto,
+      // já validado por getPlano acima
+      plano: plano as "essencial" | "standard" | "premium" | "unico",
       status_pagamento: "aguardando",
       acesso_liberado: false,
       forma_pagamento: "pix",
@@ -124,7 +129,7 @@ export async function POST(request: Request) {
       email,
       name: nome_empresa,
       phone: telefone,
-      metadata: { supabase_cliente_id: cliente.id, cnpj: cnpjLimpo, nome_responsavel, plano },
+      metadata: { supabase_cliente_id: cliente.id, cnpj: cnpjLimpo, nome_responsavel, produto, plano },
     })
   } catch (err) {
     console.error("[checkout/pix] Erro ao criar customer:", err)
@@ -143,7 +148,7 @@ export async function POST(request: Request) {
   let paymentIntent
   try {
     paymentIntent = await stripe.paymentIntents.create({
-      amount: PRECOS[plano],
+      amount: valorCentavos,
       currency: "brl",
       customer: stripeCustomer.id,
       payment_method_types: ["pix"],
@@ -154,6 +159,7 @@ export async function POST(request: Request) {
       },
       metadata: {
         supabase_cliente_id: cliente.id,
+        produto,
         plano,
         renovacao: "false",
         expires_at: String(expiresAt),
@@ -176,6 +182,7 @@ export async function POST(request: Request) {
     telefone,
     nome_responsavel,
     plano,
+    produto,
     stripe_customer_id: stripeCustomer.id,
   }).catch((err) => console.error("[checkout/pix] Erro e-mail interno:", err))
 

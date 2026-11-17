@@ -435,36 +435,32 @@ export async function POST(request: Request) {
 
           console.log(`[webhook] PIX renovado: ${clienteId}, novo vencimento: ${novoVencimento}`)
         } else {
-          // Novo cliente: marcar pagamento recebido, equipe libera manualmente
+          // Novo cliente: pagamento PIX recebido
           const { data: cliente } = await supabase
             .from("clientes")
             .select("*")
             .eq("id", clienteId)
             .maybeSingle()
 
+          // DoisB Web é self-service (ativa pelo link), igual ao cartão/boleto;
+          // ZWeb/GWeb são liberados manualmente pela equipe.
+          const ehDoisbWeb = cliente?.produto === "doisb-web"
           const vencimento = addDays(new Date().toISOString().slice(0, 10), 30)
           await supabase
             .from("clientes")
             .update({
               status_pagamento: "ativo",
-              acesso_liberado: false, // equipe libera manualmente
+              acesso_liberado: ehDoisbWeb,
               pix_vencimento: vencimento,
               data_assinatura: new Date().toISOString(),
             })
             .eq("id", clienteId)
 
           if (cliente) {
-            await Promise.allSettled([
-              enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano, cliente.produto),
-              enviarEmailInternoAtivacaoPendente({
-                nome_empresa: cliente.nome_empresa,
-                nome_responsavel: cliente.nome_responsavel,
-                email: cliente.email,
-                telefone: cliente.telefone,
-                plano: cliente.plano,
-                produto: cliente.produto,
-                forma_pagamento: "PIX",
-              }),
+            const jobs: Promise<unknown>[] = [
+              ehDoisbWeb
+                ? enviarEmailDoisbWebAtivacao(cliente.email, cliente.nome_responsavel, cliente.plano)
+                : enviarEmailPosCadastro(cliente.email, cliente.nome_responsavel, cliente.plano, cliente.produto),
               // Meta CAPI: conversão de venda (PIX confirmado)
               enviarPurchaseMeta({
                 clienteId: cliente.id,
@@ -473,10 +469,25 @@ export async function POST(request: Request) {
                 plano: cliente.plano,
                 produto: cliente.produto,
               }),
-            ])
+            ]
+            // ZWeb/GWeb: notificar a equipe para ativar manualmente.
+            if (!ehDoisbWeb) {
+              jobs.push(
+                enviarEmailInternoAtivacaoPendente({
+                  nome_empresa: cliente.nome_empresa,
+                  nome_responsavel: cliente.nome_responsavel,
+                  email: cliente.email,
+                  telefone: cliente.telefone,
+                  plano: cliente.plano,
+                  produto: cliente.produto,
+                  forma_pagamento: "PIX",
+                })
+              )
+            }
+            await Promise.allSettled(jobs)
           }
 
-          console.log(`[webhook] PIX novo cliente confirmado: ${clienteId}`)
+          console.log(`[webhook] PIX novo cliente confirmado: ${clienteId} (doisb=${ehDoisbWeb})`)
         }
         break
       }

@@ -366,19 +366,27 @@ export function CadastroForm({
                   </div>
                 </button>
 
-                <div className="relative flex flex-col items-start gap-2 p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed select-none">
-                  <span className="absolute -top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">EM BREVE</span>
-                  <QrCode className="h-5 w-5 text-slate-300" />
+                <button type="button" onClick={() => setFormaPagamento("pix")}
+                  className={cn("flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all",
+                    formaPagamento === "pix" ? "border-blue-700 bg-blue-50 shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
+                  )}>
+                  <QrCode className={cn("h-5 w-5", formaPagamento === "pix" ? "text-blue-700" : "text-slate-400")} />
                   <div>
-                    <p className="text-sm font-semibold text-slate-400">PIX</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Pagamento mensal</p>
+                    <p className={cn("text-sm font-semibold", formaPagamento === "pix" ? "text-blue-900" : "text-slate-700")}>PIX</p>
+                    <p className="text-xs text-slate-500 mt-0.5">QR Code mensal</p>
                   </div>
-                </div>
+                </button>
               </div>
 
               {formaPagamento === "boleto" && (
                 <p className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mt-2">
                   Você será redirecionado ao Stripe para gerar o boleto. O acesso é liberado após a compensação (1-3 dias úteis).
+                </p>
+              )}
+
+              {formaPagamento === "pix" && (
+                <p className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mt-2">
+                  Geramos um QR Code PIX a cada mês (cobrança mensal){planoCat?.trialDias ? ", sem o período de teste gratuito" : ""}. O acesso é liberado após a confirmação do pagamento.
                 </p>
               )}
             </div>

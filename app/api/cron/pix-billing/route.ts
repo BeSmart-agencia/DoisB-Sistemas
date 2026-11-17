@@ -2,14 +2,9 @@ import { NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe/client"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { enviarEmailPixCobranca } from "@/lib/emails"
+import { precoMensalDe } from "@/lib/planos"
 
 export const dynamic = "force-dynamic"
-
-const PRECOS: Record<string, number> = {
-  essencial: 12990,
-  standard: 19990,
-  premium: 24990,
-}
 
 function formatarData(isoDate: string): string {
   const [year, month, day] = isoDate.split("-")
@@ -34,7 +29,7 @@ export async function GET(request: Request) {
   // Buscar todos os clientes PIX ativos ou atrasados
   const { data: clientes, error } = await supabase
     .from("clientes")
-    .select("id, nome_responsavel, email, plano, pix_vencimento, pix_charge_id, stripe_customer_id, status_pagamento, acesso_liberado")
+    .select("id, nome_responsavel, email, produto, plano, pix_vencimento, pix_charge_id, stripe_customer_id, status_pagamento, acesso_liberado")
     .eq("forma_pagamento", "pix")
     .in("status_pagamento", ["ativo", "atrasado"])
     .not("pix_vencimento", "is", null)
@@ -108,7 +103,7 @@ async function gerarCobrancaRenovacao(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ) {
-  const valor = PRECOS[cliente.plano]
+  const valor = Math.round(precoMensalDe(cliente.produto ?? "zweb", cliente.plano) * 100)
   if (!valor) return
 
   // PIX de renovação expira em 5 dias (mesmo período que o lembrete)
@@ -128,6 +123,7 @@ async function gerarCobrancaRenovacao(
       },
       metadata: {
         supabase_cliente_id: cliente.id,
+        produto: cliente.produto ?? "zweb",
         plano: cliente.plano,
         renovacao: "true",
         vencimento_atual: vencimento,
