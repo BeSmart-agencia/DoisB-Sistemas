@@ -10,7 +10,9 @@
 //
 //   - 1º argumento: secret key da conta NOVA (sk_live_... ou sk_test_...)
 //   - 2º argumento (opcional): URL do site para o webhook
-//     (padrão: https://doisbsistemas.com.br)
+//     (padrão: https://www.doisbsistemas.com.br — precisa ser o host SEM
+//      redirect; o apex doisbsistemas.com.br responde 307→www e o Stripe
+//      não segue redirect em webhook, então a entrega falharia)
 //
 // Rodar UMA vez por conta — o script não verifica duplicados.
 // Depois: colar as env vars na Vercel (Production) e fazer redeploy.
@@ -67,7 +69,7 @@ const WEBHOOK_EVENTS = [
 
 async function main() {
   const key = process.argv[2]
-  const siteUrl = (process.argv[3] || "https://doisbsistemas.com.br").replace(/\/$/, "")
+  const siteUrl = (process.argv[3] || "https://www.doisbsistemas.com.br").replace(/\/$/, "")
 
   if (!key || !key.startsWith("sk_")) {
     console.error("Uso: node scripts/setup-stripe.js sk_live_xxx [url-do-site]")
