@@ -41,7 +41,7 @@ const PLANOS = [
     desc: "A escolha de 8 em cada 10 lojistas. PDV profissional + financeiro completo.",
     features: [
       "3 usuários",
-      "Frente de Caixa (PDV)",
+      "PDV Offline (vende sem internet)",
       "Controle de Contas e Saldos",
       "Emissão de Boletos e MDF-e",
       "Integração com maquininhas",
@@ -63,7 +63,8 @@ const PLANOS = [
       "Usuários ilimitados",
       "SPED Fiscal e Sintegra",
       "Tabelas de Preço por cliente",
-      "Retaguarda Offline",
+      "PDV Offline (vende sem internet)",
+      "Retaguarda multi-loja",
       "Ordens de Serviço completas",
       "Grades (vestuário/calçado)",
       "Marketplaces e e-commerce",
