@@ -20,8 +20,10 @@ const REGRAS = [
 ]
 
 const PREMISSAS_PADRAO: Premissas = {
-  zweb_vendedora: 5, zweb_socios_m1: 2, zweb_socios: 10, sob_medida_mes: 1,
-  mix_essencial: 70, mix_standard: 20, mix_premium: 10,
+  doisb_vendedora: 8, doisb_socios_m1: 3, doisb_socios: 12,
+  doisb_mix_essencial: 60, doisb_mix_standard: 40, doisb_custo_fixo: 1199.9,
+  zweb_vendedora: 2, zweb_socios_m1: 1, zweb_socios: 3, sob_medida_mes: 1,
+  mix_essencial: 50, mix_standard: 30, mix_premium: 20,
   dev_sm: 2000, mens_sm: 350, pro_labore_pct: 70, outros_custos: 80,
 }
 
@@ -36,6 +38,12 @@ export default async function MetasPage() {
   const p = premRes.data
   const premissas: Premissas = p
     ? {
+        doisb_vendedora: p.doisb_vendedora ?? PREMISSAS_PADRAO.doisb_vendedora,
+        doisb_socios_m1: p.doisb_socios_m1 ?? PREMISSAS_PADRAO.doisb_socios_m1,
+        doisb_socios: p.doisb_socios ?? PREMISSAS_PADRAO.doisb_socios,
+        doisb_mix_essencial: p.doisb_mix_essencial ?? PREMISSAS_PADRAO.doisb_mix_essencial,
+        doisb_mix_standard: p.doisb_mix_standard ?? PREMISSAS_PADRAO.doisb_mix_standard,
+        doisb_custo_fixo: p.doisb_custo_fixo != null ? Number(p.doisb_custo_fixo) : PREMISSAS_PADRAO.doisb_custo_fixo,
         zweb_vendedora: p.zweb_vendedora, zweb_socios_m1: p.zweb_socios_m1, zweb_socios: p.zweb_socios,
         sob_medida_mes: p.sob_medida_mes, mix_essencial: p.mix_essencial, mix_standard: p.mix_standard,
         mix_premium: p.mix_premium, dev_sm: Number(p.dev_sm), mens_sm: Number(p.mens_sm),

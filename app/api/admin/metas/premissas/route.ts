@@ -4,13 +4,22 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const schema = z.object({
+  // DoisB Web (carro-chefe)
+  doisb_vendedora: z.number().int().min(0).max(999),
+  doisb_socios_m1: z.number().int().min(0).max(999),
+  doisb_socios: z.number().int().min(0).max(999),
+  doisb_mix_essencial: z.number().int().min(0).max(100),
+  doisb_mix_standard: z.number().int().min(0).max(100),
+  doisb_custo_fixo: z.number().min(0).max(1_000_000),
+  // ZWeb (nicho)
   zweb_vendedora: z.number().int().min(0).max(999),
   zweb_socios_m1: z.number().int().min(0).max(999),
   zweb_socios: z.number().int().min(0).max(999),
-  sob_medida_mes: z.number().int().min(0).max(99),
   mix_essencial: z.number().int().min(0).max(100),
   mix_standard: z.number().int().min(0).max(100),
   mix_premium: z.number().int().min(0).max(100),
+  // Sob medida + gerais
+  sob_medida_mes: z.number().int().min(0).max(99),
   dev_sm: z.number().min(0).max(1_000_000),
   mens_sm: z.number().min(0).max(1_000_000),
   pro_labore_pct: z.number().int().min(0).max(100),

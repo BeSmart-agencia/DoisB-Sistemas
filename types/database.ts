@@ -405,18 +405,24 @@ export interface Database {
           id: number; zweb_vendedora: number; zweb_socios_m1: number; zweb_socios: number
           sob_medida_mes: number; mix_essencial: number; mix_standard: number; mix_premium: number
           dev_sm: number; mens_sm: number; pro_labore_pct: number; outros_custos: number
+          doisb_vendedora: number; doisb_socios_m1: number; doisb_socios: number
+          doisb_mix_essencial: number; doisb_mix_standard: number; doisb_custo_fixo: number
           atualizado_em: string | null; atualizado_por: string | null
         }
         Insert: {
           id?: number; zweb_vendedora?: number; zweb_socios_m1?: number; zweb_socios?: number
           sob_medida_mes?: number; mix_essencial?: number; mix_standard?: number; mix_premium?: number
           dev_sm?: number; mens_sm?: number; pro_labore_pct?: number; outros_custos?: number
+          doisb_vendedora?: number; doisb_socios_m1?: number; doisb_socios?: number
+          doisb_mix_essencial?: number; doisb_mix_standard?: number; doisb_custo_fixo?: number
           atualizado_em?: string | null; atualizado_por?: string | null
         }
         Update: {
           id?: number; zweb_vendedora?: number; zweb_socios_m1?: number; zweb_socios?: number
           sob_medida_mes?: number; mix_essencial?: number; mix_standard?: number; mix_premium?: number
           dev_sm?: number; mens_sm?: number; pro_labore_pct?: number; outros_custos?: number
+          doisb_vendedora?: number; doisb_socios_m1?: number; doisb_socios?: number
+          doisb_mix_essencial?: number; doisb_mix_standard?: number; doisb_custo_fixo?: number
           atualizado_em?: string | null; atualizado_por?: string | null
         }
         Relationships: []

@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { precoMensalDe } from "@/lib/planos"
 import {
   Info, Save, TrendingUp, DollarSign, PiggyBank, Wallet,
   ChevronDown, CheckCircle2, Minus, Plus, Trophy, Target,
@@ -12,13 +13,22 @@ import {
 // Tipos vindos do banco
 // ---------------------------------------------------------------
 export interface Premissas {
+  // DoisB Web (carro-chefe)
+  doisb_vendedora: number
+  doisb_socios_m1: number
+  doisb_socios: number
+  doisb_mix_essencial: number
+  doisb_mix_standard: number
+  doisb_custo_fixo: number
+  // ZWeb (nicho)
   zweb_vendedora: number
   zweb_socios_m1: number
   zweb_socios: number
-  sob_medida_mes: number
   mix_essencial: number
   mix_standard: number
   mix_premium: number
+  // Sob medida + gerais
+  sob_medida_mes: number
   dev_sm: number
   mens_sm: number
   pro_labore_pct: number
@@ -31,23 +41,33 @@ export interface RealizadoRow {
   valor: number
 }
 
-type Metrica = "zweb_vendedora" | "zweb_socios" | "sob_medida"
+type Metrica = "doisb_vendedora" | "doisb_socios" | "zweb_vendedora" | "zweb_socios" | "sob_medida"
 
 // ---------------------------------------------------------------
-// Constantes do plano
+// Preços (da tabela central) e custos
 // ---------------------------------------------------------------
-// Economia do ZWeb (tem os 3 tiers). Preços atualizados; custo (Zucchetti) mantido.
-const PLANOS = {
-  essencial: { preco: 199.9, custo: 31.79 },
-  standard: { preco: 249.9, custo: 45.49 },
-  premium: { preco: 299.9, custo: 69.7 },
+// Preços de venda vêm de lib/planos — nunca desatualizam.
+const PRECO_DOISB = {
+  essencial: precoMensalDe("doisb-web", "essencial"), // 129,90
+  standard: precoMensalDe("doisb-web", "standard"),   // 189,90
 }
+const PRECO_ZWEB = {
+  essencial: precoMensalDe("zweb", "essencial"), // 199,90
+  standard: precoMensalDe("zweb", "standard"),   // 249,90
+  premium: precoMensalDe("zweb", "premium"),     // 299,90
+}
+// Custo do ZWeb por cliente (Zucchetti). O DoisB Web não tem custo por
+// cliente — é um custo fixo mensal (pacote Nuts), editável nas premissas.
+const CUSTO_ZWEB = { essencial: 31.79, standard: 45.49, premium: 69.7 }
+
 const MESES_INICIO = { ano: 2026, mes: 7 } // agosto/2026 (0-index: 7)
 const LIMITE_MEI = 81000
 
 const METRICAS: { chave: Metrica; label: string; cor: string }[] = [
-  { chave: "zweb_vendedora", label: "ZWeb vendedora externa", cor: "amber" },
-  { chave: "zweb_socios", label: "ZWeb sócios (Abel/Laisa)", cor: "blue" },
+  { chave: "doisb_vendedora", label: "DoisB Web — vendedora externa", cor: "emerald" },
+  { chave: "doisb_socios", label: "DoisB Web — sócios (Abel/Laisa)", cor: "emerald" },
+  { chave: "zweb_vendedora", label: "ZWeb — vendedora externa", cor: "blue" },
+  { chave: "zweb_socios", label: "ZWeb — sócios (Abel/Laisa)", cor: "blue" },
   { chave: "sob_medida", label: "Sob medida entregue", cor: "violet" },
 ]
 
@@ -80,7 +100,7 @@ const inputCls =
 const labelCls = "block text-[11px] font-bold uppercase tracking-wide text-blue-900 mb-1"
 
 const BAR_COR: Record<string, string> = {
-  amber: "from-amber-500 to-amber-400",
+  emerald: "from-emerald-500 to-emerald-400",
   blue: "from-blue-600 to-sky-400",
   violet: "from-violet-600 to-fuchsia-400",
 }
@@ -131,7 +151,6 @@ export function MetasPlanner({
     const v = Math.max(0, Math.round(valor))
     const key = `${mes}|${metrica}`
     setReal((prev) => ({ ...prev, [key]: v }))
-    // debounce do PUT para não spammar em cliques rápidos
     clearTimeout(timers.current[key])
     timers.current[key] = setTimeout(async () => {
       try {
@@ -147,78 +166,106 @@ export function MetasPlanner({
     }, 600)
   }
 
-  // -------- Projeção mês a mês (agosto/26 → julho/27) --------
-  const mixTotal = p.mix_essencial + p.mix_standard + p.mix_premium || 1
-  const avgPrice =
-    (p.mix_essencial * PLANOS.essencial.preco +
-      p.mix_standard * PLANOS.standard.preco +
-      p.mix_premium * PLANOS.premium.preco) / mixTotal
-  const avgCost =
-    (p.mix_essencial * PLANOS.essencial.custo +
-      p.mix_standard * PLANOS.standard.custo +
-      p.mix_premium * PLANOS.premium.custo) / mixTotal
+  // -------- Ticket médio por produto (a partir do mix) --------
+  const mixD = p.doisb_mix_essencial + p.doisb_mix_standard || 1
+  const avgPriceD =
+    (p.doisb_mix_essencial * PRECO_DOISB.essencial + p.doisb_mix_standard * PRECO_DOISB.standard) / mixD
 
+  const mixZ = p.mix_essencial + p.mix_standard + p.mix_premium || 1
+  const avgPriceZ =
+    (p.mix_essencial * PRECO_ZWEB.essencial +
+      p.mix_standard * PRECO_ZWEB.standard +
+      p.mix_premium * PRECO_ZWEB.premium) / mixZ
+  const avgCostZ =
+    (p.mix_essencial * CUSTO_ZWEB.essencial +
+      p.mix_standard * CUSTO_ZWEB.standard +
+      p.mix_premium * CUSTO_ZWEB.premium) / mixZ
+
+  // -------- Projeção mês a mês (agosto/26 → julho/27) --------
   const linhas = useMemo(() => {
     let caixaAcum = 0
     let faturAcum = 0
-    let ativosAntes = 0
+    let ativosDAntes = 0
+    let ativosZAntes = 0
     return Array.from({ length: 12 }, (_, i) => {
       const m = i + 1
-      const metaVendedora = p.zweb_vendedora
-      const metaSocios = m === 1 ? p.zweb_socios_m1 : p.zweb_socios
-      const metaSM = p.sob_medida_mes
-      const newTotal = metaVendedora + metaSocios
-      const ativosFim = ativosAntes + newTotal
 
-      // 1ª mensalidade dos clientes da vendedora vira comissão dela (não entra no caixa DoisB nesse mês)
-      const bonusVend = metaVendedora * avgPrice
-      const recZWeb = (ativosFim - metaVendedora) * avgPrice
-      const custoZWeb = ativosFim * avgCost
+      // DoisB Web (carro-chefe)
+      const doisbVend = p.doisb_vendedora
+      const doisbSocios = m === 1 ? p.doisb_socios_m1 : p.doisb_socios
+      const novosD = doisbVend + doisbSocios
+      const ativosD = ativosDAntes + novosD
+      // 1ª mensalidade dos clientes da vendedora vira comissão dela (não entra no caixa nesse mês)
+      const recD = (ativosD - doisbVend) * avgPriceD
 
-      const smDev = metaSM * p.dev_sm
-      const smMens = (m - 1) * metaSM * p.mens_sm
+      // ZWeb (nicho)
+      const zwebVend = p.zweb_vendedora
+      const zwebSocios = m === 1 ? p.zweb_socios_m1 : p.zweb_socios
+      const novosZ = zwebVend + zwebSocios
+      const ativosZ = ativosZAntes + novosZ
+      const recZ = (ativosZ - zwebVend) * avgPriceZ
+      const custoZ = ativosZ * avgCostZ
+
+      // Sob medida
+      const smDev = p.sob_medida_mes * p.dev_sm
+      const smMens = (m - 1) * p.sob_medida_mes * p.mens_sm
       const recSM = smDev + smMens
 
-      const receitaDoisB = recZWeb + recSM
-      const custos = custoZWeb + p.outros_custos
+      const receitaDoisB = recD + recZ + recSM
+      // Custo do DoisB Web é fixo mensal (pacote Nuts), não por cliente
+      const custos = custoZ + p.doisb_custo_fixo + p.outros_custos
       const lucro = receitaDoisB - custos
       const proLaboreTotal = Math.max(0, lucro) * (p.pro_labore_pct / 100)
       const proLaboreCada = proLaboreTotal / 2
       const caixaMes = lucro - proLaboreTotal
       caixaAcum += caixaMes
 
-      const faturamentoBruto = ativosFim * avgPrice + recSM
+      const faturamentoBruto = ativosD * avgPriceD + ativosZ * avgPriceZ + recSM
       faturAcum += faturamentoBruto
-      ativosAntes = ativosFim
+      ativosDAntes = ativosD
+      ativosZAntes = ativosZ
 
       const mes = mesIso(i)
-      const metaReceitaNova = newTotal * avgPrice + smDev
+      const novosTotal = novosD + novosZ
+      const ativosTotal = ativosD + ativosZ
+      const metaReceitaNova = novosD * avgPriceD + novosZ * avgPriceZ + smDev
       return {
         i, m, mes, rotulo: rotuloMes(i),
-        metaVendedora, metaSocios, metaSM, newTotal, ativosFim,
-        recZWeb, recSM, bonusVend, custos, lucro, proLaboreCada,
+        doisbVend, doisbSocios, zwebVend, zwebSocios, metaSM: p.sob_medida_mes,
+        novosD, novosZ, novosTotal, ativosD, ativosZ, ativosTotal,
+        recD, recZ, recSM, custos, lucro, proLaboreCada,
         caixaMes, caixaAcum, faturamentoBruto, faturAcum, metaReceitaNova,
       }
     })
-  }, [p, avgPrice, avgCost])
+  }, [p, avgPriceD, avgPriceZ, avgCostZ])
 
   const ultimo = linhas[linhas.length - 1]
   const mesLimiteMEI = linhas.find((l) => l.faturAcum > LIMITE_MEI)
   const totalProLaboreCada = linhas.reduce((s, l) => s + l.proLaboreCada, 0)
-  const mrr12 = ultimo.recZWeb + (11 * p.sob_medida_mes * p.mens_sm)
+  const mrr12 = ultimo.recD + ultimo.recZ + 11 * p.sob_medida_mes * p.mens_sm
 
   const cards = [
-    { icon: TrendingUp, label: "MRR no mês 12", valor: brl(mrr12), sub: `${ultimo.ativosFim} ZWeb + sob medida` },
+    { icon: TrendingUp, label: "MRR no mês 12", valor: brl(mrr12), sub: `${ultimo.ativosTotal} assinantes + sob medida` },
     { icon: DollarSign, label: "Pró-labore de cada (mês 12)", valor: brl(ultimo.proLaboreCada), sub: "Laisa e Abel" },
     { icon: PiggyBank, label: "Caixa ao fim do ano", valor: brl(ultimo.caixaAcum), sub: "acumulado 12 meses" },
     { icon: Wallet, label: "Pró-labore/ano de cada", valor: brl(totalProLaboreCada), sub: "somando os 12 meses" },
   ]
 
   // -------- Progresso global (todas as metas de contagem, 12 meses) --------
-  const totalMeta = linhas.reduce((s, l) => s + l.metaVendedora + l.metaSocios + l.metaSM, 0)
+  const metaDoMes = (l: (typeof linhas)[number]): Record<Metrica, number> => ({
+    doisb_vendedora: l.doisbVend,
+    doisb_socios: l.doisbSocios,
+    zweb_vendedora: l.zwebVend,
+    zweb_socios: l.zwebSocios,
+    sob_medida: l.metaSM,
+  })
+  const totalMeta = linhas.reduce((s, l) => {
+    const mt = metaDoMes(l)
+    return s + mt.doisb_vendedora + mt.doisb_socios + mt.zweb_vendedora + mt.zweb_socios + mt.sob_medida
+  }, 0)
   const totalReal = linhas.reduce(
     (s, l) =>
-      s + getReal(l.mes, "zweb_vendedora") + getReal(l.mes, "zweb_socios") + getReal(l.mes, "sob_medida"),
+      s + METRICAS.reduce((a, mt) => a + getReal(l.mes, mt.chave), 0),
     0
   )
   const pctGlobal = totalMeta > 0 ? Math.round((totalReal / totalMeta) * 100) : 0
@@ -232,7 +279,7 @@ export function MetasPlanner({
     <div className="space-y-6">
       {/* ============ PREMISSAS (metas editáveis) ============ */}
       <div className="admin-panel p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2 text-blue-900">
             <Target className="h-4 w-4" />
             <h2 className="text-sm font-bold uppercase tracking-wide">Nossas metas (edite e a projeção recalcula)</h2>
@@ -242,32 +289,50 @@ export function MetasPlanner({
             disabled={!dirty || salvandoPrem}
             className={cn(
               "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-              dirty
-                ? "bg-slate-950 text-white hover:bg-blue-900"
-                : "bg-slate-100 text-slate-400 cursor-default"
+              dirty ? "bg-slate-950 text-white hover:bg-blue-900" : "bg-slate-100 text-slate-400 cursor-default"
             )}
           >
             <Save className="h-4 w-4" />
             {salvandoPrem ? "Salvando..." : dirty ? "Salvar metas" : "Salvo"}
           </button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          <Campo label="ZWeb vendedora / mês" value={p.zweb_vendedora} onChange={(v) => setPremissa("zweb_vendedora", v)} />
-          <Campo label="ZWeb sócios — mês 1 (ago)" value={p.zweb_socios_m1} onChange={(v) => setPremissa("zweb_socios_m1", v)} />
-          <Campo label="ZWeb sócios — demais" value={p.zweb_socios} onChange={(v) => setPremissa("zweb_socios", v)} />
-          <Campo label="Sob medida / mês" value={p.sob_medida_mes} onChange={(v) => setPremissa("sob_medida_mes", v)} />
+
+        {/* DoisB Web */}
+        <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700 mb-2">DoisB Web · carro-chefe</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Campo label="Vendedora / mês" value={p.doisb_vendedora} onChange={(v) => setPremissa("doisb_vendedora", v)} />
+          <Campo label="Sócios — mês 1 (ago)" value={p.doisb_socios_m1} onChange={(v) => setPremissa("doisb_socios_m1", v)} />
+          <Campo label="Sócios — demais" value={p.doisb_socios} onChange={(v) => setPremissa("doisb_socios", v)} />
+          <Campo label="% Essencial" value={p.doisb_mix_essencial} onChange={(v) => setPremissa("doisb_mix_essencial", v)} />
+          <Campo label="% Standard" value={p.doisb_mix_standard} onChange={(v) => setPremissa("doisb_mix_standard", v)} />
+          <Campo label="Custo fixo Nuts/mês (R$)" value={p.doisb_custo_fixo} onChange={(v) => setPremissa("doisb_custo_fixo", v)} />
+        </div>
+
+        {/* ZWeb */}
+        <p className="text-[11px] font-bold uppercase tracking-wide text-sky-700 mt-5 mb-2">ZWeb · nicho premium</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Campo label="Vendedora / mês" value={p.zweb_vendedora} onChange={(v) => setPremissa("zweb_vendedora", v)} />
+          <Campo label="Sócios — mês 1 (ago)" value={p.zweb_socios_m1} onChange={(v) => setPremissa("zweb_socios_m1", v)} />
+          <Campo label="Sócios — demais" value={p.zweb_socios} onChange={(v) => setPremissa("zweb_socios", v)} />
           <Campo label="% Essencial" value={p.mix_essencial} onChange={(v) => setPremissa("mix_essencial", v)} />
           <Campo label="% Standard" value={p.mix_standard} onChange={(v) => setPremissa("mix_standard", v)} />
           <Campo label="% Premium" value={p.mix_premium} onChange={(v) => setPremissa("mix_premium", v)} />
+        </div>
+
+        {/* Sob medida + gerais */}
+        <p className="text-[11px] font-bold uppercase tracking-wide text-violet-700 mt-5 mb-2">Sob medida e gerais</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <Campo label="Sob medida / mês" value={p.sob_medida_mes} onChange={(v) => setPremissa("sob_medida_mes", v)} />
           <Campo label="Dev sob medida (R$)" value={p.dev_sm} onChange={(v) => setPremissa("dev_sm", v)} />
           <Campo label="Mensalidade sob medida (R$)" value={p.mens_sm} onChange={(v) => setPremissa("mens_sm", v)} />
           <Campo label="% Pró-labore (resto = caixa)" value={p.pro_labore_pct} onChange={(v) => setPremissa("pro_labore_pct", v)} />
           <Campo label="Imposto MEI (DAS)/mês (R$)" value={p.outros_custos} onChange={(v) => setPremissa("outros_custos", v)} />
         </div>
-        <p className="text-xs text-slate-600 mt-3">
-          Ticket médio ZWeb: <b className="text-slate-800">{brl(avgPrice)}</b> · custo médio:{" "}
-          <b className="text-slate-800">{brl(avgCost)}</b> · margem por cliente:{" "}
-          <b className="text-slate-800">{brl(avgPrice - avgCost)}</b>. Plano começa em{" "}
+
+        <p className="text-xs text-slate-600 mt-4">
+          Ticket médio <b className="text-emerald-700">DoisB Web {brl(avgPriceD)}</b> ·{" "}
+          <b className="text-sky-700">ZWeb {brl(avgPriceZ)}</b> (custo {brl(avgCostZ)}/cliente). O custo do DoisB Web é
+          fixo mensal (pacote Nuts): <b className="text-slate-800">{brl(p.doisb_custo_fixo)}</b>. Plano começa em{" "}
           <b className="text-slate-800">agosto/2026</b>.
         </p>
       </div>
@@ -303,7 +368,6 @@ export function MetasPlanner({
           <h2 className="text-sm font-bold uppercase tracking-wide text-blue-900">Progresso mês a mês</h2>
         </div>
 
-        {/* Barra global */}
         <div className="admin-panel p-5 mb-4">
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm font-bold text-slate-950">Progresso do plano (ago/26 → jul/27)</p>
@@ -319,22 +383,17 @@ export function MetasPlanner({
 
         <div className="space-y-4">
           {linhas.map((l) => {
-            const metas: Record<Metrica, number> = {
-              zweb_vendedora: l.metaVendedora,
-              zweb_socios: l.metaSocios,
-              sob_medida: l.metaSM,
-            }
-            const somaMeta = metas.zweb_vendedora + metas.zweb_socios + metas.sob_medida
-            const somaReal =
-              getReal(l.mes, "zweb_vendedora") + getReal(l.mes, "zweb_socios") + getReal(l.mes, "sob_medida")
+            const metas = metaDoMes(l)
+            const somaMeta = METRICAS.reduce((a, mt) => a + metas[mt.chave], 0)
+            const somaReal = METRICAS.reduce((a, mt) => a + getReal(l.mes, mt.chave), 0)
             const pct = somaMeta > 0 ? Math.round((somaReal / somaMeta) * 100) : 0
             const completo = somaReal >= somaMeta && somaMeta > 0
             const expandido = aberto === l.mes
             const ehAtual = l.mes === mesAtual
 
             const realReceita =
-              getReal(l.mes, "zweb_vendedora") * avgPrice +
-              getReal(l.mes, "zweb_socios") * avgPrice +
+              (getReal(l.mes, "doisb_vendedora") + getReal(l.mes, "doisb_socios")) * avgPriceD +
+              (getReal(l.mes, "zweb_vendedora") + getReal(l.mes, "zweb_socios")) * avgPriceZ +
               getReal(l.mes, "sob_medida") * p.dev_sm
 
             return (
@@ -422,7 +481,6 @@ export function MetasPlanner({
                       )
                     })}
 
-                    {/* Receita nova gerada no mês (calculada) */}
                     <div className="rounded-xl bg-slate-50 p-3.5 flex flex-wrap items-center justify-between gap-2">
                       <span className="text-xs font-bold uppercase tracking-wide text-blue-900">Receita nova no mês</span>
                       <span className="text-sm text-slate-700">
@@ -444,13 +502,14 @@ export function MetasPlanner({
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
         </summary>
         <div className="overflow-x-auto border-t border-slate-100">
-          <table className="w-full text-sm min-w-[980px]">
+          <table className="w-full text-sm min-w-[1040px]">
             <thead>
               <tr className="bg-slate-50 text-right">
                 <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wide text-blue-900 sticky left-0 bg-slate-50">Mês</th>
                 <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-blue-900">Novos</th>
                 <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-blue-900">Ativos</th>
-                <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-blue-900">Rec. ZWeb</th>
+                <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-emerald-700">Rec. DoisB</th>
+                <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-sky-700">Rec. ZWeb</th>
                 <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-blue-900">Sob medida</th>
                 <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-blue-900">Custos</th>
                 <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-blue-900">Lucro</th>
@@ -466,9 +525,10 @@ export function MetasPlanner({
                     <td className={cn("px-3 py-2.5 text-left font-bold text-slate-900 capitalize sticky left-0", acimaTeto ? "bg-amber-50" : "bg-white")}>
                       {l.rotulo}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-700" title={`Vendedora ${l.metaVendedora} + sócios ${l.metaSocios}`}>{l.newTotal}</td>
-                    <td className="px-3 py-2.5 font-semibold text-slate-900">{l.ativosFim}</td>
-                    <td className="px-3 py-2.5 text-slate-800">{brl(l.recZWeb)}</td>
+                    <td className="px-3 py-2.5 text-slate-700" title={`DoisB ${l.novosD} + ZWeb ${l.novosZ}`}>{l.novosTotal}</td>
+                    <td className="px-3 py-2.5 font-semibold text-slate-900" title={`DoisB ${l.ativosD} + ZWeb ${l.ativosZ}`}>{l.ativosTotal}</td>
+                    <td className="px-3 py-2.5 text-emerald-700">{brl(l.recD)}</td>
+                    <td className="px-3 py-2.5 text-sky-700">{brl(l.recZ)}</td>
                     <td className="px-3 py-2.5 text-slate-800">{brl(l.recSM)}</td>
                     <td className="px-3 py-2.5 text-red-700">{brl(l.custos)}</td>
                     <td className="px-3 py-2.5 font-bold text-slate-950">{brl(l.lucro)}</td>

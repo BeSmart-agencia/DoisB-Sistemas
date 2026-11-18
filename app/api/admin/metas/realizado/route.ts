@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const METRICAS = ['zweb_vendedora', 'zweb_socios', 'sob_medida'] as const
+const METRICAS = ['doisb_vendedora', 'doisb_socios', 'zweb_vendedora', 'zweb_socios', 'sob_medida'] as const
 
 const schema = z.object({
   mes: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'mes deve ser YYYY-MM-DD'),
