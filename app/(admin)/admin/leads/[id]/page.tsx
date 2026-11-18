@@ -252,7 +252,7 @@ export default function LeadDetalhePage() {
     setDeletando(true)
     await fetch(`/api/admin/leads/${id}`, { method: "DELETE" })
     queryClient.invalidateQueries({ queryKey: ["admin", "leads"] })
-    router.push("/admin/leads/lista")
+    router.push("/admin/leads")
   }
 
   async function handleWhatsAppConfirm(mensagem: string, tplId: number | null) {
@@ -291,7 +291,7 @@ export default function LeadDetalhePage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-3">
-        <Link href="/admin/leads/lista">
+        <Link href="/admin/leads">
           <Button variant="outline" size="sm" className="gap-1.5 h-8 mt-1">
             <ArrowLeft className="h-4 w-4" />
           </Button>
