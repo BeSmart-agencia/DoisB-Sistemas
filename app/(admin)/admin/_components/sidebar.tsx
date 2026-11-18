@@ -17,7 +17,6 @@ import {
   Library,
   Boxes,
   LineChart,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -36,7 +35,6 @@ const NAV_ITEMS = [
   { href: "/admin/suporte", label: "Suporte", icon: Headphones },
   { href: "/admin/tutoriais", label: "Tutoriais", icon: BookOpen },
   { href: "/admin/conhecimento", label: "Base de Conhecimento", icon: Library },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ]
 
 interface SidebarProps {

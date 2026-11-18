@@ -83,7 +83,6 @@ export async function GET() {
     mrr,
     vendasMes: vendasMes ?? 0,
     chamadosAbertos: chamadosAbertos ?? 0,
-    leadsNegociacao: 0,
     sobMedidaMrr,
     sobMedidaReceber,
     mrrTotal: mrr + sobMedidaMrr,

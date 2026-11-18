@@ -10,7 +10,6 @@ interface Metrics {
   mrr: number
   vendasMes: number
   chamadosAbertos: number
-  leadsNegociacao: number
   sobMedidaMrr: number
   sobMedidaReceber: number
   mrrTotal: number
@@ -35,7 +34,7 @@ export default function AdminDashboard() {
   const cards = [
     { label: "Clientes ativos", value: data?.totalAtivos ?? 0, format: (v: number) => v.toString(), icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "MRR total", value: data?.mrrTotal ?? 0, format: formatBRL, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: "MRR ZWeb", value: data?.mrr ?? 0, format: formatBRL, icon: Repeat, color: "text-sky-600", bg: "bg-sky-50" },
+    { label: "MRR assinaturas", value: data?.mrr ?? 0, format: formatBRL, icon: Repeat, color: "text-sky-600", bg: "bg-sky-50" },
     { label: "MRR Sob Medida", value: data?.sobMedidaMrr ?? 0, format: formatBRL, icon: Boxes, color: "text-indigo-600", bg: "bg-indigo-50" },
     { label: "Sob Medida a receber", value: data?.sobMedidaReceber ?? 0, format: formatBRL, icon: Wallet, color: "text-amber-600", bg: "bg-amber-50" },
     { label: "Vendas no mês", value: data?.vendasMes ?? 0, format: (v: number) => v.toString(), icon: ShoppingCart, color: "text-violet-600", bg: "bg-violet-50" },
@@ -58,7 +57,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {cards.map((card) => (
           <div key={card.label} className="admin-panel p-5 transition-all hover:-translate-y-0.5 hover:shadow-xl">
             <div className="flex items-start justify-between mb-3">
