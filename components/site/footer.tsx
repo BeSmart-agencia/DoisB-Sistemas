@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator"
 
 const WA_LINK =
-  "https://wa.me/5551992726289?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
+  "https://wa.me/5551992622787?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
 
 const NAV = [
   { label: "DoisB Web", href: "/doisb-web" },
@@ -105,7 +105,7 @@ export function Footer() {
                   className="hover:text-blue-800 transition-colors flex items-center gap-2"
                 >
                   <span className="text-base">💬</span>
-                  (51) 99272-6289
+                  (51) 99262-2787
                 </a>
               </li>
               <li className="flex items-center gap-2">

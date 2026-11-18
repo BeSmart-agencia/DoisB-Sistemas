@@ -47,7 +47,7 @@ export function templateDoisbWebAtivacao(nome: string, plano: string): string {
             </p>
             <p style="color:#64748b;font-size:13px;line-height:1.6;margin:0;">
               Precisa de ajuda? Fale com a gente no WhatsApp
-              <a href="https://wa.me/5551992726289?text=Ol%C3%A1!%20Assinei%20o%20DoisB%20Web%20e%20preciso%20de%20ajuda%20na%20ativa%C3%A7%C3%A3o." style="color:#059669;">(51) 99272-6289</a>.
+              <a href="https://wa.me/5551992622787?text=Ol%C3%A1!%20Assinei%20o%20DoisB%20Web%20e%20preciso%20de%20ajuda%20na%20ativa%C3%A7%C3%A3o." style="color:#059669;">(51) 99262-2787</a>.
             </p>
           </td>
         </tr>
