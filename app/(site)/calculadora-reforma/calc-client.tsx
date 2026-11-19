@@ -244,7 +244,7 @@ export function CalculadoraReforma() {
           <div className="flex gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <p>
-              <b>Estimativa ilustrativa.</b> Usa a alíquota de referência (~26,5%) e cargas médias por setor. O valor real depende dos seus créditos, do seu setor específico e da transição (2029→2033), e <b>não substitui a orientação do seu contador</b>. Em breve, o cálculo oficial da Receita Federal.
+              <b>Estimativa ilustrativa.</b> Usa a alíquota de referência (~26,5%) e cargas médias por setor — serve pra você ter uma noção e começar a se preparar. O valor exato depende dos seus créditos, do seu setor específico e da transição (2029→2033), e <b>não substitui a orientação do seu contador</b>. O cálculo preciso, nota a nota, a gente faz junto com você.
             </p>
           </div>
         </div>
