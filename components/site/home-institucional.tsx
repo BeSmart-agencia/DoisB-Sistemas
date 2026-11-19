@@ -5,7 +5,7 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import {
   ArrowRight, Check, Crown, Heart, MapPin, Wrench,
-  Store, ShoppingBasket, Workflow, Boxes,
+  Store, ShoppingBasket, Workflow, Boxes, Calculator,
 } from "lucide-react"
 import { PRODUTOS_VISIVEIS, BRL, type CorProduto, type ProdutoCatalogo } from "@/lib/planos"
 
@@ -120,6 +120,39 @@ export function HomeInstitucional() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* BANNER — Calculadora da Reforma (lead magnet) */}
+      <section className="bg-white px-4 pb-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <motion.a
+            {...fadeUp(0)}
+            href="/calculadora-reforma"
+            className="group relative flex flex-col items-start gap-5 overflow-hidden rounded-3xl bg-slate-950 p-8 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-10"
+          >
+            <div
+              className="pointer-events-none absolute inset-0"
+              aria-hidden
+              style={{ background: "radial-gradient(ellipse 60% 80% at 10% 0%, rgba(20,114,181,0.35), transparent)" }}
+            />
+            <div className="relative">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-200">
+                <Calculator className="h-3.5 w-3.5" />
+                Reforma Tributária 2026
+              </span>
+              <h2 className="mt-4 max-w-xl text-2xl font-black tracking-tight text-white sm:text-3xl">
+                Quanto a sua empresa vai pagar de imposto com a reforma?
+              </h2>
+              <p className="mt-2 max-w-lg text-sm text-slate-300">
+                Descubra uma estimativa grátis em 1 minuto. Responda 3 perguntas e veja o impacto da CBS + IBS no seu negócio.
+              </p>
+            </div>
+            <span className="relative inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-slate-950 transition-transform group-hover:-translate-y-0.5">
+              Calcular agora
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </motion.a>
         </div>
       </section>
 
