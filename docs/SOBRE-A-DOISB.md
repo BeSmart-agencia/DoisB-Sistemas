@@ -1,7 +1,7 @@
 # DoisB Sistemas — Visão Geral Completa
 
 > Documento-mestre sobre a empresa, produtos, modelo de negócio, tecnologia e operação.
-> Última atualização: **28/09/2026**. Serve também como base de conhecimento para o Chat IA.
+> Última atualização: **23/11/2026**. Serve também como base de conhecimento para o Chat IA.
 
 ---
 
@@ -11,6 +11,7 @@ A **DoisB Sistemas** é uma **software house familiar** do **Rio Grande do Sul**
 
 - **Tagline:** `<Venda. Controle. Cresça.>` (sempre em fonte mono, com os sinais `< >` literais)
 - **Site:** https://www.doisbsistemas.com.br
+- **WhatsApp:** (51) 99262-2787
 - **Base:** Rio Grande do Sul — atende o Brasil todo (com visita presencial na região)
 - **CNPJ:** 54.052.940/0001-00
 
@@ -48,11 +49,13 @@ Sistema **próprio** da DoisB (white-label do ERP da **Nuts** — ver §4). É o
 - **Público:** quem quer um sistema completo (varejo, serviços, food, multiempresa)
 - **Módulos:** Vendas e faturamento (NF-e, NFC-e, pré-venda, orçamentos, pedidos, terminais), Estoque e produção (lotes, validade, variações, kits, inventário, ordem de produção), Financeiro (caixa, contas a pagar/receber, DRE, conciliação bancária OFX, conta digital, Pix/boleto/links), Fiscal e contábil (SPED, Sintegra, perfis tributários, envio à contabilidade), Serviços/OS (NFS-e, contratos, técnicos), **Food service** (salão, mesas, comandas, cozinha, cardápio digital, self-pedido), **CRM** (funil de oportunidades, automações), **Catálogo digital** (vitrine online), **Multiempresa**, etiquetas configuráveis, integração com balanças, dashboard com indicadores.
 
+**Posicionamento:** acessível, "feito pra vender", **ativa na hora** (self-service, link de ativação, trial 5 dias). É o herói da marca e o produto de volume.
+
 **Planos:**
 | Plano | Mensal | Anual (−10%) | Trial | Inclui |
 |---|---|---|---|---|
-| **Essencial** | R$ 149,90 | R$ 1.618,92 | 5 dias | ERP fiscal completo (vendas, estoque, financeiro, fiscal, plataforma) |
-| **Standard** | R$ 249,90 | R$ 2.698,92 | 5 dias | Tudo do Essencial **+ Módulo de Serviços + adicionais inclusos**: CRM, Food service, PDV Offline, Catálogo Digital, Delivery, Condicional de mercadorias, Transporte/MDF-e, WhatsApp, IA e agendamentos |
+| **Essencial** | R$ 129,90 | R$ 1.402,92 | 5 dias | ERP fiscal completo (vendas, estoque, financeiro, fiscal, plataforma) |
+| **Standard** | R$ 189,90 | R$ 2.050,92 | 5 dias | Tudo do Essencial **+ Módulo de Serviços + adicionais inclusos**: CRM, Food service, PDV Offline, Catálogo Digital, Delivery, Condicional de mercadorias, Transporte/MDF-e, WhatsApp, IA e agendamentos |
 
 Prints reais do sistema em `public/produtos/doisb/` (recortados dos screenshots em `docs/Nova fase/NUTS/`).
 
@@ -60,12 +63,13 @@ Prints reais do sistema em `public/produtos/doisb/` (recortados dos screenshots 
 Sistema de gestão da **Zucchetti** (grupo italiano, ~700 mil clientes no mundo). Revenda **oficial** da DoisB.
 
 - **Landing:** `/zweb`
-- **Público:** varejo completo, com e-commerce
+- **Público:** varejo completo e exigente, com e-commerce. Público premium/nicho (não é o foco de volume).
+- **Posicionamento:** premium, robusto, venda mais **consultiva** (ativação acompanhada). O Premium tem o diferencial do **app ZWeb** ("do orçamento à nota fiscal, no celular e na maquininha").
 - **Destaques:** PDV com retaguarda **offline**, e-commerce, NF-e/NFC-e/NFS-e, estoque, financeiro, ordens de serviço, fiscal adequado à Reforma Tributária.
-- **Planos:** Essencial R$ 129,90 · Standard R$ 199,90 · Premium R$ 249,90 (mensal).
+- **Planos:** Essencial R$ 199,90 · Standard R$ 249,90 · Premium R$ 299,90 (mensal).
 
-### 3.3. GWeb — mini-mercados (revenda Gdoor)
-White-label do **Gdoor** (Zucchetti) para o varejo alimentar pequeno. Versão simples, "o essencial bem feito".
+### 3.3. GWeb — mini-mercados (revenda Gdoor) · ⚠️ oculto
+White-label do **Gdoor** (Zucchetti) para o varejo alimentar pequeno. Versão simples, "o essencial bem feito". **Omitido das vitrines públicas** desde out/2026 (não vendido no momento, marcado `oculto: true` no catálogo) — a landing, o checkout e os dados de clientes GWeb continuam existindo.
 
 - **Landing:** `/gweb`
 - **Público:** mini-mercados, mercearias, hortifrúti, padarias
@@ -111,12 +115,12 @@ A DoisB combina **produto próprio + revenda white-label**:
 
 | Produto | Plano | Mensal | Anual | Observação |
 |---|---|---|---|---|
-| **DoisB Web** | Essencial | R$ 149,90 | R$ 1.618,92 (−10%) | 5 dias grátis |
-| **DoisB Web** | Standard | R$ 249,90 | R$ 2.698,92 (−10%) | 5 dias grátis; adicionais inclusos |
-| **ZWeb** | Essencial | R$ 129,90 | — | |
-| **ZWeb** | Standard | R$ 199,90 | — | |
-| **ZWeb** | Premium | R$ 249,90 | — | |
-| **GWeb** | único | R$ 159,90 | — | mini-mercados |
+| **DoisB Web** | Essencial | R$ 129,90 | R$ 1.402,92 (−10%) | 5 dias grátis |
+| **DoisB Web** | Standard | R$ 189,90 | R$ 2.050,92 (−10%) | 5 dias grátis; adicionais inclusos |
+| **ZWeb** | Essencial | R$ 199,90 | — | |
+| **ZWeb** | Standard | R$ 249,90 | — | |
+| **ZWeb** | Premium | R$ 299,90 | — | inclui app ZWeb |
+| **GWeb** | único | R$ 159,90 | — | mini-mercados (oculto das vitrines) |
 | **AgendaB** | único | R$ 249,00 | — | clínicas, até 5 usuários |
 | **Sob Medida** | projeto | R$ 3–7 mil + R$ 450/mês | — | 40/30/30 |
 
@@ -158,18 +162,18 @@ Sistema **multi-agente** (Claude `claude-sonnet-5`) em `/admin/marketing` para o
 Home · Sobre nós · Produtos · Chat IA · Tutoriais · Suporte
 
 ### Páginas-chave
-`/` (home) · `/produtos` · `/doisb-web` · `/zweb` · `/gweb` · `/sob-medida` · `/sobre` · `/cadastro` · `/tutoriais` · `/suporte` · `/chat-suporte` · `/contato`
+`/` (home) · `/produtos` · `/doisb-web` · `/zweb` · `/gweb` · `/sob-medida` · `/sobre` · `/cadastro` · `/tutoriais` · `/suporte` · `/chat-suporte` · `/contato` · `/calculadora-reforma` (lead magnet da Reforma Tributária)
 
 ---
 
 ## 9. Pagamentos (Stripe)
 
-- Conta Stripe **LIVE**: "BeSmart Agência de Ideias" (cobranças reais).
-- **Formas:** Cartão (assinatura recorrente), Boleto (acesso após compensação 1–3 dias), PIX (mensal via cron — habilitado conforme histórico da conta).
-- **Checkout:** `app/api/checkout/route.ts`. Aceita `produto` + `plano` + `intervalo`. DoisB Web e GWeb usam um branch genérico (customer + subscription session + metadata); DoisB Web aplica **trial de 5 dias**. Fluxo ZWeb permanece com registro em `clientes`, comissão e promoções.
-- **Webhook:** `app/api/webhooks/stripe/route.ts` (idempotência via `stripe_events`).
-- **Price IDs (DoisB Web / GWeb) criados em 28/09/2026** e cadastrados no `.env.local` e na Vercel.
-- **Provisionamento pós-pagamento** (ativação/liberação de acesso dos produtos novos): **próxima fase** (ver §12).
+- Conta Stripe **LIVE** — **conta nova** (migrada em 16/11/2026; substituiu a antiga "BeSmart"). Produtos, preços e webhook recriados via `scripts/setup-stripe.js`.
+- **Formas:** Cartão (assinatura recorrente), Boleto (acesso após compensação 1–3 dias), **PIX habilitado** em todos os produtos (QR mensal via cron `pix-billing`). No PIX não há trial; DoisB Web via PIX é self-service.
+- ⚠️ **Webhook DEVE apontar para `www.doisbsistemas.com.br`** — o apex redireciona 307→www e o Stripe não segue redirect, então a entrega falha silenciosamente (o pagamento cai mas o cliente fica "aguardando").
+- **CNPJ é único por produto** (`clientes`): o mesmo CNPJ pode assinar DoisB Web **e** ZWeb, mas não dois do mesmo produto.
+- **Checkout:** `app/api/checkout/route.ts` (cartão/boleto) e `app/api/checkout/pix/route.ts` (PIX). Todos registram em `clientes`. **DoisB Web = self-service** (acesso automático + e-mail com link de ativação); **ZWeb/GWeb = ativação manual** pela equipe.
+- **Webhook:** `app/api/webhooks/stripe/route.ts` (idempotência via `stripe_events`). O provisionamento do cliente DoisB Web no painel Nuts ainda é **manual** — passo a passo em `docs/CHECKLIST-ONBOARDING-DOISB-WEB.md`.
 
 ---
 
@@ -201,30 +205,35 @@ Home · Sobre nós · Produtos · Chat IA · Tutoriais · Suporte
 ## 11. Admin / operação
 
 Painel em `app/(admin)/admin/`:
-- **Clientes**, **chamados/suporte**, **tutoriais**, **documentos (RAG)**, **chat IA**
-- **Leads** (captação Google Places + funil kanban)
+- **Dashboard** — métricas + "precisa da sua atenção" (ativações pendentes, PIX vencendo) + meta do mês vs. realizado.
+- **Clientes**, **chamados/suporte**, **tutoriais**, **base de conhecimento (RAG)**, **chat IA**
+- **Prospecção** — funil kanban como tela principal + busca Google Places. *(Leads inbound de marketing ficam em Marketing OS → Leads.)*
 - **Vendedores** (comissões, portal)
 - **Sob Medida** (projetos + mensalidade recorrente)
-- **Metas** (Metas Ano 1 + checklist Laisa/Abel)
+- **Metas e Finanças** — simulador/planejamento Ano 1 projetando **DoisB Web + ZWeb + sob medida** (o antigo "Financeiro" foi fundido aqui).
 - **Marketing** (Marketing OS)
 
 ---
 
 ## 12. Estado atual e roadmap
 
-### Reestruturação concluída (28/09/2026)
-Site reorganizado em **4 produtos** com **DoisB Web como carro-chefe** (verde): menu novo, home, `/produtos`, landings `/doisb-web` e `/gweb`, página `/sobre`, catálogo em `lib/planos.ts`, Stripe configurado, checkout multi-produto. Publicado no `main`.
+### Já concluído
+- **Reestruturação** (set/2026): 4 produtos com DoisB Web como carro-chefe, checkout multi-produto.
+- **Pós-pagamento, Chat IA por produto e Tutoriais por produto** — as 3 fases planejadas foram entregues (ZWeb, GWeb e DoisB Web têm chat + tutoriais próprios).
+- **Reposicionamento** (out/2026): DoisB Web acessível/volume × ZWeb premium/nicho; preços novos; GWeb oculto das vitrines.
+- **Migração da conta Stripe** (16/11) + **PIX habilitado** (17/11) — testados em produção (todos os 9 combos de checkout com preço correto).
+- **Calculadora da Reforma Tributária** (`/calculadora-reforma`, 19/11): lead magnet que estima CBS/IBS e capta o contato no funil (`marketing_leads` + SDR). Banner na home.
+- **Limpeza do painel admin** (11/2026): Metas reorientado pro DoisB Web, Financeiro fundido no Metas, Prospecção (funil principal), dashboard acionável, rota órfã `/start` removida.
+- **Resend** com remetente próprio `noreply@doisbsistemas.com.br` (envios funcionando).
 
-### Próximas fases (ordem definida pela DoisB)
-1. **Pós-pagamento das licenças** — o que acontece após o pagamento no Stripe (provisionamento/ativação do acesso do cliente, integração com o painel Nuts/Gdoor).
-2. **Chat IA por produto** — atualizar o assistente para responder por produto.
-3. **Tutoriais por produto** — organizar tutoriais por sistema.
+### Primeiro cliente real
+**Lena Modas** (Taquara/RS) — DoisB Web Standard via PIX, ativo. Serviu de base para o checklist de onboarding (`docs/CHECKLIST-ONBOARDING-DOISB-WEB.md`).
 
-### Pendências históricas a verificar (podem já estar resolvidas)
-- Migrations a confirmar no Supabase: `sob_medida.sql`, `metas_checklist.sql`, `vendedores_portal.sql`, `vendedores_agendab.sql`.
-- Bug relatado (mai/2026): `POST /api/admin/leads` retornando 500 — confirmar se persiste.
-- Resend: migrar `FROM` de `onboarding@resend.dev` para `noreply@doisbsistemas.com.br` quando o domínio verificar.
+### Em aberto / avaliar
+- **Provisionamento automático na Nuts** — o cadastro do cliente DoisB Web no painel Nuts hoje é **manual**; automatizar depende de a Nuts expor uma API (a confirmar). O padrão já existe no código (ver AgendaB).
 - DoisB Web (Nuts): validar experiência do **cliente final** (não deve ver marca "Nuts"); definir responsável pelo onboarding fiscal.
+- **Calculadora da reforma — fase 2 (cálculo oficial) descartada:** a API oficial da Receita calcula **por nota fiscal** (não por faturamento), então não encaixa num chamariz de massa. Mantida a estimativa própria, bem disclaimerizada.
+- `.gitignore` para vídeos/planilhas pesadas em `docs/` (hoje travam commits que usam `git add -A`).
 
 ---
 
