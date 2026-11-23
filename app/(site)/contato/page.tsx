@@ -22,7 +22,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const WA_LINK = 'https://wa.me/5551992622787?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb'
+const WA_LINK = 'https://wa.me/5551992622787?text=Olá!%20Vim%20pelo%20site%20da%20DoisB%20e%20quero%20saber%20mais.'
 
 export default function ContatoPage() {
   const [enviado, setEnviado] = useState(false)

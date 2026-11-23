@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator"
 
 const WA_LINK =
-  "https://wa.me/5551992622787?text=Olá!%20Vim%20pelo%20site%20e%20quero%20conhecer%20o%20ZWeb"
+  "https://wa.me/5551992622787?text=Olá!%20Vim%20pelo%20site%20da%20DoisB%20e%20quero%20saber%20mais."
 
 const NAV = [
   { label: "DoisB Web", href: "/doisb-web" },
