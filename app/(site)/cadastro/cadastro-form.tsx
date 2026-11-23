@@ -132,20 +132,21 @@ export function CadastroForm({
     }
   }
 
-  function lerCodigoVendedor(): string | undefined {
-    const m = document.cookie.match(/(?:^|;\s*)vend_ref=([^;]+)/)
+  function lerCookie(nome: string): string | undefined {
+    const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${nome}=([^;]+)`))
     return m ? decodeURIComponent(m[1]) : undefined
   }
 
   async function onSubmit(data: FormData) {
     setLoading(true)
-    const vendedor_codigo = lerCodigoVendedor()
+    const vendedor_codigo = lerCookie("vend_ref")
+    const gclid = lerCookie("gclid")
     try {
       if (formaPagamento === "pix") {
         const res = await fetch("/api/checkout/pix", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, produto, plano, intervalo, vendedor_codigo }),
+          body: JSON.stringify({ ...data, produto, plano, intervalo, vendedor_codigo, gclid }),
         })
         const json = await res.json()
         if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }
@@ -159,7 +160,7 @@ export function CadastroForm({
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, produto, plano, intervalo, forma_pagamento: formaPagamento, vendedor_codigo }),
+          body: JSON.stringify({ ...data, produto, plano, intervalo, forma_pagamento: formaPagamento, vendedor_codigo, gclid }),
         })
         const json = await res.json()
         if (!res.ok) { toast.error(json.error ?? "Erro ao processar cadastro"); return }

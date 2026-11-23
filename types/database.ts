@@ -34,6 +34,7 @@ export interface Database {
           cep: string | null; logradouro: string | null; numero: string | null; complemento: string | null
           bairro: string | null; cidade: string | null; estado: string | null
           vendedor_id: string | null; comissao_paga: boolean; comissao_paga_em: string | null
+          gclid: string | null
         }
         Insert: {
           id?: string; nome_empresa: string; cnpj: string; email: string; telefone: string
@@ -46,6 +47,7 @@ export interface Database {
           cep?: string | null; logradouro?: string | null; numero?: string | null; complemento?: string | null
           bairro?: string | null; cidade?: string | null; estado?: string | null
           vendedor_id?: string | null; comissao_paga?: boolean; comissao_paga_em?: string | null
+          gclid?: string | null
         }
         Update: {
           id?: string; nome_empresa?: string; cnpj?: string; email?: string; telefone?: string
@@ -58,6 +60,7 @@ export interface Database {
           cep?: string | null; logradouro?: string | null; numero?: string | null; complemento?: string | null
           bairro?: string | null; cidade?: string | null; estado?: string | null
           vendedor_id?: string | null; comissao_paga?: boolean; comissao_paga_em?: string | null
+          gclid?: string | null
         }
         Relationships: [
           { foreignKeyName: "clientes_vendedor_id_fkey"; columns: ["vendedor_id"]; isOneToOne: false; referencedRelation: "vendedores"; referencedColumns: ["id"] }

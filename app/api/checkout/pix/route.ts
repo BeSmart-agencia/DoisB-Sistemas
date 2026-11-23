@@ -31,6 +31,7 @@ const schema = z.object({
   produto: z.enum(["zweb", "doisb-web", "gweb"]).default("zweb"),
   plano: z.string().min(1),
   vendedor_codigo: z.string().optional(),
+  gclid: z.string().max(200).optional(),
   nome_fantasia: z.string().optional(),
   ie: z.string().optional(),
   im: z.string().optional(),
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
   }
 
   const { nome_empresa, cnpj, email, telefone, nome_responsavel, produto, plano,
-    vendedor_codigo, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
+    vendedor_codigo, gclid, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
 
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
       acesso_liberado: false,
       forma_pagamento: "pix",
       vendedor_id: vendedorId,
+      gclid: gclid ?? null,
       nome_fantasia,
       ie,
       im,

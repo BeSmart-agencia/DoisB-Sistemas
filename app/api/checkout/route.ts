@@ -47,6 +47,7 @@ const schema = z.object({
   intervalo: z.enum(["mensal", "anual"]).default("mensal"),
   forma_pagamento: z.enum(["cartao", "boleto"]).default("cartao"),
   vendedor_codigo: z.string().optional(),
+  gclid: z.string().max(200).optional(),
   nome_fantasia: z.string().optional(),
   ie: z.string().optional(),
   im: z.string().optional(),
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
   }
 
   const { nome_empresa, cnpj, email, telefone, nome_responsavel, produto, plano, intervalo, forma_pagamento,
-    vendedor_codigo, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
+    vendedor_codigo, gclid, nome_fantasia, ie, im, crt, cep, logradouro, numero, complemento, bairro, cidade, estado } = parsed.data
   const cnpjLimpo = cnpj.replace(/\D/g, "")
   const supabase = createAdminClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -132,6 +133,7 @@ export async function POST(request: Request) {
       acesso_liberado: false,
       forma_pagamento,
       vendedor_id: vendedorId,
+      gclid: gclid ?? null,
       nome_fantasia,
       ie,
       im,

@@ -12,6 +12,7 @@ import {
   enviarEmailDoisbWebAtivacao,
 } from "@/lib/emails"
 import { enviarPurchaseMeta } from "@/lib/meta/capi"
+import { enviarConversaoGoogleAds } from "@/lib/google-ads/conversions"
 
 export const dynamic = "force-dynamic"
 
@@ -235,6 +236,13 @@ export async function POST(request: Request) {
             plano: cliente.plano as string,
             produto: cliente.produto as string,
           }),
+          // Google Ads: conversão offline (pagamento confirmado)
+          enviarConversaoGoogleAds({
+            gclid: cliente.gclid as string | null,
+            clienteId: cliente.id as string,
+            plano: cliente.plano as string,
+            produto: cliente.produto as string,
+          }),
         ]
         // ZWeb/GWeb: notificar a equipe para ativar manualmente.
         if (!ehDoisbWeb) {
@@ -398,6 +406,13 @@ export async function POST(request: Request) {
               plano: cliente.plano,
               produto: cliente.produto,
             }),
+            // Google Ads: conversão offline (boleto compensado)
+            enviarConversaoGoogleAds({
+              gclid: cliente.gclid,
+              clienteId: cliente.id,
+              plano: cliente.plano,
+              produto: cliente.produto,
+            }),
           ])
         }
         break
@@ -466,6 +481,13 @@ export async function POST(request: Request) {
                 clienteId: cliente.id,
                 email: cliente.email,
                 telefone: cliente.telefone,
+                plano: cliente.plano,
+                produto: cliente.produto,
+              }),
+              // Google Ads: conversão offline (PIX confirmado)
+              enviarConversaoGoogleAds({
+                gclid: cliente.gclid,
+                clienteId: cliente.id,
                 plano: cliente.plano,
                 produto: cliente.produto,
               }),
