@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/react'
 import { Suspense } from 'react'
 import MetaPixel from './components/MetaPixel'
+import GoogleTag from './components/GoogleTag'
 import './globals.css'
 
 const geistSans = localFont({
@@ -55,6 +56,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <MetaPixel />
         </Suspense>
+        <GoogleTag />
         {children}
         <Analytics />
       </body>
